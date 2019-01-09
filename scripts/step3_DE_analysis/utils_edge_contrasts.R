@@ -1,3 +1,8 @@
+# This file contains EDGE code adapted to work with limma contrasts
+
+library(edge)
+library(splines)
+library(MASS)
 
 center_data = function(y, ng_labels){
   for(g in levels(ng_labels)){
@@ -20,7 +25,8 @@ compute_beta_null = function(X, beta, contrasts_coef){
 
   # The observations can not be assumed to be balanced...
   # We need to get rid of the intercept for this part
-  part_K = ginv(t(X) %*% X)
+  # FIXME don't invert this matrix…
+  part_K = MASS::ginv(t(X) %*% X)
   K = part_K * contrasts_coef_**2
 
   # We now need to sum all elements associated to the same pairs of splines.
@@ -29,7 +35,7 @@ compute_beta_null = function(X, beta, contrasts_coef){
   K = sapply(1:df, function(jg) rowSums(K[, (jg-1)*ng + 1:ng]))
   K = sapply(1:df, function(jg) colSums(K[(jg-1)*ng + 1:ng,]))
 
-  T_ = ginv(K) %*% t_
+  T_ = MASS::ginv(K) %*% t_
 
   # We got T. Now, let's move on to the rest
   tmp = as.array(rep(as.vector(T_), each=ng), dim=c(1, 1, 1))
@@ -176,7 +182,7 @@ edgeWithContrasts = function(data, meta, contrasts, center=FALSE, weights=NULL, 
     }
     row.names(beta) = row.names(data)
   }else{
-    beta = y %*% X %*% ginv(t(X) %*% X)
+    beta = y %*% X %*% MASS::ginv(t(X) %*% X)
   }
   beta_null = compute_beta_null(X, beta, contrasts_coef)
 
