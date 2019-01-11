@@ -9,6 +9,7 @@ source("utils_edge_contrasts.R")
 data_dir = "results/varoquaux2019/leaf/"
 var_filtering = TRUE
 var_cutoff = 0.5
+take_log = TRUE
 
 contrasts = as.vector(
     unlist(read.table(file.path(data_dir, "contrasts"),
@@ -22,6 +23,19 @@ counts = read.delim(file.path(data_dir, "counts_normed.tsv"),
 		    check.names=FALSE)
 meta = read.table(file.path(data_dir, "meta.tsv"),
 		  check.names=FALSE)
+
+if(take_log){
+    counts = log2(counts + 1)
+}
+
+###############################################################################
+# Var filtering
+#
+# FIXME
+
+
+###############################################################################
+# DE analysis
 
 meta$Time = as.numeric(as.character(meta$Week))
 ng_labels = as.factor(

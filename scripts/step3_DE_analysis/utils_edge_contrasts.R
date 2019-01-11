@@ -3,6 +3,7 @@
 library(edge)
 library(splines)
 library(MASS)
+source("utils_splines.R")
 
 center_data = function(y, ng_labels){
   for(g in levels(ng_labels)){
@@ -172,18 +173,8 @@ edgeWithContrasts = function(data, meta, contrasts, center=FALSE, weights=NULL, 
     X = t(center_data(t(X)))
   }
 
-  n = ncol(X)
-  nr = nrow(y)
 
-  if(!is.null(weights)){
-    beta = matrix(nrow=nr, ncol=n)
-    for(i in 1:nr){
-      beta[i,] = lm.wfit(X, y[i,], weights[i, ])$coefficients
-    }
-    row.names(beta) = row.names(data)
-  }else{
-    beta = y %*% X %*% MASS::ginv(t(X) %*% X)
-  }
+  beta = fit_splines(y, X, weights=weights)
   beta_null = compute_beta_null(X, beta, contrasts_coef)
 
   pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights)
@@ -240,12 +231,6 @@ predict_ = function(fit, meta, time, null_model=FALSE){
 }
 
 
-# XXX It's wierd that this does not exists in R…
-# it probably exists but under another name?
-rowMax = function(X){
-  return(apply(X, 1, max))
-}
-
 # FIXME this should not be done this way.
 compute_lfc = function(fit, meta, method="mean"){
   
@@ -287,7 +272,7 @@ compute_lfc = function(fit, meta, method="mean"){
   foldchange[is.na(foldchange)] = 0
   foldchange_ = rowMeans(abs(foldchange))
   fit$lfc_mean = log2(foldchange_+1)
-  foldchange = rowMax(abs(foldchange))
+  foldchange = row_max(abs(foldchange))
   fit$lfc_max = log2(foldchange+1)
 
   if(method == "mean"){
