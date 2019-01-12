@@ -78,14 +78,22 @@ lrtStat = function(resNull, resFull, ng_labels=NULL) {
 }
 
 compute_pvalue = function(X, y, beta, beta_null, ng_labels, statistics="lrt",
-			  df2=NULL, weights=NULL, mask=NULL){
+			  df2=NULL, weights=NULL, mask=NULL, developmental=FALSE){
 
     fitFull = beta %*% t(X)
-    fitNull = beta_null %*% t(X)
+    if(developmental){
+      fitNull = row_mean(y[, mask])
+    }else{
+      fitNull = beta_null %*% t(X)
+    }
   
     if(!is.null(mask)){
       fitFull = fitFull[, mask]
-      fitNull = fitNull[, mask]
+      if(!developmental){
+        fitNull = fitNull[, mask]
+      }
+      y = y[, mask]
+      ng_labels = ng_labels[mask]
     }
 
     if(!is.null(weights)){
@@ -142,9 +150,15 @@ summarise = function(X, ng_levels) {
 #' @param mask boolean mask of which points to use for the tests. This is
 #'	  useful when you want to use all data points for fitting the splines,
 #'	  but not all the data points for the tests.
-edgeWithContrasts = function(data, meta, contrasts, center=FALSE, weights=NULL, df=4,
-			     basis=NULL, mask=NULL){
+edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE, weights=NULL, df=4,
+			     basis=NULL, mask=NULL, developmental=FALSE){
   ng = nlevels(meta$Group)
+  ng_labels = meta$Group
+
+  if(is.null(contrasts) & !developmental){
+    # FIXME need better error message
+    stop("Needs either contrasts or developmental")
+  }
 
   contrasts_coef = c(contrasts)
   meta = droplevels(meta)
@@ -175,13 +189,23 @@ edgeWithContrasts = function(data, meta, contrasts, center=FALSE, weights=NULL, 
 
 
   beta = fit_splines(y, X, weights=weights)
-  beta_null = compute_beta_null(X, beta, contrasts_coef)
+  if(developmental){
+    # For developmental, only consider the group from the contrast
+    beta_full = compute_beta_null(X, beta, contrasts_coef)
+    beta_null = NULL
+  }else{
+    beta_null = compute_beta_null(X, beta, contrasts_coef)
+  }
 
-  pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights)
+  pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights,
+		        mask=mask,
+		        developmental=developmental)
   pval_BH = p.adjust(pval, method="BH")
   pval_ftest = compute_pvalue(
       X, y, beta, beta_null, ng_labels,
-      statistics="ftest")
+      statistics="ftest",
+      mask=mask,
+      developmental=developmental)
   pval_ftest_BH = p.adjust(pval_ftest, method="BH")
 
   fit = NULL
