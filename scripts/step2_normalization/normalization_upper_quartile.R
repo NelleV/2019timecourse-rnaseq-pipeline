@@ -1,3 +1,4 @@
+library("config")
 library("genefilter")
 library("EDASeq")
 source("utils_normalization.R")
@@ -7,10 +8,17 @@ source("utils_normalization.R")
 #
 # Will filter all_samples that don't have at least `min_counts` counts in
 # `min_samples` samples
-data_dir = "results/varoquaux2019/leaf/"
-filter_expression = TRUE
-min_counts = 20
-min_samples = 3
+args = commandArgs(trailingOnly=TRUE)
+# For debugging purpose
+# data_dir = "results/varoquaux2019/leaf
+data_dir = args[1]
+
+config_file = file.path(data_dir, "config.yml")
+config = config::get(file=config_file)
+
+filter_expression = unlist(config["filter_expression"] )
+min_counts = unlist(config["min_counts"])
+min_samples = unlist(config["min_samples"])
 
 ###############################################################################
 # Load the data
