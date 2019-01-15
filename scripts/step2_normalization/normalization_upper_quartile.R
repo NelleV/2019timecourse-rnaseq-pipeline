@@ -1,7 +1,8 @@
 library("config")
 library("genefilter")
 library("EDASeq")
-source("utils_normalization.R")
+library("devtools")
+load_all("../../bin/moanin")
 
 ###############################################################################
 # Options
@@ -34,7 +35,7 @@ meta = read.table(file.path(data_dir, "meta.tsv"),
 # Filter very low expressed genes before normalization
 if(filter_expression){
     counts = expression_filtering(
-	counts, meta, min_counts=min_counts, min_samples=min_samples)
+	counts, min_counts=min_counts, min_samples=min_samples)
 }
 
 # Normalize
