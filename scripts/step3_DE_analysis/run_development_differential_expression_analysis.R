@@ -9,12 +9,18 @@ source("utils_edge_contrasts.R")
 # Options
 #
 
-data_dir = "results/varoquaux2019/leaf/"
-var_filtering = TRUE
-var_cutoff = 0.5
-take_log = TRUE
+args = commandArgs(trailingOnly=TRUE)
+data_dir = args[1]
+# For debugging purposes
+# data_dir = "results/varoquaux2019/leaf/"
 
-contrasts = c("Control.RT430", "Control.BT642")
+config_file = file.path(data_dir, "config.yml")
+config = config::get(file=config_file)
+
+var_filtering = unlist(config["var_filtering"] )
+var_cutoff = unlist(config["var_cutoff"])
+take_log = unlist(config["take_log"])
+contrasts = as.vector(unlist(strsplit(unlist(config["development_contrasts"]), ",")))
 
 ###############################################################################
 # Load the data
@@ -59,7 +65,7 @@ for(contrast_formula in contrasts){
     de_analysis[contrast_name_qval] = model$qval
 }
 
-outname = file.path(data_dir, "developmental_de_analysis.tsv")
+outname = file.path(data_dir, "development_de_analysis.tsv")
 write.table(
     de_analysis,
     file=outname,

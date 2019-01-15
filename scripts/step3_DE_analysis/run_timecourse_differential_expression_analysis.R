@@ -1,19 +1,26 @@
+library("config")
 library("edge")
 library("limma")
 source("utils_edge_contrasts.R")
 
 ###############################################################################
-# Options
+# Load Options
 #
 
-data_dir = "results/varoquaux2019/leaf/"
-var_filtering = TRUE
-var_cutoff = 0.5
-take_log = TRUE
+args = commandArgs(trailingOnly=TRUE)
+data_dir = args[1]
+# For debugging purpose
+# data_dir = "results/varoquaux2019/leaf
 
-contrasts = as.vector(
-    unlist(read.table(file.path(data_dir, "contrasts"),
-		      sep=",", header=FALSE)))
+config_file = file.path(data_dir, "config.yml")
+config = config::get(file=config_file)
+
+var_filtering = unlist(config["var_filtering"] )
+var_cutoff = unlist(config["var_cutoff"])
+take_log = unlist(config["take_log"])
+
+contrasts = as.vector(unlist(
+    strsplit(unlist(config["timecourse_contrasts"]), ",")))
 
 ###############################################################################
 # Load the data
@@ -37,11 +44,6 @@ if(take_log){
 ###############################################################################
 # DE analysis
 
-meta$Time = as.numeric(as.character(meta$Week))
-ng_labels = as.factor(
-  make.names(meta$Condition:meta$Genotype))
-meta$Group = ng_labels
-
 de_analysis = data.frame(row.names=row.names(counts))
 for(contrast_formula in contrasts){
     contrast = limma::makeContrasts(
@@ -55,7 +57,7 @@ for(contrast_formula in contrasts){
     de_analysis[contrast_name_qval] = model$qval
 }
 
-outname = file.path(data_dir, "de_analysis.tsv")
+outname = file.path(data_dir, "timecourse_de_analysis.tsv")
 write.table(
     de_analysis,
     file=outname,

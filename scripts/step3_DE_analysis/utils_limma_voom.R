@@ -6,12 +6,12 @@ fit_limma_voom = function(counts, meta, contrasts, use_voom_weights=TRUE){
     y = DGEList(counts=counts)
     y = calcNormFactors(y, method="upperquartile")
 
-    design = model.matrix(~Group + 0, data=meta)
+    design = model.matrix(~WeeklyGroup + 0, data=meta)
 
     v = voom(y, design, plot=FALSE)
     v = lmFit(v)
 
-    cleaned_colnames = gsub("Group", "", colnames(design))
+    cleaned_colnames = gsub("WeeklyGroup", "", colnames(design))
     colnames(design) = cleaned_colnames
 
     allcontrasts = makeContrasts(
@@ -19,8 +19,32 @@ fit_limma_voom = function(counts, meta, contrasts, use_voom_weights=TRUE){
         levels=design)
 
     fit = contrasts.fit(v, allcontrasts)
-    fit = topTable(eBayes(fit), number=1000000)
+    fit = eBayes(fit)
+    contrast_names = colnames(fit$p.value)
+    fit$adj.p.value = p.adjust(fit$p.value, method="BH")
+    dim(fit$adj.p.value) = dim(fit$p.value)
+    colnames(fit$adj.p.value) = contrast_names
 
-    fit$adj.p.value = p.adjust(fit$P.Value, method="BH")
-    return(fit)
+    combine_results = function(ii, fit2){
+	de_analysis = data.frame(row.names=row.names(counts))
+
+        base_colname = gsub(" ", "", contrast_formula, fixed=TRUE)
+	colname_pval = paste(base_colname, "-pval", sep="")
+	colname_qval = paste(base_colname, "-qval", sep="")
+	colname_lfc = paste(base_colname, "-lfc", sep="")
+
+        tt = topTable(
+            fit2, coef=ii, number=length(rownames(fit2$coef)),
+            p.value=1, adjust.method="none",
+            genelist=rownames(fit2$coef))
+	de_analysis[colname_pval] = fit2$p.value[ii]
+	de_analysis[colname_qval] = fit2$adj.p.value[ii]
+	de_analysis[colname_lfc] = tt$logFC
+	return(de_analysis)
+    }
+
+    all_results = do.call("cbind",
+			  lapply(1:length(contrast_names),
+				 combine_results, fit2=fit))
+    return(all_results)
 }

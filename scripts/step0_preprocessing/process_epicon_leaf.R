@@ -24,7 +24,10 @@ meta = read.table(file.path(data_dir, "meta.tsv"),
 meta$Time = as.numeric(as.character(meta$Week))
 ng_labels = as.factor(
   make.names(meta$Condition:meta$Genotype))
+weekly_ng_labels = as.factor(
+    make.names(meta$Condition:meta$Genotype:as.factor(meta$Time)))
 meta$Group = ng_labels
+meta$WeeklyGroup = weekly_ng_labels
 
 
 ###############################################################################

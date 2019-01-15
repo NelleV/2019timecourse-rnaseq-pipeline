@@ -21,6 +21,7 @@ fit_splines = function(y, X, weights=NULL){
         }
 	row.names(beta) = row.names(data)
     }else{
+	# Don't inverse directly the matrix
 	beta = y %*% X %*% MASS::ginv(t(X) %*% X)
     }
 }

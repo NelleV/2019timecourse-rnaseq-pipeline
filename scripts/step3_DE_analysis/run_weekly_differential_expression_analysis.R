@@ -5,15 +5,19 @@ source("utils_limma_voom.R")
 ###############################################################################
 # Options
 #
+#args = commandArgs(trailingOnly=TRUE)
+#data_dir = args[1]
+# For debugging purpose
+data_dir = "results/varoquaux2019/leaf"
 
-data_dir = "results/varoquaux2019/leaf/"
-var_filtering = TRUE
-var_cutoff = 0.5
-take_log = TRUE
+config_file = file.path(data_dir, "config.yml")
+config = config::get(file=config_file)
 
-contrasts = as.vector(
-    unlist(read.table(file.path(data_dir, "contrasts"),
-		      sep=",", header=FALSE)))
+var_filtering = unlist(config["var_filtering"] )
+var_cutoff = unlist(config["var_cutoff"])
+take_log = unlist(config["take_log"])
+contrasts = as.vector(unlist(strsplit(unlist(config["weekly_contrasts"]), ",")))
+
 
 ###############################################################################
 # Load the data
@@ -34,35 +38,7 @@ meta = read.table(file.path(data_dir, "meta.tsv"),
 ###############################################################################
 # DE analysis
 
-meta$Time = as.numeric(as.character(meta$Week))
-ng_labels = as.factor(
-  make.names(meta$Condition:meta$Genotype))
-meta$Group = ng_labels
-de_analysis = data.frame(row.names=row.names(counts))
-
-for(w in unique(meta$Week)){
-    for(contrast_formula in contrasts){
-        contrast_name = gsub(" ", "", contrast_formula, fixed=TRUE)
-	contrast_name_pval = paste(contrast_name, "-timepoint", w, "-pval", sep="")
-	contrast_name_qval = paste(contrast_name, "-timepoint", w, "-qval", sep="")
-	contrast_name_lfc = paste(contrast_name, "-timepoint", w, "-lfc", sep="")
-
-        mask = with(meta, Week == w)
-	c = counts[, mask]
-	m = meta[mask, ]
-	tryCatch(
-	    {
-		model = fit_limma_voom(c, m, contrast_formula)
-	    },
-	    error=function(err) { model = NULL},
-	    finally={
-		de_analysis[contrast_name_pval] = model$P.Value
-		de_analysis[contrast_name_qval] = model$adj.P.Val
-		de_analysis[contrast_name_lfc] = model$logFC
-	    }
-	)
-    }
-}
+de_analysis = fit_limma_voom(counts, meta, contrasts)
 
 outname = file.path(data_dir, "weekly_de_analysis.tsv")
 write.table(
