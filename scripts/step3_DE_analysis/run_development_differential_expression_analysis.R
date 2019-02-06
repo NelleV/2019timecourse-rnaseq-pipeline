@@ -1,6 +1,7 @@
 library("limma")
 library("edge")
-source("utils_edge_contrasts.R")
+library("devtools")
+load_all("../../bin/moanin")
 
 # FIXME XXX it works, but there's a lot of hacks going on…
 

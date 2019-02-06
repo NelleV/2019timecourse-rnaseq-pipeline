@@ -1,7 +1,8 @@
 library("config")
 library("edge")
 library("limma")
-source("utils_edge_contrasts.R")
+library("devtools")
+load_all("../../bin/moanin/")
 
 ###############################################################################
 # Load Options

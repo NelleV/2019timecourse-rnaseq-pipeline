@@ -8,12 +8,16 @@ library(MASS)
 #'
 #' @param y the data
 #' @param X the basis
-#' @param weights
-#' @return beta 
+#' @param weights weigts
+#'
+#' @return beta coefficients
+#'
+#' @export
 fit_splines = function(y, X, weights=NULL){
     n = ncol(X)
     nr = nrow(y)
 
+    
     if(!is.null(weights)){
 	beta = matrix(nrow=nr, ncol=n)
 	for(i in 1:nr){
@@ -22,7 +26,7 @@ fit_splines = function(y, X, weights=NULL){
 	row.names(beta) = row.names(data)
     }else{
 	# Don't inverse directly the matrix
-	beta = y %*% X %*% MASS::ginv(t(X) %*% X)
+	beta = t(lm.fit(X, t(y))$coefficients)
     }
 }
 
@@ -97,7 +101,7 @@ score_genes_centroid = function(y, centroid){
 #'
 #' Combines all p-value per rows.
 #' 
-#' @param pvalues
+#' @param pvalues pvalues
 fisher_method = function(pvalues){
     # TODO Add a check that all pvalues are "valid"
     keep = (pvalues >= 0) & (pvalues <= 1)

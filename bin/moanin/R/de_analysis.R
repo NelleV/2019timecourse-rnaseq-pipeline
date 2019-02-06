@@ -1,9 +1,8 @@
 # This file contains EDGE code adapted to work with limma contrasts
 
-library(edge)
-library(splines)
-library(MASS)
-source("utils_splines.R")
+library("edge")
+library("splines")
+library("MASS")
 
 center_data = function(y, ng_labels){
   for(g in levels(ng_labels)){
@@ -108,7 +107,7 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels, statistics="lrt",
     df = ncol(X) / ng
 
     if(statistics == "ftest"){
-      stat = edge:::lrtStat(resNull, resFull)
+      stat = lrtStat(resNull, resFull)
       if(is.null(df2)){
         df2 = nrow(X) - ncol(X)
       }
@@ -142,8 +141,9 @@ summarise = function(X, ng_levels) {
 #' 
 #' @param data The data matrix.
 #' @param meta Meta data which should be consistent with the column names \code{data}.
-#' @param contrast Contrast using \code{makeContrasts} from \code{limma}.
-#' @param center: boolean
+#' @param contrasts Contrast using \code{makeContrasts} from \code{limma}.
+#' @param center boolean, whether to center the data matrix
+#' @param developmental boolean, is that a developmental test?
 #' @param weights Weights matrix for the fitting.
 #' @param df Degrees of freedom to for the splines.
 #' @param basis the basis matrix. If provided, ignore some of the parameters

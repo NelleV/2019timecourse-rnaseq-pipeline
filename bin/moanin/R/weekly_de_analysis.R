@@ -1,25 +1,36 @@
 library("limma")
+library("stats")
 library("edgeR")
 
 
-fit_limma_voom = function(counts, meta, contrasts, use_voom_weights=TRUE){
-    y = DGEList(counts=counts)
-    y = calcNormFactors(y, method="upperquartile")
+#' Fit weekly differential expression analysis
+#'
+#' @param counts Gene expression data
+#' @param meta Metadata data frame
+#' @param contrasts Contrast to use.
+#' @param use_voom_weights boolean: whether to use voom weights or not
+fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
 
-    design = model.matrix(~WeeklyGroup + 0, data=meta)
-
-    v = voom(y, design, plot=FALSE)
-    v = lmFit(v)
+    design = stats::model.matrix(~WeeklyGroup + 0, data=meta)
 
     cleaned_colnames = gsub("WeeklyGroup", "", colnames(design))
     colnames(design) = cleaned_colnames
 
-    allcontrasts = makeContrasts(
+    allcontrasts = limma::makeContrasts(
         contrasts=contrasts,
         levels=design)
 
-    fit = contrasts.fit(v, allcontrasts)
-    fit = eBayes(fit)
+    if(use_voom_weights){
+        y = edgeR::DGEList(counts=counts)
+	y = edgeR::calcNormFactors(y, method="upperquartile")
+        v = limma:voom(y, design, plot=FALSE)
+	v = limma:lmFit(v)
+    }else{
+	fit = limma::lmFit(counts, design)	
+    }
+
+    fit = limma::contrasts.fit(v, allcontrasts)
+    fit = limma::eBayes(fit)
     contrast_names = colnames(fit$p.value)
     fit$adj.p.value = p.adjust(fit$p.value, method="BH")
     dim(fit$adj.p.value) = dim(fit$p.value)
@@ -33,7 +44,7 @@ fit_limma_voom = function(counts, meta, contrasts, use_voom_weights=TRUE){
 	colname_qval = paste(base_colname, "-qval", sep="")
 	colname_lfc = paste(base_colname, "-lfc", sep="")
 
-        tt = topTable(
+        tt = limma::topTable(
             fit2, coef=ii, number=length(rownames(fit2$coef)),
             p.value=1, adjust.method="none",
             genelist=rownames(fit2$coef))

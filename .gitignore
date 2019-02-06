@@ -1,2 +1,4 @@
 *.swo
 *.swp
+bin/*.Rcheck
+bin/*.tar.gz
