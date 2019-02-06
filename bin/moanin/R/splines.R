@@ -28,12 +28,20 @@ fit_splines = function(y, X, weights=NULL){
 	# Don't inverse directly the matrix
 	beta = t(lm.fit(X, t(y))$coefficients)
     }
+    return(beta)
 }
 
-
+#' Fit and predict splines
+#'
+#' @param y the data
+#' @param X the basis
+#' @param weights weigts
+#'
+#' @return y_fitted the fitted y values
+#'
+#' @export
 fit_predict_splines = function(y, X, weights=NULL){
-    beta = fit_splines(y, X, weights=weights)
-    y_fitted = beta %*% t(X)
+    y_fitted = t(lm.fit(X, t(y))$fitted.values)
     return(y_fitted)
 }
 

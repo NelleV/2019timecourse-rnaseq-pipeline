@@ -11,7 +11,7 @@ load_all("../../bin/moanin/")
 args = commandArgs(trailingOnly=TRUE)
 data_dir = args[1]
 # For debugging purpose
-# data_dir = "results/varoquaux2019/leaf
+# data_dir = "results/varoquaux2019/leaf"
 
 config_file = file.path(data_dir, "config.yml")
 config = config::get(file=config_file)

@@ -53,26 +53,38 @@ compute_beta_null = function(X, beta, contrasts_coef){
 
 
 lrtStat = function(resNull, resFull, ng_labels=NULL) {
+  # FIXME I'm pretty sure that in the case of contrasts, the degrees of
+  # freedom computed here are wrong as they include part of the data that is
+  # not used for the test. This needs to be fixed
   stat = 0
-  for(g in levels(ng_labels)){
-    whKeep = which(ng_labels == g)
-    sub_resNull = resNull[,whKeep]
-    sub_resFull = resFull[,whKeep]
-
-    # Somehow the two lines above don't return the same object depending on
-    # the dimension of resNull and resFull, so need to distinguish the case
-    # where there is only one observation in data.
-    if(is.null(dim(sub_resNull))){
-	ss0 = sum(sub_resNull^2)
-    	ss1 = sum(sub_resFull^2)
-	n = length(sub_resNull)
-    }else{
-        ss0 = rowSums(sub_resNull^2)
-	ss1 = rowSums(sub_resFull^2)
-	n = ncol(sub_resNull)
-    }
+  if(is.null(ng_labels)){
+    ss0 = rowSums(resNull^2)
+    ss1 = rowSums(resFull^2)
+    n = ncol(resNull)
     stat = stat + n * (ss0 - ss1)/(ss1)
+
+  }else{
+    for(g in levels(ng_labels)){
+	whKeep = which(ng_labels == g)
+	sub_resNull = resNull[,whKeep]
+	sub_resFull = resFull[,whKeep]
+
+	# Somehow the two lines above don't return the same object depending on
+	# the dimension of resNull and resFull, so need to distinguish the case
+	# where there is only one observation in data.
+	if(is.null(dim(sub_resNull))){
+	    ss0 = sum(sub_resNull^2)
+	    ss1 = sum(sub_resFull^2)
+	    n = length(sub_resNull)
+	}else{
+	    ss0 = rowSums(sub_resNull^2)
+	    ss1 = rowSums(sub_resFull^2)
+	    n = ncol(sub_resNull)
+	}
+	stat = stat + n * (ss0 - ss1)/(ss1)
+    }
   }
+
   return(stat)
 }
 
@@ -112,11 +124,10 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels, statistics="lrt",
         df2 = nrow(X) - ncol(X)
       }
       df1 = df
-      pval = 1 - pf(stat * df2 / df1, df1=df1, df2=df2)
-
+      pval = pf(stat * df2 / df1, df1=df1, df2=df2, lower.tail=FALSE)
     }else{
       lstat = lrtStat(resNull, resFull, ng_labels=ng_labels)
-      pval = 1 - pchisq(lstat, df=df)
+      pval = pchisq(lstat, df=df, lower.tail=FALSE)
     }
     return(pval)
 }
@@ -189,6 +200,7 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE, weights=N
 
 
   beta = fit_splines(y, X, weights=weights)
+
   if(developmental){
     # For developmental, only consider the group from the contrast
     beta_full = compute_beta_null(X, beta, contrasts_coef)
@@ -287,10 +299,6 @@ compute_lfc = function(fit, meta, method="mean"){
     }else{
 	foldchange = foldchange + y_fitted[, ((i-1)*nobs+1):(i*nobs)]
     } 
-  }
-
-  if(any(is.na(foldchange))){
-    warning("NAs in the foldchange")
   }
 
   foldchange[is.na(foldchange)] = 0

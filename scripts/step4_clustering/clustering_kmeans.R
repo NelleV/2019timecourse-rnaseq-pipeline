@@ -1,11 +1,13 @@
 library(splines)
 library(stats)
 source("utils_splines.R")
+library(devtools)
+load_all("../../bin/moanin")
 
 ###############################################################################
 # Options
 
-n_clusters = 10
+n_clusters = 20
 df = 6
 data_dir = "results/varoquaux2019/leaf/"
 filter_genes = TRUE
@@ -20,7 +22,7 @@ counts = read.delim(file.path(data_dir, "counts_normed.tsv"),
 		    check.names=FALSE)
 meta = read.table(file.path(data_dir, "meta.tsv"),
 		  check.names=FALSE)
-pvalues = read.table(file.path(data_dir, "de_analysis.tsv"),
+pvalues = read.table(file.path(data_dir, "timecourse_de_analysis.tsv"),
 		     sep="\t",
 		     check.names=FALSE)
 
@@ -61,7 +63,4 @@ for(k in 1:n_clusters){
 max_score = quantile(row_min(all_scores), c(percentage_genes_to_label))
 genes_to_not_consider = row_min(all_scores) >= max_score
 labels = row_argmin(all_scores)
-labels[genes_to_not_consider,] = NA
-
-
-
+labels[genes_to_not_consider] = NA
