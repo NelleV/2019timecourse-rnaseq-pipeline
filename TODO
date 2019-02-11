@@ -1,0 +1,5 @@
+# TODO list
+
+
+- Check computation of degrees of freedom when number of samples differ for
+  each group.

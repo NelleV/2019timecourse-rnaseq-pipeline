@@ -30,7 +30,8 @@ filter_expression = FALSE
 timecourse_contrasts = c("C-K", "C-M")
 
 # Clustering
-filter_genes = FALSE
+filter_genes = TRUE
+n_genes_to_keep = 5000
 n_clusters = 20
 percentage_genes_to_label = 0.5
 ```
@@ -45,6 +46,8 @@ meta = shoemaker2015$meta
 
 # Normalization
 
+FIXME this is not the normalization to use (this is the one for the EPICON
+data)
 ```{r}
 # Normalize
 data_set = EDASeq::newSeqExpressionSet(as.matrix(data), phenoData=meta)
@@ -53,14 +56,13 @@ data_normalized = EDASeq::betweenLaneNormalization(
 data_normalized = EDASeq::normCounts(data_normalized)
 ```
 
-```{r}
-
-```
 
 # Differential expression analysis
 
 
 ## Time-course differential expression analysis between two groups
+
+FIXME add estimation of log fold change.
 
 ```{r}
 # Define contrast
@@ -76,6 +78,8 @@ for(contrast_formula in timecourse_contrasts){
     de_analysis[contrast_name_pval] = model$pval
     de_analysis[contrast_name_qval] = model$qval
 }
+
+pvalues = de_analysis
 ```
 
 
@@ -119,6 +123,8 @@ meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Time))
 
 # Clustering
 
+FIXME should use a package with a smarter initialization (kmeans++)
+
 ```{r}
 if(filter_genes){
     # Filter out q-values for the pvalues table
@@ -140,7 +146,6 @@ X = model.matrix(full_model, data=meta)
 fitted_data = fit_predict_splines(y, X)
 rescaled_fitted_data = rescale_values(fitted_data, meta)
 
-# FIXME should use a package with a smarter initialization
 kmeans_clusters = kmeans(rescaled_fitted_data, n_clusters, nstart=10)
 all_scores = data.frame(row.names=row.names(data))
 for(k in 1:n_clusters){

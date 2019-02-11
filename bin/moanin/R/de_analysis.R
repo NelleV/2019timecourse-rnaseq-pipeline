@@ -4,6 +4,7 @@ library("edge")
 library("splines")
 library("MASS")
 
+
 center_data = function(y, ng_labels){
   for(g in levels(ng_labels)){
     whKeep = which(ng_labels == g)
@@ -88,7 +89,11 @@ lrtStat = function(resNull, resFull, ng_labels=NULL) {
   return(stat)
 }
 
-compute_pvalue = function(X, y, beta, beta_null, ng_labels, statistics="lrt",
+compute_pvalue = function(X, y, beta, beta_null, ng_labels,
+			  n_groups=NULL,
+			  n_samples=NULL,
+			  degrees_of_freedom=NULL,
+			  statistics="lrt",
 			  df2=NULL, weights=NULL, mask=NULL, developmental=FALSE){
 
     fitFull = beta %*% t(X)
@@ -115,19 +120,30 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels, statistics="lrt",
       resFull = y - fitFull
     }
 
-    ng = nlevels(ng_labels)
-    df = ncol(X) / ng
+    # estimate degrees of freedom.
+    if(is.null(n_groups)){
+        n_groups = nlevels(ng_labels)
+	# FIXME Raise warning
+    }
+
+    if(is.null(n_samples)){
+	n_samples = ncol(X)
+	# FIXME raise warning
+    }
+    
+    df = degrees_of_freedom
 
     if(statistics == "ftest"){
-      stat = lrtStat(resNull, resFull)
-      if(is.null(df2)){
-        df2 = nrow(X) - ncol(X)
-      }
-      df1 = df
-      pval = pf(stat * df2 / df1, df1=df1, df2=df2, lower.tail=FALSE)
+	stat = lrtStat(resNull, resFull)
+	if(is.null(df2)){
+	    # FIXME Check this.
+	    df2 = n_samples - degrees_of_freedom * n_groups
+	}
+	df1 = df
+	pval = pf(stat * df2 / df1, df1=df1, df2=df2, lower.tail=FALSE)
     }else{
-      lstat = lrtStat(resNull, resFull, ng_labels=ng_labels)
-      pval = pchisq(lstat, df=df, lower.tail=FALSE)
+	lstat = lrtStat(resNull, resFull, ng_labels=ng_labels)
+	pval = pchisq(lstat, df=degrees_of_freedom, lower.tail=FALSE)
     }
     return(pval)
 }
@@ -163,80 +179,90 @@ summarise = function(X, ng_levels) {
 #'	  but not all the data points for the tests.
 edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE, weights=NULL, df=4,
 			     basis=NULL, mask=NULL, developmental=FALSE){
-  ng = nlevels(meta$Group)
-  ng_labels = meta$Group
+    ng = nlevels(meta$Group)
+    ng_labels = meta$Group
 
-  if(is.null(contrasts) & !developmental){
-    # FIXME need better error message
-    stop("Needs either contrasts or developmental")
-  }
-
-  contrasts_coef = c(contrasts)
-  meta = droplevels(meta)
-
-  if(!is.null(mask)){
-    if(length(mask) != dim(data)[2]){
-      stop("The mask provided doesn't have the correct length.")
+      if(is.null(contrasts) & !developmental){
+	# FIXME need better error message
+	stop("Needs either contrasts or developmental")
     }
-  }
 
-  if(length(contrasts_coef) != ng){
-    stop("The contrast coef vector should be of the same size as the number of groups")
-  }
-  
+    contrasts_coef = c(contrasts)
+    meta = droplevels(meta)
 
-  if(is.null(basis)){
-    full_model = ~Group:ns(Time, df=df) + Group + 0
-    X = model.matrix(full_model, data=meta)
-  }else{
-    X = basis
-  }
-  y = data
+    if(!is.null(mask)){
+	if(length(mask) != dim(data)[2]){
+	stop("The mask provided doesn't have the correct length.")
+	}
+    }
 
-  if(center){
-    y = center_data(y)
-    X = t(center_data(t(X)))
-  }
+    if(length(contrasts_coef) != ng){
+	stop("The contrast coef vector should be of the same size as the number of groups")
+    }
 
+    if(is.null(basis)){
+	full_model = ~Group:ns(Time, df=df) + Group + 0
+	X = model.matrix(full_model, data=meta)
+    }else{
+	X = basis
+    }
+    y = data
 
-  beta = fit_splines(y, X, weights=weights)
+    if(center){
+	y = center_data(y)
+	X = t(center_data(t(X)))
+    }
 
-  if(developmental){
-    # For developmental, only consider the group from the contrast
-    beta_full = compute_beta_null(X, beta, contrasts_coef)
-    beta_null = NULL
-  }else{
-    beta_null = compute_beta_null(X, beta, contrasts_coef)
-  }
+    # Get the number of samples used for this particular contrast:
+    groups_of_interest = row.names(contrasts)[contrast != 0]
+    n_samples_fit = sum(with(meta, Group %in% groups_of_interest))
+    n_groups = length(groups_of_interest)
+    degrees_of_freedom = dim(X)[2] / ng
 
-  pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights,
-		        mask=mask,
-		        developmental=developmental)
-  pval_BH = p.adjust(pval, method="BH")
-  pval_ftest = compute_pvalue(
-      X, y, beta, beta_null, ng_labels,
-      statistics="ftest",
-      mask=mask,
-      developmental=developmental)
-  pval_ftest_BH = p.adjust(pval_ftest, method="BH")
+    beta = fit_splines(y, X, weights=weights)
 
-  fit = NULL
-  fit$pval_lrt = pval
-  fit$pval = pval_ftest
-  fit$qval = pval_ftest_BH
-  fit$qval_lrt = pval_BH
-  fit$beta = beta
-  fit$beta_null = beta_null
-  if(is.null(basis)){
-    fit$full_model = full_model
-  }else{
-    fit$full_model = NULL
-  }
-  fit$basis = X
-  fit$weights = weights
-  fit$center = center # Keep track of that for when predicting
-  fit$contrasts = contrasts
-  return(fit)
+    if(developmental){
+	# For developmental, only consider the group from the contrast
+	beta_full = compute_beta_null(X, beta, contrasts_coef)
+	beta_null = NULL
+    }else{
+	beta_null = compute_beta_null(X, beta, contrasts_coef)
+    }
+
+    pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights,
+			  n_samples=n_samples_fit,
+			  n_groups=n_groups,
+			  degrees_of_freedom=degrees_of_freedom,
+		          mask=mask,
+		          developmental=developmental)
+    pval_BH = p.adjust(pval, method="BH")
+    pval_ftest = compute_pvalue(
+	X, y, beta, beta_null, ng_labels,
+	statistics="ftest",
+	mask=mask,
+	degrees_of_freedom=degrees_of_freedom,
+	n_groups=n_groups,
+	n_samples=n_samples_fit,
+	developmental=developmental)
+    pval_ftest_BH = p.adjust(pval_ftest, method="BH")
+
+    fit = NULL
+    fit$pval_lrt = pval
+    fit$pval = pval_ftest
+    fit$qval = pval_ftest_BH
+    fit$qval_lrt = pval_BH
+    fit$beta = beta
+    fit$beta_null = beta_null
+    if(is.null(basis)){
+	fit$full_model = full_model
+    }else{
+	fit$full_model = NULL
+    }
+    fit$basis = X
+    fit$weights = weights
+    fit$center = center # Keep track of that for when predicting
+    fit$contrasts = contrasts
+    return(fit)
 }
 
 
