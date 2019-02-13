@@ -1,0 +1,157 @@
+library("limma")
+
+ALL_LFC_METHODS = c("sum", "max", "timely", "epicon", "abs_sum", "abs_squared_sum")
+
+#' Estimates log fold change
+#'
+#' @param data The data in a matrix
+#' @param meta The metadata containing Groups and Time
+#' @param between_groups The two groups to consider
+#' @param method ["sum", "max", "timely", "epicon"]
+#'
+#' @export
+estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
+    # Should check that data and meta is sorted identically
+    meta = check_meta(meta)
+    # Should check that the method is a known method
+
+    if(!(method %in% ALL_LFC_METHODS)){
+	all_methods = paste(ALL_LFC_METHODS, sep=", ")
+	throw(
+	    paste("moanin::estimate_log_fold_change: '", method, "' is an unknown",
+		  " method to compute log fold change. Known methods are",
+		  all_methods, sep=""))
+    }
+
+    if(method == "sum"){
+
+	log_fold_changes = estimate_log_fold_change_sum(data, meta, contrasts)
+
+    }else if(method == "timely"){
+
+	log_fold_changes = lfc_per_time(data, meta, contrasts)
+
+    }else if(method %in% c("max", "abs_sum", "abs_squared_sum", "epicon")){
+
+	timely_lfc = lfc_per_time(data, meta, contrasts)
+	timely_lfc_meta = reconstruct_meta_from_lfc(timely_lfc)
+    	log_fold_changes = data.frame(row.names=row.names(data))
+	for(contrast in contrasts){
+	    mask = timely_lfc_meta$Group == contrast
+	    if(method == "max"){
+		log_fold_changes[, contrast] = rowMax(timely_lfc[, mask])
+	    }else if(method == "abs_sum"){
+		log_fold_changes[, contrast] = rowSums(abs(timely_lfc[, mask]))
+	    }else if(method == "abs_squared_sum"){
+		log_fold_changes[, contrast] = rowSums(timely_lfc[, mask]**2)
+	    }else if(method == "epicon"){
+		log_fold_changes[, contrast] = (
+		    rowSums(abs(timely_lfc[, mask])) * sign(rowSums(timely_lfc[, mask])))
+	    }
+	}
+
+    }else(
+	throw("blah…")
+    )
+
+    return(log_fold_changes)
+    
+}
+
+#' Estimate log fold change using the sum method
+#'
+#'
+estimate_log_fold_change_sum = function(data, meta, contrasts){
+    contrasts_coef = limma::makeContrasts(contrasts=contrasts,
+					  levels=levels(meta$Group))
+    sample_coefficients = lapply(meta$Group, function(x) return(contrasts_coef[x, ]))
+    sample_coefficients = as.matrix(sample_coefficients)
+
+    # First, do weekly contrasts
+
+    row.names(sample_coefficients) = row.names(meta)
+    log_fold_changes = data.frame(row.names=row.names(data))
+    for(column in 1:ncol(sample_coefficients)){
+	sample_coefficient = as.vector(unlist(sample_coefficients[, column]))
+	log_fold_changes[, column] = as.matrix(data) %*% sample_coefficient 	
+    }
+
+}
+
+
+data_summarize_per_time = function(data, meta){
+    all_group_times = levels(meta$WeeklyGroup)
+
+    log_fold_changes = data.frame(row.names=row.names(data))
+    for(column in all_group_times){
+	mask = meta$WeeklyGroup == column
+	average_expr = rowSums(t(t(data) * mask))
+	log_fold_changes[column] = average_expr 
+    }
+}
+
+
+# XXX helper function to reconstruct metadat from adat
+reconstruct_meta_from_lfc = function(data_per_time){
+    meta_per_time = t(as.data.frame(strsplit(colnames(data_per_time), ".", fixed=TRUE)))
+    row.names(meta_per_time) = colnames(data_per_time)
+    colnames(meta_per_time) = c("Group", "Time")
+    meta_per_time = as.data.frame(meta_per_time)
+    meta_per_time[, "Time"] = as.numeric(meta_per_time[, "Time"])
+    return(meta_per_time) 
+}
+
+
+lfc_per_time = function(data, meta, contrasts){
+    meta$Time = as.factor(meta$Time)
+
+    # Ok, now that we've cleaned up this, move on to contrsats
+    contrasts_coef = limma::makeContrasts(
+	contrasts=contrasts,
+	levels=levels(meta$Group))
+    sample_coefficients = lapply(meta$Group, function(x) return(contrasts_coef[x, ]))
+    sample_coefficients = as.matrix(sample_coefficients)
+    colnames(sample_coefficients) = contrasts
+
+    log_fold_changes = data.frame(row.names=row.names(data))
+    for(column in colnames(sample_coefficients)){
+	sample_coefficient = as.vector(unlist(sample_coefficients[, column]))
+	coef_data = t(t(data) * sample_coefficient)
+	for(time in meta$Time){
+	    mask = meta$Time == time
+	    colname = paste0(column, ".", as.character(time))
+	    log_fold_changes[, colname] = rowSums(coef_data[, mask])
+	}
+    }
+    return(log_fold_changes)
+}
+
+
+
+
+#' Check that the metadata provided is what we expect
+#'
+#' This method will raise errors if the metadata provided is not as expected.
+#'
+#' @param meta metadata
+#' @return meta returns the metadata with additional columns if necessary.
+check_meta = function(meta){
+    metadata_column_names = colnames(meta)
+    if(!("Group" %in% metadata_column_names)){
+	error(
+	    "Metadata doesn't contain expected information." +
+	    " Group column is missing.")
+    }
+
+    if(!("Time" %in% metadata_column_names)){
+	error(
+	    "Metadata doesn't contain expected information." +
+	    " Group column is missing.")
+    }
+
+    # Just create this one.
+    if(!("WeeklyGroup" %in% metadata_column_names)){
+	meta["WeeklyGroup"] = as.factor(make.names(meta$Group:as.factor(meta$Time)))
+    }
+    return(meta) 
+}

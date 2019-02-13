@@ -18,4 +18,4 @@ doc:
 
 
 test:
-	$(RSCRIPT) tests/testthat.R
+	$(RSCRIPT) .scripts/test_package.R
