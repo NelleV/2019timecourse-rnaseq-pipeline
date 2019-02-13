@@ -33,7 +33,6 @@ check_data_meta = function(data, meta){
     dim_data = dim(data)
     dim_meta = dim(meta)
     data = as.matrix(data)
-    browser()
     if(dim_meta[1] != dim_data[2]){
 	stop(
 	    "Data and metadata are inconsistent. Data is of shape (Xx"+
