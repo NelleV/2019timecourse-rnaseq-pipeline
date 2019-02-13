@@ -6,7 +6,7 @@ ALL_LFC_METHODS = c("sum", "max", "timely", "epicon", "abs_sum", "abs_squared_su
 #'
 #' @param data The data in a matrix
 #' @param meta The metadata containing Groups and Time
-#' @param between_groups The two groups to consider
+#' @param contrasts The contrasts to consider
 #' @param method ["sum", "max", "timely", "epicon"]
 #'
 #' @export
@@ -56,9 +56,7 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
     
 }
 
-#' Estimate log fold change using the sum method
-#'
-#'
+
 estimate_log_fold_change_sum = function(data, meta, contrasts){
     contrasts_coef = limma::makeContrasts(contrasts=contrasts,
 					  levels=levels(meta$Group))

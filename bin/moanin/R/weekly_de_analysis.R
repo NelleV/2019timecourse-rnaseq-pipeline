@@ -9,7 +9,10 @@ library("edgeR")
 #' @param meta Metadata data frame
 #' @param contrasts Contrast to use.
 #' @param use_voom_weights boolean: whether to use voom weights or not
+#'
+#' @export
 fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
+    meta = check_meta(meta)
 
     design = stats::model.matrix(~WeeklyGroup + 0, data=meta)
 
