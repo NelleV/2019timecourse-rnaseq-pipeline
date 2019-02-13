@@ -14,7 +14,6 @@ test_that("Estimating log fold change smoke tests", {
     contrasts = c("C-K")
     methods = moanin:::ALL_LFC_METHODS
     for(method in methods){
-	print(method)
         log_fold_change_sum = estimate_log_fold_change(
 	    data, meta, contrasts, method=method)
     }

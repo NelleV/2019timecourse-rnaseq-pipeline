@@ -32,14 +32,15 @@ check_meta = function(meta){
 check_data_meta = function(data, meta){
     dim_data = dim(data)
     dim_meta = dim(meta)
-
+    data = as.matrix(data)
+    browser()
     if(dim_meta[1] != dim_data[2]){
 	stop(
 	    "Data and metadata are inconsistent. Data is of shape (Xx"+
 	    "Metadata is of shape XX")
     }
 
-    if(typeof(data) != numeric){
+    if(!is.numeric(data)){
 	stop("Data should be of type numeric")
     }
     meta = check_meta(meta)
