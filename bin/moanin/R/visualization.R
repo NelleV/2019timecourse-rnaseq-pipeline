@@ -11,15 +11,15 @@ plot_centroids = function(centroids, meta){
     if(n_centroids <= 3){
         par(mfrow=c(n_centroids, 1),
             mar=c(0.1, 0.1, 0.1, 0.1))
-    } else if(n_centroids <= 6){
+    }else if(n_centroids <= 6){
         n_col = ceiling(n_centroids / 2)
         par(mfrow=c(n_col, 2),
             mar=c(0.1, 0.1, 0.1, 0.1))
-    } else if (n_centroids <= 12){
+    }else if(n_centroids <= 12){
         ncol = ceiling(n_centroids / 3)
         par(mfrow=c(ncol, 3),
             mar=c(0.1, 0.1, 0.1, 0.1))
-    } else {
+    }else{
         nrow = round(n_centroids ** 0.5)
         ncol = ceiling(n_centroids / nrow)
         par(mfrow=c(ncol, nrow),
@@ -27,7 +27,7 @@ plot_centroids = function(centroids, meta){
     }
 
     for(i in 1:n_centroids){
-        plot_centroid_individual(kmeans_centroids[i, ], meta)
+        plot_centroid_individual(centroids[i, ], meta)
     }
 }
 

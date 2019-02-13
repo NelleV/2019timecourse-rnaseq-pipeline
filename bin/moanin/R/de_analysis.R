@@ -177,12 +177,16 @@ summarise = function(X, ng_levels) {
 #' @param mask boolean mask of which points to use for the tests. This is
 #'	  useful when you want to use all data points for fitting the splines,
 #'	  but not all the data points for the tests.
-edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE, weights=NULL, df=4,
+#' @export
+edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE,
+			     weights=NULL, df=4,
 			     basis=NULL, mask=NULL, developmental=FALSE){
     ng = nlevels(meta$Group)
     ng_labels = meta$Group
 
-      if(is.null(contrasts) & !developmental){
+    meta = check_meta(meta)
+
+    if(is.null(contrasts) & !developmental){
 	# FIXME need better error message
 	stop("Needs either contrasts or developmental")
     }
@@ -197,7 +201,8 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE, weights=N
     }
 
     if(length(contrasts_coef) != ng){
-	stop("The contrast coef vector should be of the same size as the number of groups")
+	stop("The contrast coef vector should be of the same size" +
+	     " as the number of groups")
     }
 
     if(is.null(basis)){
