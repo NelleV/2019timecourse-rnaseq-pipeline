@@ -23,7 +23,7 @@ splines_kmeans = function(data, meta, n_clusters=10,
     meta = check_meta(meta)
     check_data_meta(data, meta)
     if(is.null(basis)){
-        full_model = ~Group:ns(Time, df=df) + Group + 0
+        full_model = ~Group:ns(Time, df=degrees_of_freedom) + Group + 0
 	X = model.matrix(full_model, data=meta)
     }else{
 	X = basis
@@ -41,7 +41,7 @@ splines_kmeans = function(data, meta, n_clusters=10,
 
     # Set the random seed if it is null.
     if(is.null(random_seed)){
-	set.seed()
+	set.seed(NULL)
 	random_seed = .Random.seed[1]
     }
     kmeans_clusters = ClusterR::KMeans_rcpp(

@@ -67,13 +67,9 @@ row_max = function(X){
   return(apply(X, 1, max))
 }
 
-
-# XXX It's wierd that this does not exists in R…
-# it probably exists but under another name?
 row_min = function(X){
   return(apply(X, 1, min))
 }
-
 
 row_mean = function(X){
     return(apply(X, 1, mean))
@@ -87,13 +83,24 @@ row_argmin = function(X){
     return(apply(X, 1, which.min))
 }
 
-align_data_onto_centroid = function(y, centroid){
+
+# Worst name ever
+align_data_onto_centroid = function(data, centroid){
+    n_samples = dim(data)[2]
+    n_genes = dim(data)[1]
+    if(n_samples != length(centroid)){
+	stop("align_data_onto_centroid: problem in dimensions")
+    }
     scaling_factors = (
-	rowSums(centroid - mean(centroid) * y) /
-	rowSums(y - row_mean(y) * y))
+	rowSums(rep(centroid - mean(centroid), each=n_genes) * data) /
+	rowSums((data - rowMeans(data)) * data))
     scaling_factors[scaling_factors < 0] = 0
-    shift_factors = row_mean(centroid - scaling_factors * y)
-    return(scaling_factors * y + shift_factors)
+    shift_factors = rowMeans(
+	rep(centroid, each=n_genes) - rep(scaling_factors, times=n_samples) * data)
+
+    data_fitted = rep(scaling_factors, times=n_samples) * data
+    data_fitted = (data_fitted + rep(shift_factors, times=n_samples))
+    return(data_fitted)
 }
 
 
@@ -105,7 +112,7 @@ score_genes_centroid = function(y, centroid){
 }
 
 
-#' Fisher's method to combine pvalues
+#' Fosher's method to combine pvalues
 #'
 #' Combines all p-value per rows.
 #' 
