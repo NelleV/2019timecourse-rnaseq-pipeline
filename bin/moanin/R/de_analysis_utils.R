@@ -122,32 +122,3 @@ lfc_per_time = function(data, meta, contrasts){
     return(log_fold_changes)
 }
 
-
-
-
-#' Check that the metadata provided is what we expect
-#'
-#' This method will raise errors if the metadata provided is not as expected.
-#'
-#' @param meta metadata
-#' @return meta returns the metadata with additional columns if necessary.
-check_meta = function(meta){
-    metadata_column_names = colnames(meta)
-    if(!("Group" %in% metadata_column_names)){
-	error(
-	    "Metadata doesn't contain expected information." +
-	    " Group column is missing.")
-    }
-
-    if(!("Time" %in% metadata_column_names)){
-	error(
-	    "Metadata doesn't contain expected information." +
-	    " Group column is missing.")
-    }
-
-    # Just create this one.
-    if(!("WeeklyGroup" %in% metadata_column_names)){
-	meta["WeeklyGroup"] = as.factor(make.names(meta$Group:as.factor(meta$Time)))
-    }
-    return(meta) 
-}

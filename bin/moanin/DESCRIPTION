@@ -8,7 +8,7 @@ Depends: R (>= 3.4.4)
 Imports: MASS (>= 1.0.0),
 	 edge (>= 2.4.0),
 	 limma,
-	 edgeR, stats, graphics, grDevices
+	 edgeR, stats, graphics, grDevices, ClusterR
 Suggests: testthat (>= 1.0.0),
 	  knitr, rmarkdown, covr, shiny, DT
 VignetteBuilder: knitr
