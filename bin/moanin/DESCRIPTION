@@ -10,7 +10,7 @@ Imports: MASS (>= 1.0.0),
 	 limma,
 	 edgeR
 Suggests: testthat (>= 1.0.0),
-	  knitr, rmarkdown
+	  knitr, rmarkdown, covr, shiny, DT
 VignetteBuilder: knitr
 License: BSD 3-clause License + file LICENSE
 Encoding: UTF-8

@@ -50,9 +50,7 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 	    }
 	}
 
-    }else(
-	throw("blah…")
-    )
+    }
 
     return(log_fold_changes)
     
