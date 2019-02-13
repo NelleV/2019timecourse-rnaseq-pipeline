@@ -266,28 +266,3 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE, weights=N
 }
 
 
-predict_ = function(fit, meta, time, null_model=FALSE){
-  meta_predict = expand.grid(
-      Group=levels(meta$Group),
-      Time=time)
-
-  if(!is.null(fit$full_model)){
-    X_pred = model.matrix(fit$full_model, data=meta_predict)
-  }else{
-    X_pred = fit$basis
-    meta_predict = meta  
-  }
-  
-  if(fit$center){
-    X_pred = t(center_data(t(X_pred)))
-  }
-  
-  if(null_model){
-    y_fitted = fit$beta_null %*% t(X_pred)
-  }else{
-    y_fitted = fit$beta %*% t(X_pred)
-  }
-
-  colnames(y_fitted) = make.names(meta_predict$Group:as.factor(meta_predict$Time))
-  return(y_fitted)
-}
