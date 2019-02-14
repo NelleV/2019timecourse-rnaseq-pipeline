@@ -28,3 +28,16 @@ test_that("splines:align_data_onto_centroid", {
     expect_error(align_data_onto_centroid(data[, 1:10], centroid))
 })
 
+
+test_that("splines:rescale_values", {
+
+    n_genes = 5
+    data(shoemaker2015)
+    data = shoemaker2015$data
+    meta = shoemaker2015$meta
+    data = data[1:n_genes,]
+
+    rescaled_data = rescale_values(data, meta)
+    expect_equal(rep(0, n_genes), as.vector(row_min(rescaled_data)))
+    expect_equal(rep(1, n_genes), as.vector(row_max(rescaled_data)))
+})

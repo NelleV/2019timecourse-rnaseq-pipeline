@@ -46,17 +46,24 @@ fit_predict_splines = function(y, X, weights=NULL){
 }
 
 
-rescale_values = function(y, meta, group="Group"){
-    factors_to_consider = levels(unlist(meta[group]))
-    for(factor in factors_to_consider){
-	mask = meta["Group"] == factor
-	ymin = row_min(y[, mask]) 
-	y[, mask] = y[, mask] - ymin
-	ymax = row_max(y[, mask])
+rescale_values = function(y, meta, group=NULL){
+    if(is.null(group)){
+	ymin = row_min(y) 
+	y = y - ymin
+	ymax = row_max(y)
 	# We may have a division by 0 here
-	y[, mask] = y[, mask] / ymax
+	y = y / ymax
+    }else{
+	factors_to_consider = levels(unlist(meta[group]))
+	for(factor in factors_to_consider){
+	    mask = meta["Group"] == factor
+	    ymin = row_min(y[, mask]) 
+	    y[, mask] = y[, mask] - ymin
+	    ymax = row_max(y[, mask])
+	    # We may have a division by 0 here
+	    y[, mask] = y[, mask] / ymax
+	}
     }
-
     return(y)
 }
 
@@ -104,9 +111,12 @@ align_data_onto_centroid = function(data, centroid){
 }
 
 
-score_genes_centroid = function(y, centroid){
-    y_fitted = align_data_onto_centroid(y, centroid)
-    scores = row_sum((y_fitted - centroid)**2)
+score_genes_centroid = function(data, centroid){
+    n_genes = dim(data)[1]
+    data_fitted = align_data_onto_centroid(data, centroid)
+
+    scores = row_sum((data_fitted - rep(centroid, times=n_genes))**2)
+
     scores = scores / max(scores)
     return(scores)
 }
