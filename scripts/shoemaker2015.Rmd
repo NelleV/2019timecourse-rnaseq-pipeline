@@ -1,28 +1,28 @@
----
+
 title: "Shoemaker et al, 2015: An Ultrasensitive Mechanism Regulates Influenza Virus-Induced Inflammation"
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteEngine{knitr::knitr}
-    %\VignetteIndexEntry{Title of your vignette}
-      %\usepackage[UTF-8]{inputenc}
+
 ---
 
-```{r}
+
+
+```{r echo=TRUE, results="hide"}
 # Loading dependencies
 library(devtools)
 library(limma)
 library(splines)
 library(stats)
+library(moanin)
 
 # library(moanin)
-load_all("../bin/moanin")
 ```
 
-```{r}
+```{r echo=TRUE}
 # Set options
 df = 6
 
 # Preprocessing & filtering
+is_count = FALSE
 take_log = FALSE    
 filter_expression = FALSE
 
@@ -36,11 +36,13 @@ n_clusters = 20
 percentage_genes_to_label = 0.5
 ```
 
-```{r}
+```{r echo=FALSE}
 # Set data files and options
 data("shoemaker2015")
 data = shoemaker2015$data
 meta = shoemaker2015$meta
+
+# Right now, the package doesn't contain the normalized data
 ```
 
 
@@ -48,14 +50,16 @@ meta = shoemaker2015$meta
 
 FIXME this is not the normalization to use (this is the one for the EPICON
 data)
-```{r}
-# Normalize
-data_set = EDASeq::newSeqExpressionSet(as.matrix(data), phenoData=meta)
-data_normalized = EDASeq::betweenLaneNormalization(
-    data_set, which="upper", offset=TRUE, round=FALSE)
-data_normalized = EDASeq::normCounts(data_normalized)
-```
 
+```{r normalization}
+if(is_count){
+    # Normalize
+    data_set = EDASeq::newSeqExpressionSet(as.matrix(data), phenoData=meta)
+    data_normalized = EDASeq::betweenLaneNormalization(
+	data_set, which="upper", offset=TRUE, round=FALSE)
+    data_normalized = EDASeq::normCounts(data_normalized)
+}
+```
 
 # Differential expression analysis
 
@@ -64,19 +68,19 @@ data_normalized = EDASeq::normCounts(data_normalized)
 
 FIXME add estimation of log fold change.
 
-```{r}
+```{r de_analysis}
 # Define contrast
 de_analysis = data.frame(row.names=row.names(data))
 for(contrast_formula in timecourse_contrasts){
     contrast = limma::makeContrasts(
 	contrast_formula,
 	levels=levels(meta$Group))
-    model = edgeWithContrasts(as.matrix(data), meta, contrast)
+    model = moanin:::edgeWithContrasts(as.matrix(data), meta, contrast)
     contrast_name = gsub(" ", "", contrast_formula, fixed=TRUE)
     contrast_name_pval = paste(contrast_name, "-pval", sep="")
     contrast_name_qval = paste(contrast_name, "-qval", sep="")
-    de_analysis[contrast_name_pval] = model$pval
-    de_analysis[contrast_name_qval] = model$qval
+    de_analysis[contrast_name_pval] = model$pval_lrt
+    de_analysis[contrast_name_qval] = model$qval_lrt
 }
 
 pvalues = de_analysis
@@ -93,7 +97,7 @@ contrast = limma::makeContrasts(
     levels=levels(meta$Group))
 # Why do I have to do this again?
 mask = with(meta, Group == contrast_formula)
-model = edgeWithContrasts(
+model = moanin:::edgeWithContrasts(
     as.matrix(data), meta, contrast, developmental=TRUE,
     mask=mask)
 ```
@@ -123,14 +127,12 @@ meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Time))
 
 # Clustering
 
-FIXME should use a package with a smarter initialization (kmeans++)
-
 ```{r}
 if(filter_genes){
     # Filter out q-values for the pvalues table
     col_to_keep = colnames(pvalues)[grepl("-pval", colnames(pvalues))]
     pvalues = pvalues[, col_to_keep]
-    fishers_pval = fisher_method(pvalues)
+    fishers_pval = moanin:::fisher_method(pvalues)
     genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
     y = as.matrix(data[genes_to_keep, ])
 }else{
@@ -140,24 +142,34 @@ if(filter_genes){
 ###############################################################################
 # Fit the splines
 
-full_model = ~Group:ns(Time, df=df) + Group + 0
-X = model.matrix(full_model, data=meta)
 
-fitted_data = fit_predict_splines(y, X)
-rescaled_fitted_data = rescale_values(fitted_data, meta)
+kmeans_clusters = moanin::splines_kmeans(
+    y, meta, n_clusters=20,
+    random_seed=42,
+    degrees_of_freedom=df)
 
-kmeans_clusters = kmeans(rescaled_fitted_data, n_clusters, nstart=10)
+# Rescale the centroids
+centroids = moanin::rescale_values(kmeans_clusters$centroids, meta)
 all_scores = data.frame(row.names=row.names(data))
 for(k in 1:n_clusters){
-    scores = score_genes_centroid(data, kmeans_clusters$centers[k,])
+    scores = moanin:::score_genes_centroid(data, centroids[k,])
     all_scores[paste0("cluster_", k)] = scores
 }
 
 # Only assign labels to X% of the genes
-max_score = quantile(row_min(all_scores), c(percentage_genes_to_label))
-genes_to_not_consider = row_min(all_scores) >= max_score
-labels = row_argmin(all_scores)
+max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
+genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
+labels = moanin:::row_argmin(all_scores)
 labels[genes_to_not_consider] = NA
+```
+
+```{r}
+print(unique(labels))
+```
+
+
+```{r}
+moanin::plot_centroids(centroids, meta)
 ```
 
 # Downstream analysis
