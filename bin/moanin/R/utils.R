@@ -1,10 +1,12 @@
 
 # This should override the Biobase function
 rowMax = function(data){
-    return(as.vector(lapply(data, function(x) max(x))))
+    check_is_2d(data)
+    return(as.vector(apply(data, 1, max)))
 }
 
 rowMin = function(data){
-    return(as.vector(lapply(data, function(x) min(x))))
+    check_is_2d(data)
+    return(as.vector(apply(data, 1, min)))
 }
 

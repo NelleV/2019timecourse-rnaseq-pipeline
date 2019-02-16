@@ -51,10 +51,24 @@ pvalues = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
 
 ```{r}
 if(filter_genes){
-    # Filter out q-values for the pvalues table
-    col_to_keep = colnames(pvalues)[grepl("-pval", colnames(pvalues))]
-    pvalues = pvalues[, col_to_keep]
-    fishers_pval = moanin:::fisher_method(pvalues)
+    # First, filter out any genes that doesn't have a log fold change of at
+    # least 2
+    # XXX I should actually filter on the max, but it is broken right now.
+    lfc_col_to_keep = colnames(pvalues)[
+	grepl("-lfc_epicon", colnames(pvalues))]
+    pvalues = pvalues[rowSums(abs(pvalues[, lfc_col_to_keep]) > 2) > 0, ]
+
+    if(dim(pvalues)[1] > n_genes_to_keep){
+
+	# Then rank by fisher's p-value and take max the number of genes of
+	# interest
+	# Filter out q-values for the pvalues table
+	pval_col_to_keep = colnames(pvalues)[grepl("-pval", colnames(pvalues))]
+	pvalues = pvalues[, pval_col_to_keep]
+	fishers_pval = moanin:::fisher_method(pvalues)
+    } else {
+	genes_to_keep = names(pvalues)
+    }
     genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
     y = as.matrix(data[genes_to_keep, ])
 }else{
@@ -92,4 +106,9 @@ table(labels)
 
 ```{r}
 moanin::plot_centroids(centroids, meta)
+```
+
+```{r results="hide", echo=FALSE}
+# Save the clustering for the next step
+write.table(labels, ".results/clustering_labels.txt", sep="\t")
 ```

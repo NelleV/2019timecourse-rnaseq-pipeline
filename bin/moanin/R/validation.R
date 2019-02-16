@@ -17,7 +17,7 @@ check_meta = function(meta){
     if(!("Time" %in% metadata_column_names)){
 	stop(
 	    "Metadata doesn't contain expected information." +
-	    " Group column is missing.")
+	    " Time column is missing.")
     }
 
     # Just create this one.
@@ -43,4 +43,13 @@ check_data_meta = function(data, meta){
 	stop("Data should be of type numeric")
     }
     meta = check_meta(meta)
+}
+
+
+#' Check is 2D
+check_is_2d = function(X){
+    dim_data = dim(X)
+    if(is.null(dim_data)){
+	stop("Data is expected to be 2D. No dimension found.")
+    }
 }
