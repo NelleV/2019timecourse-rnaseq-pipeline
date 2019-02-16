@@ -104,7 +104,7 @@ is_expressed = rowSums(data$other$"gIsWellAboveBG" > 0) >= 4
 
 data = data[!control_probes & is_expressed, ]$E
 
-write.table(data, "results/quantile_normalized.txt")
+write.table(data, ".results/quantile_normalized.txt")
 
 meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
 
@@ -172,4 +172,3 @@ aheatmap(data_corr,
          annLegend=FALSE, 
          main="Replicates\nAfter Normalization")
 ```
-
