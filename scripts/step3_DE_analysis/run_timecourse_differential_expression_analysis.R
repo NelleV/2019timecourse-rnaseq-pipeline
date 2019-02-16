@@ -54,8 +54,8 @@ for(contrast_formula in contrasts){
     contrast_name = gsub(" ", "", contrast_formula, fixed=TRUE)
     contrast_name_pval = paste(contrast_name, "-pval", sep="")
     contrast_name_qval = paste(contrast_name, "-qval", sep="")
-    de_analysis[contrast_name_pval] = model$pval
-    de_analysis[contrast_name_qval] = model$qval
+    de_analysis[contrast_name_pval] = model$pval_lrt
+    de_analysis[contrast_name_qval] = model$qval_lrt
 }
 
 outname = file.path(data_dir, "timecourse_de_analysis.tsv")

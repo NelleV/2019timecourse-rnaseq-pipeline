@@ -14,6 +14,26 @@ library(stats)
 library(moanin)
 ```
 
+```{r echo=FALSE}
+# Set options
+df = 6
+
+# Preprocessing & filtering
+is_count = FALSE
+take_log = FALSE    
+filter_expression = FALSE
+
+# Differential expression analysis
+timecourse_contrasts = c("C-K", "C-M")
+
+# Clustering
+filter_genes = TRUE
+n_genes_to_keep = 5000
+n_clusters = 20
+percentage_genes_to_label = 0.5
+```
+
+
 ```{r echo=FALSE, results="hide"}
 # Set data files and options
 data("shoemaker2015")
@@ -44,7 +64,7 @@ for(contrast_formula in timecourse_contrasts){
 
 pvalues = de_analysis
 outname = ".results/pvalues.txt"
-write.table(pvalues, outname)
+write.table(pvalues, outname, sep="\t")
 ```
 
 

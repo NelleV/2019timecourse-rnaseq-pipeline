@@ -41,7 +41,7 @@ data = shoemaker2015$data
 meta = shoemaker2015$meta
 
 # Right now, the package doesn't contain the normalized data
-pvalues = read.table(".results/pvalues.txt", sep="\t")
+pvalues = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
 ```
 
 
@@ -71,7 +71,7 @@ kmeans_clusters = moanin::splines_kmeans(
     degrees_of_freedom=df)
 
 # Rescale the centroids
-centroids = moanin::rescale_values(kmeans_clusters$centroids, meta)
+centroids = moanin:::rescale_values(kmeans_clusters$centroids, meta)
 all_scores = data.frame(row.names=row.names(data))
 for(k in 1:n_clusters){
     scores = moanin:::score_genes_centroid(data, centroids[k,])
@@ -93,5 +93,3 @@ table(labels)
 ```{r}
 moanin::plot_centroids(centroids, meta)
 ```
-
-

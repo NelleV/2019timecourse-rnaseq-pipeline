@@ -1,3 +1,6 @@
 library("devtools")
-document()
+library("pkgdown")
+
+devtools::document()
+pkgdown::build_site()
 
