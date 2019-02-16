@@ -18,3 +18,8 @@ pipeline:
 %.html: %.Rmd
 	mkdir -p .results
 	Rscript .scripts/compile_rmarkdown.R $<
+
+
+clean:
+	rm *.html
+	for i in $(PIPELINE_STEPS); do $(MAKE) -C $$i clean; done

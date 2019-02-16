@@ -55,7 +55,7 @@ if(filter_genes){
     # least 2
     # XXX I should actually filter on the max, but it is broken right now.
     lfc_col_to_keep = colnames(pvalues)[
-	grepl("-lfc_epicon", colnames(pvalues))]
+	grepl("-lfc_max", colnames(pvalues))]
     pvalues = pvalues[rowSums(abs(pvalues[, lfc_col_to_keep]) > 2) > 0, ]
 
     if(dim(pvalues)[1] > n_genes_to_keep){
@@ -104,7 +104,8 @@ table(labels)
 ```
 
 
-```{r}
+```{r fig.height=8, fig.width=8}
+
 moanin::plot_centroids(centroids, meta)
 ```
 
