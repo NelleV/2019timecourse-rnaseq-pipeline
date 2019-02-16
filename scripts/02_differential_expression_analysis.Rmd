@@ -60,6 +60,20 @@ for(contrast_formula in timecourse_contrasts){
     contrast_name_qval = paste(contrast_name, "-qval", sep="")
     de_analysis[contrast_name_pval] = model$pval_lrt
     de_analysis[contrast_name_qval] = model$qval_lrt
+
+    # Now compute log fold change using different methods
+    # XXX This fails very badly if the contrasts provided is wrong.
+    log_fold_change_epicon = moanin::estimate_log_fold_change(
+	data, meta, c(contrast_formula), method="epicon")
+    contrast_name_lfc_epicon = paste(contrast_name, "-lfc_epicon", sep="")
+    de_analysis[contrast_name_lfc_epicon] = log_fold_change_epicon
+
+    # XXX Something is wrong with method max
+    log_fold_change_max = moanin::estimate_log_fold_change(
+	data, meta, c(contrast_formula), method="max")
+    contrast_name_lfc_max = paste(contrast_name, "-lfc_max", sep="")
+    de_analysis[contrast_name_lfc_max] = log_fold_change_max
+
 }
 
 pvalues = de_analysis

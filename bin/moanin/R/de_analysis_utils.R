@@ -46,7 +46,7 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 		log_fold_changes[, contrast] = rowSums(timely_lfc[, mask]**2)
 	    }else if(method == "epicon"){
 		log_fold_changes[, contrast] = (
-		    rowSums(abs(timely_lfc[, mask])) * sign(rowSums(timely_lfc[, mask])))
+		    rowMeans(abs(timely_lfc[, mask])) * sign(rowSums(timely_lfc[, mask])))
 	    }
 	}
 
