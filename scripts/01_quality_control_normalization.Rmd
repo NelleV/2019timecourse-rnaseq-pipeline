@@ -1,0 +1,37 @@
+---
+title: "Normalization: A pipeline to analyse time-course gene expression data"
+output: rmarkdown::html_vignette
+---
+
+
+
+```{r echo=FALSE, results="hide"}
+# Loading dependencies
+library(devtools)
+library(limma)
+library(splines)
+library(stats)
+library(moanin)
+
+# library(moanin)
+```
+
+```{r echo=FALSE}
+# Set options
+df = 6
+
+# Preprocessing & filtering
+is_count = FALSE
+take_log = FALSE    
+filter_expression = FALSE
+
+# Differential expression analysis
+timecourse_contrasts = c("C-K", "C-M")
+
+# Clustering
+filter_genes = TRUE
+n_genes_to_keep = 5000
+n_clusters = 20
+percentage_genes_to_label = 0.5
+```
+

@@ -1,12 +1,11 @@
-
-title: "Shoemaker et al, 2015: An Ultrasensitive Mechanism Regulates Influenza Virus-Induced Inflammation"
+---
+title: "A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
-
 ---
 
 
 
-```{r echo=TRUE, results="hide"}
+```{r echo=FALSE, results="hide"}
 # Loading dependencies
 library(devtools)
 library(limma)
@@ -17,7 +16,7 @@ library(moanin)
 # library(moanin)
 ```
 
-```{r echo=TRUE}
+```{r echo=FALSE}
 # Set options
 df = 6
 
@@ -164,7 +163,7 @@ labels[genes_to_not_consider] = NA
 ```
 
 ```{r}
-print(unique(labels))
+table(labels)
 ```
 
 

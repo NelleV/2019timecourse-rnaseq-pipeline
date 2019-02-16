@@ -1,0 +1,97 @@
+---
+title: "Clustering: A pipeline to analyse time-course gene expression data"
+output: rmarkdown::html_vignette
+---
+
+
+```{r echo=FALSE, results="hide"}
+# Loading dependencies
+library(devtools)
+library(limma)
+library(splines)
+library(stats)
+library(moanin)
+
+# library(moanin)
+```
+
+```{r echo=FALSE, results="hide"}
+# Set options
+df = 6
+
+# Preprocessing & filtering
+is_count = FALSE
+take_log = FALSE    
+filter_expression = FALSE
+
+# Differential expression analysis
+timecourse_contrasts = c("C-K", "C-M")
+
+# Clustering
+filter_genes = TRUE
+n_genes_to_keep = 5000
+n_clusters = 20
+percentage_genes_to_label = 0.5
+```
+
+```{r echo=FALSE, results="hide"}
+# Set data files and options
+data("shoemaker2015")
+data = shoemaker2015$data
+meta = shoemaker2015$meta
+
+# Right now, the package doesn't contain the normalized data
+pvalues = read.table(".results/pvalues.txt", sep="\t")
+```
+
+
+
+
+# Clustering of time-course data
+
+```{r}
+if(filter_genes){
+    # Filter out q-values for the pvalues table
+    col_to_keep = colnames(pvalues)[grepl("-pval", colnames(pvalues))]
+    pvalues = pvalues[, col_to_keep]
+    fishers_pval = moanin:::fisher_method(pvalues)
+    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
+    y = as.matrix(data[genes_to_keep, ])
+}else{
+    y = as.matrix(data)
+}
+
+#############################################################################
+# Fit the splines
+
+
+kmeans_clusters = moanin::splines_kmeans(
+    y, meta, n_clusters=20,
+    random_seed=42,
+    degrees_of_freedom=df)
+
+# Rescale the centroids
+centroids = moanin::rescale_values(kmeans_clusters$centroids, meta)
+all_scores = data.frame(row.names=row.names(data))
+for(k in 1:n_clusters){
+    scores = moanin:::score_genes_centroid(data, centroids[k,])
+    all_scores[paste0("cluster_", k)] = scores
+}
+
+# Only assign labels to X% of the genes
+max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
+genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
+labels = moanin:::row_argmin(all_scores)
+labels[genes_to_not_consider] = NA
+```
+
+```{r}
+table(labels)
+```
+
+
+```{r}
+moanin::plot_centroids(centroids, meta)
+```
+
+

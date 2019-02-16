@@ -1,0 +1,42 @@
+---
+title: "XXX: a pipeline to analyse time-course gene expression data"
+output: html_document
+---
+
+# Abstract
+
+
+The phenotypic diversity of cells is governed by a complex equilibrium between
+their genetic identity and their environmental interactions, and understanding
+the dynamics of gene expression is a fundamental question of biology. However,
+analysing time-course transcriptomic data raises challenging statistical and
+computational questions, requiring the development of novel methods and
+software. 
+
+# Introduction
+
+- TODO why is time-course gene expression analysis important for biology. Why
+  are novel workflows necessary.
+
+Time-course gene expression analysis workflows include steps used more broadly
+for gene expression data analasys such as quality control (QC), exploratory
+data analysis (EDA), pre-processing, normalization, and visualization. Yet, a
+typical gene expression data analysis workflow is not entirely adequate for
+analysing time-course data. In particular, differential expression analysis
+needs to be adapted to time-course data, and often needs to be followed by a
+clustering step to group genes sharing similar patterns of expression.
+
+Here, we propose an integrated workflow for downstream analysis of time-course
+data, with the following main steps: (1) quality control and normalization;
+(2) differential expression analysis of time-course data; (3) clustering; (4)
+downstream analysis of clusters with GO term and pathway enrichment.
+
+XXX Add the packages used in the workflow
+
+# Analysis of the dynamical response of mouse lung tissue to influenza
+
+## Overview
+
+This workflow is illustrated using data from a micro-array time-course
+experiment, exposing mice to different strains of influenza, and collecting
+lung tissue during 12 time-points (..).
