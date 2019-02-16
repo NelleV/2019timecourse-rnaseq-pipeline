@@ -1,13 +1,13 @@
 library("limma")
 
-ALL_LFC_METHODS = c("sum", "max", "timely", "epicon", "abs_sum", "abs_squared_sum")
+ALL_LFC_METHODS = c("sum", "max", "timely", "epicon", "abs_sum", "abs_squared_sum", "min")
 
 #' Estimates log fold change
 #'
 #' @param data The data in a matrix
 #' @param meta The metadata containing Groups and Time
 #' @param contrasts The contrasts to consider
-#' @param method ["sum", "max", "timely", "epicon"]
+#' @param method ["sum", "max", "min", "timely", "epicon"]
 #'
 #' @export
 estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
@@ -31,7 +31,7 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 
 	log_fold_changes = lfc_per_time(data, meta, contrasts)
 
-    }else if(method %in% c("max", "abs_sum", "abs_squared_sum", "epicon")){
+    }else if(method %in% c("max", "min", "abs_sum", "abs_squared_sum", "epicon")){
 
 	timely_lfc = lfc_per_time(data, meta, contrasts)
 	timely_lfc_meta = reconstruct_meta_from_lfc(timely_lfc)
@@ -39,7 +39,9 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 	for(contrast in contrasts){
 	    mask = timely_lfc_meta$Group == contrast
 	    if(method == "max"){
-		log_fold_changes[, contrast] = rowMax(timely_lfc[, mask])
+		log_fold_changes[, contrast] = rowMax(abs(timely_lfc[, mask]))
+	    } else if(method == "min") {
+		log_fold_changes[, contrast] = rowMin(abs(timely_lfc[, mask])) 
 	    }else if(method == "abs_sum"){
 		log_fold_changes[, contrast] = rowSums(abs(timely_lfc[, mask]))
 	    }else if(method == "abs_squared_sum"){
