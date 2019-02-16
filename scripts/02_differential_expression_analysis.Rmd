@@ -24,7 +24,7 @@ take_log = FALSE
 filter_expression = FALSE
 
 # Differential expression analysis
-timecourse_contrasts = c("C-K", "C-M")
+timecourse_contrasts = c("C-K", "C-M", "C-VL", "C-VH")
 
 # Clustering
 filter_genes = TRUE
@@ -77,6 +77,35 @@ for(contrast_formula in timecourse_contrasts){
 }
 
 pvalues = de_analysis
+```
+
+Let's explore a bit the number of genes found differentially expressed.
+
+```{r}
+print(colSums(pvalues[, grepl("-qval", colnames(pvalues))] < 0.05))
+```
+
+And now a volcano plot for quick visualization
+
+```{r fig.height=8, fig.width=8}
+
+pvalue = de_analysis[, "C-K-qval"]
+lfc_epicon = de_analysis[, "C-K-lfc_epicon"]
+
+plot(lfc_epicon, -log10(pvalue), pch=20, main="Volcano plot",
+     xlim=c(-2.5, 2))
+
+# Add colored points: red if padj<0.05, orange of log2FC>1, green if both)
+points(lfc_epicon[pvalue < 0.01], -log10(pvalue[pvalue < 0.01]), pch=20,
+       col="red")
+points(lfc_epicon[abs(lfc_epicon) > 1],
+       -log10(pvalue[abs(lfc_epicon) > 1]), pch=20, col="orange")
+points(lfc_epicon[(pvalue < 0.01) & (abs(lfc_epicon) > 1)],
+       -log10(pvalue[(pvalue < 0.01) & (abs(lfc_epicon) > 1)]), pch=20, col="green")
+
+```
+
+```{r echo=FALSE, results="hide"}
 outname = ".results/pvalues.txt"
 write.table(pvalues, outname, sep="\t")
 ```
