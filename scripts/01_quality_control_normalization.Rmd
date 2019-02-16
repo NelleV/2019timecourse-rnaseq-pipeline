@@ -35,3 +35,141 @@ n_clusters = 20
 percentage_genes_to_label = 0.5
 ```
 
+```{r echo=FALSE, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(
+  cache=FALSE, autodep=FALSE, warning=FALSE, error=FALSE, message=FALSE,
+  echo=FALSE,
+  duplicate.label="allow"
+)
+
+library(genefilter)
+library(dplyr)
+library(ggplot2)
+library(NMF)
+library(reshape2)
+library(limma)
+```
+
+The paper describes a normalization strategy that I am going to use here:
+
+  - First, normalize probe intensity using background information using the
+    "norm-exponential" strategy.
+  - Then normalize across micro-arrrays using quantily normalization.
+
+Unfortunately, that means going back to the raw data, which can be downloaded
+in the data folder, by clicking on the link specified in the README (it might
+take a while…). Untar the main file into a `rawdata` folder.
+
+```{r reading_targets, echo=FALSE, include=FALSE}
+
+targets = readTargets()
+RG = read.maimages(
+  targets, source="agilent",
+  path="data/shoemaker2015/rawdata",
+  other.columns="gIsWellAboveBG",
+  green.only=TRUE)
+
+```
+
+Before quantile normalization:
+
+```{r echo=FALSE, include=FALSE}
+RG = backgroundCorrect(RG, method="normexp")
+```
+
+```{r plot_densities, echo=FALSE}
+xlim = c(0, 14)
+plotDensities(RG, col="black", legend=FALSE)
+```
+
+After quantile normalization:
+
+```{r normalize_between_arrays, echo=FALSE}
+RG.q = normalizeBetweenArrays(RG, method="quantile")
+plotDensities(RG.q, col="black", legend=FALSE)
+
+sample_names = sapply(strsplit(colnames(RG.q), "_"), .subset2,  1)
+colnames(RG.q) = sample_names
+row.names(RG.q) = make.names(RG$genes$SystematicName, unique=TRUE)
+idx_to_keep = which(
+  !(RG$genes$Systematic %in% c("DarkCorner", "GE_BrightCorner",
+			       "NegativeControl")))
+
+data = RG.q[idx_to_keep,]
+
+# Filter out control probes.
+control_probes = data$genes[, "ControlType"] == 1
+is_expressed = rowSums(data$other$"gIsWellAboveBG" > 0) >= 4
+
+data = data[!control_probes & is_expressed, ]$E
+
+write.table(data, "results/quantile_normalized.txt")
+
+meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
+
+```
+
+```{r order_genes, echo=FALSE}
+# Reorder genes on condition, time, and replicate
+ord = order(
+  meta$Group,
+  meta$Time,
+  meta$Replicate)
+data = data[, ord]
+meta = meta[ord, ]
+meta["Time"] = as.factor(unlist(meta["Time"]))
+meta["Replicate"] = as.factor(unlist(meta["Replicate"]))
+```
+
+
+## Plot the RLE and PCA
+
+```{r leafRleRaw, fig.width=6}
+library(EDASeq)
+ylim = c(-2.5,2.5)
+plotRLE(exp(data), outline=FALSE,
+        whisklty=1, whisklwd=2, col=meta$Replicate, main="RLE, data")
+plotRLE(exp(data), outline=FALSE,
+        whisklty=1, whisklwd=2, col=meta$Group, main="RLE, data")
+plotRLE(exp(data), outline=FALSE,
+        whisklty=1, whisklwd=2, col=meta$Time, main="RLE, data")
+
+```
+```{r leafPCARaw}
+library(ggfortify)
+pca_data = prcomp(t(data), rank=5, center=TRUE, scale=TRUE) 
+percent_var = round(100 * attr(pca_data, "percentVar"))
+
+autoplot(pca_data, data=meta, colour="Group")
+autoplot(pca_data, data=meta, colour="Time")
+autoplot(pca_data, data=meta, colour="Replicate")
+
+```
+
+```{r fig.width=6, fig.height=6}
+library(NMF)
+
+data_corr = cor(data, method="pearson")
+aheatmap(data_corr,
+         Colv=NA, Rowv=NA,
+         annCol=meta[,
+		     c("Group", "Time",
+			"Replicate")],
+         annLegend=FALSE, 
+         main="Replicates\nAfter Normalization")
+```
+
+```{r fig.width=6, fig.height=6}
+library(NMF)
+
+data_corr = cor(data, method="spearman")
+aheatmap(data_corr,
+         Colv=NA, Rowv=NA,
+         annCol=meta[,
+		     c("Group", "Time",
+			"Replicate")],
+         annLegend=FALSE, 
+         main="Replicates\nAfter Normalization")
+```
+
