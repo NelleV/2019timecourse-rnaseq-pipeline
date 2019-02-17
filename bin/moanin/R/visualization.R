@@ -39,7 +39,7 @@ plot_centroid_individual = function(centroid, meta){
     yrange = range(centroid)
     
     plot(xrange, yrange, type="n")
-    colors = grDevices::terrain.colors(length(groups))
+    colors = viridis(length(groups))
     
     for(i in 1:length(groups)){
         group = groups[i]

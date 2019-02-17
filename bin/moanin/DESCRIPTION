@@ -7,7 +7,7 @@ Description: What the package does.
 Depends: R (>= 3.4.4)
 Imports: MASS (>= 1.0.0),
 	 edge (>= 2.4.0),
-	 limma,
+	 limma, viridis,
 	 edgeR, stats, graphics, grDevices, ClusterR
 Suggests: testthat (>= 1.0.0),
 	  knitr, rmarkdown, covr, shiny, DT

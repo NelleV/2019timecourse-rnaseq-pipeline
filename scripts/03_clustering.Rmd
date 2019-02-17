@@ -100,16 +100,21 @@ labels[genes_to_not_consider] = NA
 ```
 
 ```{r}
+table(kmeans_clusters$clusters)
+```
+
+```{r}
 table(labels)
 ```
 
 
 ```{r fig.height=8, fig.width=8}
-
 moanin::plot_centroids(centroids, meta)
 ```
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step
-write.table(labels, ".results/clustering_labels.txt", sep="\t")
+write.table(kmeans_clusters$clusters,
+	    ".results/clustering_labels.txt",
+	    sep="\t")
 ```
