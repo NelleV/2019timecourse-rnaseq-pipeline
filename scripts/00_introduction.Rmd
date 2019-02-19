@@ -1,5 +1,5 @@
 ---
-title: "XXX: a pipeline to analyse time-course gene expression data"
+title: "a pipeline to analyse time-course gene expression data"
 output: html_document
 ---
 
@@ -38,5 +38,13 @@ XXX Add the packages used in the workflow
 ## Overview
 
 This workflow is illustrated using data from a micro-array time-course
-experiment, exposing mice to different strains of influenza, and collecting
-lung tissue during 12 time-points (..).
+experiment, exposing mice to three different strains of influenza, and
+collecting lung tissue during 14 time-points.  The three strains of influenza
+used in the study are (1) a low pathogenicity seasonal H1N1 influenza virus
+(A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009
+pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1
+avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
+10^5 PFU of each virus. An adidtional 42 mice were injected with a lower dose
+of the Vietnam avian influenza virus (10^3 PFU).
+
+XXX Add summary of the findings of the paper.
