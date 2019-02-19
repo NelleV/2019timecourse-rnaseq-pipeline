@@ -12,6 +12,7 @@ library(limma)
 library(splines)
 library(stats)
 library(moanin)
+source("utils.R")
 
 # library(moanin)
 ```
@@ -51,6 +52,8 @@ library(reshape2)
 library(limma)
 ```
 
+
+
 The paper describes a normalization strategy that I am going to use here:
 
   - First, normalize probe intensity using background information using the
@@ -69,7 +72,6 @@ RG = read.maimages(
   path="data/shoemaker2015/rawdata",
   other.columns="gIsWellAboveBG",
   green.only=TRUE)
-
 ```
 
 Before quantile normalization:
@@ -170,5 +172,6 @@ aheatmap(data_corr,
 		     c("Group", "Time",
 			"Replicate")],
          annLegend=FALSE, 
+	 annColors=ann_colors,
          main="Replicates\nAfter Normalization")
 ```
