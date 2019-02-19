@@ -1,9 +1,8 @@
 ---
-title: "Normalization: A pipeline to analyse time-course gene expression data"
+title: "Differential expression analysis: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
 ---
 
-## Differential expression analysis of time-course data
 
 ```{r echo=FALSE, results="hide"}
 # Reloading necessary data and preliminary results
@@ -24,7 +23,7 @@ take_log = FALSE
 filter_expression = FALSE
 
 # Differential expression analysis
-timecourse_contrasts = c("C-K", "C-M", "C-VL", "C-VH")
+timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
 
 # Clustering
 filter_genes = TRUE
@@ -42,6 +41,123 @@ meta = shoemaker2015$meta
 
 # Right now, the package doesn't contain the normalized data
 ```
+
+```{r, echo=FALSE, results="hide"}
+source("utils.R")
+```
+
+
+## Differential expression analysis of time-course data
+
+The next step is typically to run a differential expression analysis.
+
+### Weekly differential expression analysis
+
+`moanin` provides a simple interface to perform a time by time differential
+expression analysis. Under the hood, it simply calls `limma` on the set of
+contrasts provided. Here, we show an example between the control mouse and the
+mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
+(H5N1), but the function works with any form contrasts.
+
+```{r weekly_differential_analysis}
+meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Time))
+
+# Define contrast	
+contrasts = c("M.0-VH.0",
+	      "M.3-VH.3",
+	      "M.6-VH.6",
+	      "M.9-VH.9",
+	      "M.12-VH.12",
+	      "M.18-VH.18",
+	      "M.24-VH.24",
+	      "M.30-VH.30",
+	      "M.48-VH.48",
+	      "M.60-VH.60",
+	      "M.72-VH.72",
+	      "M.120-VH.120",
+	      "M.168-VH.168")
+weekly_de_analysis =  moanin::fit_weekly_analysis(
+     data, meta, contrasts,
+     use_voom_weights=FALSE)
+```
+
+```{r echo=FALSE, results="hide"}
+# Run the DE analysis on the rest of the influenza strain.
+contrasts = c("M.0-K.0",
+	      "M.3-K.3",
+	      "M.6-K.6",
+	      "M.9-K.9",
+	      "M.12-K.12",
+	      "M.18-K.18",
+	      "M.24-K.24",
+	      "M.30-K.30",
+	      "M.48-K.48",
+	      "M.60-K.60",
+	      "M.72-K.72",
+	      "M.120-K.120",
+	      "M.168-K.168")
+K_weekly_de_analysis =  moanin::fit_weekly_analysis(
+     data, meta, contrasts,
+     use_voom_weights=FALSE)
+contrasts = c("M.0-C.0",
+	      "M.3-C.3",
+	      "M.6-C.6",
+	      "M.9-C.9",
+	      "M.12-C.12",
+	      "M.18-C.18",
+	      "M.24-C.24",
+	      "M.30-C.30",
+	      "M.48-C.48",
+	      "M.60-C.60",
+	      "M.72-C.72",
+	      "M.120-C.120",
+	      "M.168-C.168")
+C_weekly_de_analysis =  moanin::fit_weekly_analysis(
+     data, meta, contrasts,
+     use_voom_weights=FALSE)
+contrasts = c("M.0-VH.0",
+	      "M.3-VH.3",
+	      "M.6-VH.6",
+	      "M.9-VH.9",
+	      "M.12-VH.12",
+	      "M.18-VH.18",
+	      "M.24-VH.24",
+	      "M.30-VH.30",
+	      "M.48-VH.48",
+	      "M.60-VH.60",
+	      "M.72-VH.72",
+	      "M.120-VH.120",
+	      "M.168-VH.168")
+VH_weekly_de_analysis =  moanin::fit_weekly_analysis(
+     data, meta, contrasts,
+     use_voom_weights=FALSE)
+
+``` 
+
+Let's look at the distribution of genes found differentially expressed per
+week between control and each of the influenza strains.
+
+```{r fig.width=8, fig.height=8, echo=FALSE}
+par(mfrow=c(2, 2))
+
+time = c(0, 3, 6, 9, 12, 18, 24, 30, 48, 60, 72, 120, 168)
+
+timely_barplot = function(de_analysis, labels, qval_threshold=0.05, title=""){
+    qval_colnames = colnames(de_analysis)[
+	grepl("qval", colnames(de_analysis))]
+    number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
+    names(number_de_genes_per_time) = labels
+    barplot(number_de_genes_per_time, col="black", ylim=c(0, 20000),
+	    xlab="Time", ylab="Number of DE genes", main=title)
+    
+}
+
+timely_barplot(K_weekly_de_analysis, time, title="Kawasaki")
+timely_barplot(M_weekly_de_analysis, time, title="California")
+timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high")
+timely_barplot(weekly_de_analysis, time, title="Vietnam low")
+```
+
 
 ### Time-course differential expression analysis between two groups
 
@@ -89,8 +205,8 @@ And now a volcano plot for quick visualization
 
 ```{r fig.height=8, fig.width=8}
 
-pvalue = de_analysis[, "C-K-qval"]
-lfc_epicon = de_analysis[, "C-K-lfc_epicon"]
+pvalue = de_analysis[, "M-K-qval"]
+lfc_epicon = de_analysis[, "M-K-lfc_epicon"]
 
 plot(lfc_epicon, -log10(pvalue), pch=20, main="Volcano plot",
      xlim=c(-2.5, 2))
@@ -108,43 +224,4 @@ points(lfc_epicon[(pvalue < 0.01) & (abs(lfc_epicon) > 1)],
 ```{r echo=FALSE, results="hide"}
 outname = ".results/pvalues.txt"
 write.table(pvalues, outname, sep="\t")
-```
-
-
-### Developmental differential expression analysis
-
-```{r}
-# Define contrast
-contrast_formula = "C"
-contrast = limma::makeContrasts(
-    contrast_formula,
-    levels=levels(meta$Group))
-# Why do I have to do this again?
-mask = with(meta, Group == contrast_formula)
-model = moanin:::edgeWithContrasts(
-    as.matrix(data), meta, contrast, developmental=TRUE,
-    mask=mask)
-```
-
-### Weekly differential expression analysis
-
-```{r}
-# Define contrast
-contrasts = c("C.0-K.0",
-	      "C.3-K.3",
-	      "C.6-K.6",
-	      "C.9-K.9",
-	      "C.12-K.12",
-	      "C.18-K.18",
-	      "C.24-K.24",
-	      "C.30-K.30",
-	      "C.48-K.48",
-	      "C.60-K.60",
-	      "C.120-K.120",
-	      "C.168-K.168")
-	
-meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Time))
-# de_analysis =  fit_weekly_analysis(
-#     data, meta, contrasts,
-#     use_voom_weights=FALSE)
 ```
