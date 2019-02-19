@@ -11,7 +11,7 @@ library(limma)
 library(splines)
 library(stats)
 library(moanin)
-
+source("utils.R")
 # library(moanin)
 ```
 
@@ -79,7 +79,7 @@ if(filter_genes){
 # Fit the splines
 
 
-kmeans_clusters = moanin::splines_kmeans(
+kmeans_clusters = moanin:::splines_kmeans(
     y, meta, n_clusters=20,
     random_seed=42,
     degrees_of_freedom=df)
@@ -109,12 +109,15 @@ table(labels)
 
 
 ```{r fig.height=8, fig.width=8}
-moanin::plot_centroids(centroids, meta)
+moanin:::plot_centroids(centroids, meta,
+			colors=as.vector(unlist(ann_colors["Group"])))
 ```
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step
-write.table(kmeans_clusters$clusters,
+kmeans_labels = as.data.frame(kmeans_clusters$clusters)
+row.names(kmeans_labels) = row.names(y)
+write.table(kmeans_labels,
 	    ".results/clustering_labels.txt",
 	    sep="\t")
 ```
