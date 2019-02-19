@@ -4,15 +4,16 @@ Version: 0.0.0
 Author: Nelle Varoquaux <nelle.varoquaux@gmail.com>
 Maintainer: Nelle Varoquaux <nelle.varoquaux@gmail.com>
 Description: What the package does.
-Depends: R (>= 3.4.4)
+Depends: R (>= 3.5.2)
 Imports: MASS (>= 1.0.0),
 	 edge (>= 2.4.0),
 	 limma, viridis,
 	 edgeR, stats, graphics, grDevices, ClusterR
 Suggests: testthat (>= 1.0.0),
-	  knitr, rmarkdown, covr, shiny, DT
+	  knitr, rmarkdown, covr, shiny, DT,
+	  roxygen2
 VignetteBuilder: knitr
 License: BSD 3-clause License + file LICENSE
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1

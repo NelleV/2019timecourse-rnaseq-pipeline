@@ -4,9 +4,11 @@
 #'
 #' @param centroids matrix (k, t) containing the centroids
 #' @param meta	data.frame (t, n) containing the metadata.
+#' @param colors vector, optional, default NULL
+#'		vector of colors
 #'
 #' @export
-plot_centroids = function(centroids, meta){
+plot_centroids = function(centroids, meta, colors=NULL){
     n_centroids = dim(centroids)[1]
     if(n_centroids <= 3){
         par(mfrow=c(n_centroids, 1),
@@ -27,19 +29,21 @@ plot_centroids = function(centroids, meta){
     }
 
     for(i in 1:n_centroids){
-        plot_centroid_individual(centroids[i, ], meta)
+        plot_centroid_individual(centroids[i, ], meta, colors=colors)
     }
 }
 
 
-plot_centroid_individual = function(centroid, meta){
+plot_centroid_individual = function(centroid, meta, colors=NULL){
     groups = levels(meta$Group)
 
     xrange = range(meta$Time)
     yrange = range(centroid)
     
     plot(xrange, yrange, type="n")
-    colors = viridis(length(groups))
+    if(is.null(colors)){
+        colors = viridis(length(groups))
+    }
     
     for(i in 1:length(groups)){
         group = groups[i]

@@ -29,7 +29,7 @@ fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
         v = limma:voom(y, design, plot=FALSE)
 	v = limma:lmFit(v)
     }else{
-	fit = limma::lmFit(counts, design)	
+	v = limma::lmFit(counts, design)	
     }
 
     fit = limma::contrasts.fit(v, allcontrasts)
@@ -40,6 +40,7 @@ fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
     colnames(fit$adj.p.value) = contrast_names
 
     combine_results = function(ii, fit2){
+	contrast_formula = contrasts[ii]
 	de_analysis = data.frame(row.names=row.names(counts))
 
         base_colname = gsub(" ", "", contrast_formula, fixed=TRUE)
@@ -51,8 +52,8 @@ fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
             fit2, coef=ii, number=length(rownames(fit2$coef)),
             p.value=1, adjust.method="none",
             genelist=rownames(fit2$coef))
-	de_analysis[colname_pval] = fit2$p.value[ii]
-	de_analysis[colname_qval] = fit2$adj.p.value[ii]
+	de_analysis[colname_pval] = fit2$p.value[, contrast_formula]
+	de_analysis[colname_qval] = fit2$adj.p.value[,  contrast_formula]
 	de_analysis[colname_lfc] = tt$logFC
 	return(de_analysis)
     }
