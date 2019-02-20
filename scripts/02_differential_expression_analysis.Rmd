@@ -153,7 +153,7 @@ timely_barplot = function(de_analysis, labels, qval_threshold=0.05, title=""){
 }
 
 timely_barplot(K_weekly_de_analysis, time, title="Kawasaki")
-timely_barplot(M_weekly_de_analysis, time, title="California")
+timely_barplot(C_weekly_de_analysis, time, title="California")
 timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high")
 timely_barplot(weekly_de_analysis, time, title="Vietnam low")
 ```
