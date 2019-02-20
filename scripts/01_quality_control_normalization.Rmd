@@ -154,8 +154,11 @@ percent_var = round(100 * attr(pca_data, "percentVar"))
 meta["Time"] = as.factor(unlist(meta["Time"]))
 meta["Replicate"] = as.factor(unlist(meta["Replicate"]))
 par(mfrow=c(1, 2))
-autoplot(pca_data, data=meta, colour="Group", shape="Replicate")
-autoplot(pca_data, data=meta, colour="Time", shape="Replicate")
+autoplot(pca_data, data=meta, colour="Group", shape="Replicate") +
+    scale_color_manual(values=as.vector(unlist(ann_colors["Group"])))
+
+autoplot(pca_data, data=meta, colour="Time", shape="Replicate") +
+    scale_color_manual(values=as.vector(unlist(ann_colors["Group"])))
 ```
 
 We then plot the correlation matrix
