@@ -158,7 +158,7 @@ autoplot(pca_data, data=meta, colour="Group", shape="Replicate") +
     scale_color_manual(values=as.vector(unlist(ann_colors["Group"])))
 
 autoplot(pca_data, data=meta, colour="Time", shape="Replicate") +
-    scale_color_manual(values=as.vector(unlist(ann_colors["Group"])))
+    scale_color_manual(values=as.vector(unlist(ann_colors["Time"])))
 ```
 
 We then plot the correlation matrix
