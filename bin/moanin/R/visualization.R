@@ -1,4 +1,4 @@
-
+library(viridis)
 
 #' Plotting centroids
 #'
