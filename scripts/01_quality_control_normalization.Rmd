@@ -3,8 +3,6 @@ title: "Normalization: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
 ---
 
-
-
 ```{r echo=FALSE, results="hide"}
 # Loading dependencies
 library(devtools)
@@ -40,7 +38,7 @@ percentage_genes_to_label = 0.5
 library(knitr)
 knitr::opts_chunk$set(
   cache=FALSE, autodep=FALSE, warning=FALSE, error=FALSE, message=FALSE,
-  echo=FALSE,
+  echo=TRUE,
   duplicate.label="allow"
 )
 
@@ -53,43 +51,62 @@ library(limma)
 ```
 
 
+## Pre-processing
 
-The paper describes a normalization strategy that I am going to use here:
+The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
+with accession number GSE63786. The dataset has a total of 209 samples, with
+45018 probes.
+
+Note that in the following, we assume that the user has access to a data
+folder `data/shoemaker2015/rawdata`, containing the microarray data. 
+
+```{r}
+data_dir = "data/shoemaker2015/rawdata"
+```
+
+The normalization strategy we apply here relies on `limma` and is as follows:
 
   - First, normalize probe intensity using background information using the
     "norm-exponential" strategy.
-  - Then normalize across micro-arrrays using quantily normalization.
+  - Then normalize across micro-arrrays using quantile normalization.
 
-Unfortunately, that means going back to the raw data, which can be downloaded
-in the data folder, by clicking on the link specified in the README (it might
-take a while…). Untar the main file into a `rawdata` folder.
 
-```{r reading_targets, echo=FALSE, include=FALSE}
 
-targets = readTargets()
-RG = read.maimages(
+```{r reading_targets, results="hide", fig.width=8, fig.height=8}
+# Read in the data using limma.
+targets = limma::readTargets()
+RG = limma::read.maimages(
   targets, source="agilent",
-  path="data/shoemaker2015/rawdata",
+  path=data_dir,
   other.columns="gIsWellAboveBG",
   green.only=TRUE)
-```
 
-Before quantile normalization:
-
-```{r echo=FALSE, include=FALSE}
+# Preform background correction using norm-exponential strategy and normalize
+# across samples using quantile normalization.
 RG = backgroundCorrect(RG, method="normexp")
-```
-
-```{r plot_densities, echo=FALSE}
-xlim = c(0, 14)
-plotDensities(RG, col="black", legend=FALSE)
-```
-
-After quantile normalization:
-
-```{r normalize_between_arrays, echo=FALSE}
 RG.q = normalizeBetweenArrays(RG, method="quantile")
+
+# Plot the densities of the probes before and after normalization.
+par(mfrow=c(1, 2))
+plotDensities(RG, col="black", legend=FALSE)
 plotDensities(RG.q, col="black", legend=FALSE)
+```
+
+
+```{r echo=FALSE, results="hide"}
+# Get the number for the text. Do not display results or computation
+control_probes = RG.q$genes[, "ControlType"] == 1
+is_expressed = rowSums(RG.q$other$"gIsWellAboveBG" > 0) >= 4
+n_control_probes = sum(control_probes)
+n_lowly_expressed = sum(!is_expressed)
+```
+
+We then clean up the names of each gene and each sample to match the original
+data. Finally, we further filter out probes based on the following criteria:
+(1) removing the `r n_control_probes` control probes; (2) removing `r
+n_lowly_expressed` low-expressed genes. 
+
+```{r clean_up_names}
 
 sample_names = sapply(strsplit(colnames(RG.q), "_"), .subset2,  1)
 colnames(RG.q) = sample_names
@@ -105,14 +122,47 @@ control_probes = data$genes[, "ControlType"] == 1
 is_expressed = rowSums(data$other$"gIsWellAboveBG" > 0) >= 4
 
 data = data[!control_probes & is_expressed, ]$E
-
-write.table(data, ".results/quantile_normalized.txt")
-
-meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
-
 ```
 
-```{r order_genes, echo=FALSE}
+ XXX The original paper says the data is "averaged over unique probes IDs."
+
+
+```{r echo=FALSE, results="hide"}
+# Do not display. setting variables for text
+n_samples = dim(data)[2]
+n_probes = dim(data)[1]
+```
+
+After filtering, we are left with `r n_probes` probes of interest in `r
+n_samples`.
+
+
+```{r}
+
+# Now load in the metadata
+meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
+write.table(data, ".results/quantile_normalized.txt")
+```
+
+```{r order_genes}
+# Reorder genes on condition, time, and replicate
+
+library(ggfortify)
+pca_data = prcomp(t(data), rank=5, center=TRUE, scale=TRUE) 
+percent_var = round(100 * attr(pca_data, "percentVar"))
+
+meta["Time"] = as.factor(unlist(meta["Time"]))
+meta["Replicate"] = as.factor(unlist(meta["Replicate"]))
+par(mfrow=c(1, 2))
+autoplot(pca_data, data=meta, colour="Group", shape="Replicate")
+autoplot(pca_data, data=meta, colour="Time", shape="Replicate")
+```
+
+We then plot the correlation matrix
+
+```{r fig.width=6, fig.height=6}
+library(NMF)
+
 # Reorder genes on condition, time, and replicate
 ord = order(
   meta$Group,
@@ -120,37 +170,6 @@ ord = order(
   meta$Replicate)
 data = data[, ord]
 meta = meta[ord, ]
-meta["Time"] = as.factor(unlist(meta["Time"]))
-meta["Replicate"] = as.factor(unlist(meta["Replicate"]))
-```
-
-
-## Plot the RLE and PCA
-
-```{r leafRleRaw, fig.width=6}
-library(EDASeq)
-ylim = c(-2.5,2.5)
-plotRLE(exp(data), outline=FALSE,
-        whisklty=1, whisklwd=2, col=meta$Replicate, main="RLE, data")
-plotRLE(exp(data), outline=FALSE,
-        whisklty=1, whisklwd=2, col=meta$Group, main="RLE, data")
-plotRLE(exp(data), outline=FALSE,
-        whisklty=1, whisklwd=2, col=meta$Time, main="RLE, data")
-
-```
-```{r leafPCARaw}
-library(ggfortify)
-pca_data = prcomp(t(data), rank=5, center=TRUE, scale=TRUE) 
-percent_var = round(100 * attr(pca_data, "percentVar"))
-
-autoplot(pca_data, data=meta, colour="Group")
-autoplot(pca_data, data=meta, colour="Time")
-autoplot(pca_data, data=meta, colour="Replicate")
-
-```
-
-```{r fig.width=6, fig.height=6}
-library(NMF)
 
 data_corr = cor(data, method="pearson")
 aheatmap(data_corr,
@@ -159,19 +178,12 @@ aheatmap(data_corr,
 		     c("Group", "Time",
 			"Replicate")],
          annLegend=FALSE, 
-         main="Replicates\nAfter Normalization")
+	 annColors=ann_colors,
+         main="Correlation plot after Normalization")
 ```
 
-```{r fig.width=6, fig.height=6}
-library(NMF)
 
-data_corr = cor(data, method="spearman")
-aheatmap(data_corr,
-         Colv=NA, Rowv=NA,
-         annCol=meta[,
-		     c("Group", "Time",
-			"Replicate")],
-         annLegend=FALSE, 
-	 annColors=ann_colors,
-         main="Replicates\nAfter Normalization")
+## Structure of the data set
+
+```{r}
 ```
