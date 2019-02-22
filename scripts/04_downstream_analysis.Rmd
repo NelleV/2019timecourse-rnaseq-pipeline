@@ -12,8 +12,6 @@ library(splines)
 library(stats)
 library(moanin)
 library(KEGGprofile)
-
-# library(moanin)
 ```
 
 ```{r echo=FALSE, results="hide"}
@@ -35,6 +33,13 @@ n_clusters = 20
 percentage_genes_to_label = 0.5
 ```
 
+## Downstream analysis of clusters.
+
+Once good clusters are obtained, the next step is to leverage the clustering
+to ease interpretation. Classic enrichment analysis step can then be performed
+in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
+term enrichment analysis, motif enrichment analysis, etc.
+
 ```{r echo=FALSE, results="hide"}
 # Set data files and options
 data("shoemaker2015")
@@ -45,39 +50,85 @@ labels = read.table(".results/clustering_labels.txt", sep="\t",
 		    check.names=FALSE)
 ```
 
+First, let us clean up the gene obtained and only select the genes we are
+going to use in the enrichment analysis. One can either use the whole set of
+genes, only the set of differentially expressed genes in each cluster, or a
+subset of genes that fit well to a cluster (based on some criterion).
+
 ```{r}
 gene_names = row.names(labels)
 gene_names = gene_names[!is.na(labels)]
 labels = labels[!is.na(labels)]
 ```
 
-### Finding enriched pathways
+### Finding enriched pathways using `biomaRt` and `KEGGprofile`
+
+Let us first tackle the case of pathway enrichment analysis. We will leverage
+the packages `biomaRt` and `KEGGprofile` for this step. `KEGGprofile` is a
+package that easily allows to perform pathway enrichment analysis on a set of
+genes labeled with the ensembl annotation. We thus need to convert the gene
+names into the appropriate format. This is where `biomaRt` comes in handy: it
+enables easy conversion from one gene annotation to another. Here, we will use
+it to convert the gene names from the Refseq annotation to the ensembl one.
 
 
 ```{r}
 library(biomaRt)
 ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
-
 ```
 
-```{r}
-clusters = as.vector(unlist(unique(labels)))
+```{r enrichment_analysis, results="hide"}
+clusters = sort(as.vector(unlist(unique(labels))))
+all_pathways = data.frame()
 for(cluster in clusters){
-    print(cluster)
     genes = gene_names[labels == cluster]
 
     # convert gene names
     genes = getBM(attributes=c("ensembl_gene_id", "entrezgene"),
-		       filters="refseq_mrna", values=genes,
-		       mart=ensembl)["entrezgene"]
+		  filters="refseq_mrna", values=genes,
+		  mart=ensembl)["entrezgene"]
     genes = as.vector(unlist(genes))
     pathways = KEGGprofile::find_enriched_pathway(
 	genes, species="mmu",
 	download_latest=TRUE)
-    print(pathways$stastic)
+
+    if((dim(all_pathways)[1] == 0) & (dim(pathways$stastic)[1] != 0)){
+	print("Initialize")
+	pathways$stastic["Cluster"] = cluster
+	all_pathways = pathways$stastic
+    }else if(dim(pathways$stastic)[1] != 0) {
+	print("Merge")
+	pathways$stastic["Cluster"] = cluster
+	all_pathways = merge(all_pathways, pathways$stastic, all=TRUE)
+    }
 }
+```
+
+```{r echo=FALSE}
+library(kableExtra)
+library(viridis)
+
+all_pathways = all_pathways[
+    order(all_pathways["Cluster"],
+	  all_pathways["pvalueAdj"]),]
+
+# Select the columns to print
+all_pathways = subset(
+    all_pathways,
+    select=c(
+	"Pathway_Name", "Percentage",
+	"pvalueAdj", "Cluster"))
+
+colnames(all_pathways) = c("Pathway", "Percentage", "Adj. p-value", "Cluster")
+all_pathways["Percentage"] = all_pathways["Percentage"] * 100
+kable(all_pathways, "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
 ```
 
 
 ### Finding enriched GO terms
+
+```{r go_term_enrichment}
+
+```
