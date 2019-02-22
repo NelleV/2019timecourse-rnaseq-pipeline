@@ -1,5 +1,5 @@
 ---
-title: "a pipeline to analyse time-course gene expression data"
+title: "Introduction: a pipeline to analyse time-course gene expression data"
 output: html_document
 ---
 
