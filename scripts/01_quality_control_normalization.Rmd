@@ -51,11 +51,12 @@ library(limma)
 ```
 
 
-## Pre-processing
+## Pre-processing and normalization
 
 The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
 with accession number GSE63786. The dataset has a total of 209 samples, with
-45018 probes.
+45018 probes (1 sample was removed by the authors prior to uploading the
+dataset on GEo).
 
 Note that in the following, we assume that the user has access to a data
 folder `data/shoemaker2015/rawdata`, containing the microarray data. 
@@ -72,7 +73,7 @@ The normalization strategy we apply here relies on `limma` and is as follows:
 
 
 
-```{r reading_targets, results="hide", fig.width=8, fig.height=8}
+```{r reading_targets, results="hide", fig.width=8, fig.height=4}
 # Read in the data using limma.
 targets = limma::readTargets()
 RG = limma::read.maimages(
@@ -85,7 +86,14 @@ RG = limma::read.maimages(
 # across samples using quantile normalization.
 RG = backgroundCorrect(RG, method="normexp")
 RG.q = normalizeBetweenArrays(RG, method="quantile")
+```
 
+Plotting the smoothed empirical densities of the probe values before
+normalization shows considerable variations betweens arrays. Once the data has
+been normalized across array using quantile normalization, the smoothed
+empirical densities of each sample perfectly overlap.
+
+```{r plotting_densities, results="hide", fig.width=8, fig.height=4}
 # Plot the densities of the probes before and after normalization.
 par(mfrow=c(1, 2))
 plotDensities(RG, col="black", legend=FALSE)
@@ -144,28 +152,65 @@ meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
 write.table(data, ".results/quantile_normalized.txt")
 ```
 
-```{r order_genes, fig.width=8, fig.height=4}
+## Exploratory analysis and quality control
+
+Plotting the smoothed empirical densities of probe values for each sample and
+estimating the variations across samples before and after normalization is a
+first quality control. Typically, two other quality control and exploratory
+analysis steps are also performed before and after normalization: (1) low
+dimensionality embedding of the samples; (2) correlation plots between each
+samples. In both cases, we expect a strong biological signal, while replicate
+samples should be strongly clustered or correlated with one another.
+
+
+Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
+centered and scaled gene expression data. 
+
+```{r pca, fig.width=8, fig.height=8}
 # Reorder genes on condition, time, and replicate
 
 library(ggfortify)
-pca_data = prcomp(t(data), rank=5, center=TRUE, scale=TRUE) 
+pca_data = prcomp(t(data), rank=3, center=TRUE, scale=TRUE) 
 percent_var = round(100 * attr(pca_data, "percentVar"))
-
-# FIXME Add legend
-par(mfrow=c(1, 2))
-plot(pca_data$x[, "PC1"], pca_data$x[, "PC2"],
-     col=ann_colors$Group[meta$Group], pch=16, xlab="PC1", ylab="PC2")
-plot(pca_data$x[, "PC1"], pca_data$x[, "PC2"],
-     col=ann_colors$Time[meta$Time], pch=16, xlab="PC1", ylab="PC2")
-
 ```
 
-We then plot the correlation matrix
+We then plot the two first components, and color each sample by (1) its
+condition; (2) its sampling time. We use different markers for each replicate.
+We also plot the second and third components in the second row.
 
-```{r fig.width=6, fig.height=6}
+```{r pca_plots, fig.width=8, fig.height=8}
+# FIXME Add legend
+par(mfrow=c(2, 2))
+plot(pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+     col=ann_colors$Group[meta$Group],
+     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+     xlab="PC2", ylab="PC1")
+plot(pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+     col=ann_colors$Time[as.factor(meta$Time)],
+     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+     xlab="PC2", ylab="PC1")
+
+plot(pca_data$x[, "PC2"], pca_data$x[, "PC3"],
+     col=ann_colors$Group[meta$Group],
+     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+     xlab="PC2", ylab="PC3")
+plot(pca_data$x[, "PC2"], pca_data$x[, "PC3"],
+     col=ann_colors$Time[as.factor(meta$Time)],
+     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+     xlab="PC2", ylab="PC3")
+```
+
+Then, we plot the pearson correlation across each samples. We order the
+samples by their Group (treatment) and Time (the time of sampling).
+Additionally, in this example, we order each treatment by strength of the
+pathogenicity of the treatment: Control, Kawasaki, California, low dose of
+Vietnam, then high dose of Vietnam.
+
+```{r  correlation_plot, fig.width=6, fig.height=6}
 library(NMF)
 
 # Reorder genes on condition, time, and replicate
+meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 1, 2, 5, 4)])
 ord = order(
   meta$Group,
   meta$Time,
@@ -174,16 +219,20 @@ data = data[, ord]
 meta = meta[ord, ]
 
 data_corr = cor(data, method="pearson")
+
 aheatmap(data_corr,
          Colv=NA, Rowv=NA,
          annCol=meta[,
 		     c("Group", "Time",
-			"Replicate")],
+		       "Replicate")],
          annLegend=FALSE, 
 	 annColors=ann_colors,
-         main="Correlation plot after Normalization")
+         main="Correlation plot")
 ```
 
+We can already see interesting patterns: the cross-correlation amongst samples
+taking from the untreated mice is higher than the cross correlation amongst
+the rest of the treatments.
 
 ## Structure of the data set
 
