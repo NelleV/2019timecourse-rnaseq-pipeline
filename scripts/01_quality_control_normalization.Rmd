@@ -154,6 +154,7 @@ write.table(data, ".results/quantile_normalized.txt")
 
 ## Exploratory analysis and quality control
 
+
 Plotting the smoothed empirical densities of probe values for each sample and
 estimating the variations across samples before and after normalization is a
 first quality control. Typically, two other quality control and exploratory
@@ -162,6 +163,22 @@ dimensionality embedding of the samples; (2) correlation plots between each
 samples. In both cases, we expect a strong biological signal, while replicate
 samples should be strongly clustered or correlated with one another.
 
+
+Before performing any additional exploratory analysis, let us only keep highly
+variable genes. 
+
+```{r}
+variance_cutoff = 0.5
+variance_per_genes = apply(data, 1, mad)
+min_variance = quantile(variance_per_genes, c(variance_cutoff))
+data = data[variance_per_genes > min_variance,]
+```
+
+```{r echo=FALSE, fig.width=8, fig.height=4}
+hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
+     ylab="# probes")
+abline(v=min_variance, col="#AB0000", lw=2)
+```
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data. 
@@ -220,21 +237,20 @@ meta = meta[ord, ]
 
 data_corr = cor(data, method="pearson")
 
+meta$Time = as.factor(meta$Time)
 aheatmap(data_corr,
          Colv=NA, Rowv=NA,
          annCol=meta[,
-		     c("Group", "Time",
-		       "Replicate")],
+		     c("Group", "Time")],
          annLegend=FALSE, 
 	 annColors=ann_colors,
          main="Correlation plot")
 ```
 
-We can already see interesting patterns: the cross-correlation amongst samples
-taking from the untreated mice is higher than the cross correlation amongst
-the rest of the treatments.
-
-## Structure of the data set
-
-```{r}
-```
+We can already see interesting patterns emerging from the correlation plot.
+First, the cross-correlation amongst samples taking from the control mice is
+higher than the cross correlation amongst the rest of the treatments. Second,
+the influenza-infected mice midly react until time point 36. Third, the
+California strain samples seem closer to control samples than the
+lowly-pathogenic Kawasaki samples. Fourth, the Vietnam samples at time point
+120 and 168 are the one that are the most different from control samples.
