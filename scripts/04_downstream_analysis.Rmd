@@ -129,6 +129,57 @@ kable(all_pathways, "html", escape=F, digits=4) %>%
 
 ### Finding enriched GO terms
 
-```{r go_term_enrichment}
+```{r go_to_gene_mapping}
 
+genes = getBM(attributes=c("go_id", "refseq_mrna"), values=gene_names, filters="refseq_mrna",
+	      mart=ensembl)
+
+# Create gene to GO id mapping
+gene_id_go_mapping = NULL
+i = 1
+for(gene in gene_names){
+    go_terms = genes[genes[, "refseq_mrna"] == gene, "go_id"]
+    if(length(go_terms) != 0){
+        gene_id_go_mapping$gene = go_terms
+	names(gene_id_go_mapping)[i] = gene
+	i = i + 1
+    }
+}
 ```
+
+```{r go_term_enrichment, results="hide"}
+source("GO_terms_analysis.R")
+
+all_go_terms = data.frame()
+for(cluster in clusters){
+
+    scores = as.numeric(labels == cluster)
+    names(scores) = gene_names
+    go_terms_enriched = find_enriched_go_terms(
+	scores,
+    	gene_id_go_mapping)
+
+    if((dim(all_go_terms)[1] == 0) & (dim(go_terms_enriched)[1] != 0)){
+	go_terms_enriched["Cluster"] = cluster
+	all_go_terms = go_terms_enriched
+    }else if(dim(go_terms_enriched)[1] != 0){
+	go_terms_enriched["Cluster"] = cluster
+	all_go_terms = merge(all_go_terms, go_terms_enriched, all=TRUE)
+    }
+
+}
+```
+
+
+```{r echo=FALSE}
+library(kableExtra)
+library(viridis)
+
+all_go_terms = all_go_terms[
+    order(all_go_terms["Cluster",],
+	  all_go_terms["resultFisher.p.adj",])]
+
+kable(all_go_terms, "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
+```
+
