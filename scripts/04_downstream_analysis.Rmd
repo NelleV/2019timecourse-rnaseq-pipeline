@@ -129,7 +129,7 @@ kable(all_pathways, "html", escape=F, digits=4) %>%
 
 ### Finding enriched GO terms
 
-```{r go_to_gene_mapping}
+```{r go_to_gene_mapping, results="hide"}
 
 genes = getBM(attributes=c("go_id", "refseq_mrna"), values=gene_names, filters="refseq_mrna",
 	      mart=ensembl)
@@ -173,7 +173,6 @@ for(cluster in clusters){
 
 ```{r echo=FALSE}
 library(kableExtra)
-library(viridis)
 
 all_go_terms = all_go_terms[
     order(all_go_terms["Cluster",],

@@ -43,6 +43,8 @@ meta = shoemaker2015$meta
 ```
 
 ```{r, echo=FALSE, results="hide"}
+# XXX FIXME
+data = read.table(".results/quantile_normalized.txt") 
 source("utils.R")
 ```
 
@@ -63,19 +65,20 @@ mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
 meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Time))
 
 # Define contrast	
-contrasts = c("M.0-VH.0",
-	      "M.3-VH.3",
-	      "M.6-VH.6",
-	      "M.9-VH.9",
-	      "M.12-VH.12",
-	      "M.18-VH.18",
-	      "M.24-VH.24",
-	      "M.30-VH.30",
-	      "M.48-VH.48",
-	      "M.60-VH.60",
-	      "M.72-VH.72",
-	      "M.120-VH.120",
-	      "M.168-VH.168")
+contrasts = c("M.0-VL.0",
+	      "M.3-VL.3",
+	      "M.6-VL.6",
+	      "M.9-VL.9",
+	      "M.12-VL.12",
+	      "M.18-VL.18",
+	      "M.24-VL.24",
+	      "M.30-VL.30",
+	      "M.36-VL.36",
+	      "M.48-VL.48",
+	      "M.60-VL.60",
+	      "M.72-VL.72",
+	      "M.120-VL.120",
+	      "M.168-VL.168")
 weekly_de_analysis =  moanin::fit_weekly_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
@@ -91,6 +94,7 @@ contrasts = c("M.0-K.0",
 	      "M.18-K.18",
 	      "M.24-K.24",
 	      "M.30-K.30",
+	      "M.36-K.36",
 	      "M.48-K.48",
 	      "M.60-K.60",
 	      "M.72-K.72",
@@ -107,6 +111,7 @@ contrasts = c("M.0-C.0",
 	      "M.18-C.18",
 	      "M.24-C.24",
 	      "M.30-C.30",
+	      "M.36-K.36",
 	      "M.48-C.48",
 	      "M.60-C.60",
 	      "M.72-C.72",
@@ -123,6 +128,7 @@ contrasts = c("M.0-VH.0",
 	      "M.18-VH.18",
 	      "M.24-VH.24",
 	      "M.30-VH.30",
+	      "M.36-VH.36",
 	      "M.48-VH.48",
 	      "M.60-VH.60",
 	      "M.72-VH.72",
@@ -131,8 +137,8 @@ contrasts = c("M.0-VH.0",
 VH_weekly_de_analysis =  moanin::fit_weekly_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
-
 ``` 
+
 
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
@@ -140,7 +146,7 @@ week between control and each of the influenza strains.
 ```{r fig.width=8, fig.height=8, echo=FALSE}
 par(mfrow=c(2, 2))
 
-time = c(0, 3, 6, 9, 12, 18, 24, 30, 48, 60, 72, 120, 168)
+time = c(0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60, 72, 120, 168)
 
 timely_barplot = function(de_analysis, labels, qval_threshold=0.05, title=""){
     qval_colnames = colnames(de_analysis)[
@@ -154,8 +160,8 @@ timely_barplot = function(de_analysis, labels, qval_threshold=0.05, title=""){
 
 timely_barplot(K_weekly_de_analysis, time, title="Kawasaki")
 timely_barplot(C_weekly_de_analysis, time, title="California")
-timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high")
-timely_barplot(weekly_de_analysis, time, title="Vietnam low")
+timely_barplot(weekly_de_analysis, time, title="Vietnam low-dose")
+timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose")
 ```
 
 
