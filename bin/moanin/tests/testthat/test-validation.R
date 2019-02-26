@@ -11,6 +11,10 @@ test_that("validation:check_meta", {
     meta_without_time = subset(meta, select=c("Group", "Replicate"))
     expect_error(check_meta(meta_without_group))
     expect_error(check_meta(meta_without_time))
+
+    meta_without_replicate = subset(meta, select=c("Time", "Group"))
+    expect_silent(check_meta(meta_without_replicate))
+    expect_error(check_meta(meta_without_replicate, check_replicates=TRUE))
 })
 
 test_that("validation:check_data_meta", {

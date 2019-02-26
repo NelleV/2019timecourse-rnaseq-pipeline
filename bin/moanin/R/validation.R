@@ -5,8 +5,10 @@
 #' This method will raise errors if the metadata provided is not as expected.
 #'
 #' @param meta metadata
+#' @param check_replicates boolean, optional, default: FALSE
+#'	  If TRUE, checks whether metadata contains a column Replicate
 #' @return meta returns the metadata with additional columns if necessary.
-check_meta = function(meta){
+check_meta = function(meta, check_replicates=FALSE){
     metadata_column_names = colnames(meta)
     if(!("Group" %in% metadata_column_names)){
 	stop(
@@ -18,6 +20,12 @@ check_meta = function(meta){
 	stop(
 	    "Metadata doesn't contain expected information." +
 	    " Time column is missing.")
+    }
+
+    if(check_replicates & !("Replicate" %in% metadata_column_names)){
+	stop(
+	    "Metadata doesn't contain expected information." +
+	    "Replicate column is missing")
     }
 
     # Just create this one.
