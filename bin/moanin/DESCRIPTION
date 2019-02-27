@@ -11,7 +11,7 @@ Imports: MASS (>= 1.0.0),
 	 edgeR, stats, graphics, grDevices, ClusterR
 Suggests: testthat (>= 1.0.0),
 	  knitr, rmarkdown, covr, shiny, DT,
-	  roxygen2
+	  roxygen2, kableExtra
 VignetteBuilder: knitr
 License: BSD 3-clause License + file LICENSE
 Encoding: UTF-8
