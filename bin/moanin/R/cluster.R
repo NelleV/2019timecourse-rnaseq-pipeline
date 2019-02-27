@@ -1,4 +1,5 @@
 library(ClusterR)
+library(splines)
 
 #' Performs splines clustering using K-means
 #'
@@ -23,7 +24,7 @@ splines_kmeans = function(data, meta, n_clusters=10,
     meta = check_meta(meta)
     check_data_meta(data, meta)
     if(is.null(basis)){
-        full_model = ~Group:ns(Time, df=degrees_of_freedom) + Group + 0
+        full_model = ~Group:splines::ns(Time, df=degrees_of_freedom) + Group + 0
 	X = model.matrix(full_model, data=meta)
     }else{
 	X = basis
