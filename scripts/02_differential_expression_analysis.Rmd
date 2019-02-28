@@ -79,7 +79,7 @@ contrasts = c("M.0-VL.0",
 	      "M.72-VL.72",
 	      "M.120-VL.120",
 	      "M.168-VL.168")
-weekly_de_analysis =  moanin::fit_weekly_analysis(
+weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
 ```
@@ -100,7 +100,7 @@ contrasts = c("M.0-K.0",
 	      "M.72-K.72",
 	      "M.120-K.120",
 	      "M.168-K.168")
-K_weekly_de_analysis =  moanin::fit_weekly_analysis(
+K_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
 contrasts = c("M.0-C.0",
@@ -117,7 +117,7 @@ contrasts = c("M.0-C.0",
 	      "M.72-C.72",
 	      "M.120-C.120",
 	      "M.168-C.168")
-C_weekly_de_analysis =  moanin::fit_weekly_analysis(
+C_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
 contrasts = c("M.0-VH.0",
@@ -134,7 +134,7 @@ contrasts = c("M.0-VH.0",
 	      "M.72-VH.72",
 	      "M.120-VH.120",
 	      "M.168-VH.168")
-VH_weekly_de_analysis =  moanin::fit_weekly_analysis(
+VH_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
 ``` 
@@ -174,9 +174,10 @@ FIXME add estimation of log fold change.
 de_analysis = data.frame(row.names=row.names(data))
 for(contrast_formula in timecourse_contrasts){
     contrast = limma::makeContrasts(
-	contrast_formula,
+	contrasts=contrast_formula,
 	levels=levels(meta$Group))
-    model = moanin:::edgeWithContrasts(as.matrix(data), meta, contrast)
+    model = moanin::timecourse_differential_expression_analysis(
+	as.matrix(data), meta, contrast)
     contrast_name = gsub(" ", "", contrast_formula, fixed=TRUE)
     contrast_name_pval = paste(contrast_name, "-pval", sep="")
     contrast_name_qval = paste(contrast_name, "-qval", sep="")

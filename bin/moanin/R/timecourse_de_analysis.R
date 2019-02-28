@@ -173,9 +173,15 @@ summarise = function(X, ng_levels) {
 #'	  useful when you want to use all data points for fitting the splines,
 #'	  but not all the data points for the tests.
 #' @export
-edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE,
-			     weights=NULL, df=4,
-			     basis=NULL, mask=NULL, developmental=FALSE){
+timecourse_differential_expression_analysis = function(data,
+						       meta,
+						       contrasts=NULL,
+						       center=FALSE,
+						       weights=NULL,
+						       df=4,
+						       basis=NULL,
+						       mask=NULL,
+						       developmental=FALSE){
     ng = nlevels(meta$Group)
     ng_labels = meta$Group
 
