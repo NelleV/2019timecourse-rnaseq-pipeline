@@ -26,8 +26,8 @@ fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
     if(use_voom_weights){
         y = edgeR::DGEList(counts=counts)
 	y = edgeR::calcNormFactors(y, method="upperquartile")
-        v = limma:voom(y, design, plot=FALSE)
-	v = limma:lmFit(v)
+        v = limma::voom(y, design, plot=FALSE)
+	v = limma::lmFit(v)
     }else{
 	v = limma::lmFit(counts, design)	
     }
@@ -35,7 +35,7 @@ fit_weekly_analysis = function(counts, meta, contrasts, use_voom_weights=TRUE){
     fit = limma::contrasts.fit(v, allcontrasts)
     fit = limma::eBayes(fit)
     contrast_names = colnames(fit$p.value)
-    fit$adj.p.value = p.adjust(fit$p.value, method="BH")
+    fit$adj.p.value = stats::p.adjust(fit$p.value, method="BH")
     dim(fit$adj.p.value) = dim(fit$p.value)
     colnames(fit$adj.p.value) = contrast_names
 

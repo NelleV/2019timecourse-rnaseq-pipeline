@@ -17,7 +17,7 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 
     if(!(method %in% ALL_LFC_METHODS)){
 	all_methods = paste(ALL_LFC_METHODS, sep=", ")
-	throw(
+	stop(
 	    paste("moanin::estimate_log_fold_change: '", method, "' is an unknown",
 		  " method to compute log fold change. Known methods are",
 		  all_methods, sep=""))

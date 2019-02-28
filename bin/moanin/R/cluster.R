@@ -1,16 +1,28 @@
 library(ClusterR)
+library(stats)
 library(splines)
 
 #' Performs splines clustering using K-means
 #'
-#' @param data
-#' @param meta
+#' @param data matrix containg the data. Data needs to be in log scale.
+#' @param meta data.frame containing the metadata. Metadata needs to contain
+#'	       column 'Group' and 'Time'
 #' @param n_clusters int optional, default: 10
 #' @param basis basis, optional, default: NULL 
 #'		to use for the splines fitting
 #' @param init	["kmeans++", "random", "optimal_init"]
+#' @param n_init int, optional, default: 10
+#'	    Number of initialization to perform.
+#' @param max_iter  int, optional, default: 300
+#'	Maximum number of iteration to perform	
 #' @param random_seed int, optional, default: NULL
+#' @param fit_splines	boolean, optional, default: TRUE
+#'	Whether to fit splines or not.
+#' @param rescale   boolean, optional, default: TRUE
+#'	Whether to rescale the data or not.
 #' @param degrees_of_freedom int, optional, default: 4
+#'	Number of degrees of freedom used in the clustering. Only used if
+#'	fit_splines is TRUE
 #' @export
 splines_kmeans = function(data, meta, n_clusters=10,
 			  basis=NULL,
@@ -25,7 +37,7 @@ splines_kmeans = function(data, meta, n_clusters=10,
     check_data_meta(data, meta)
     if(is.null(basis)){
         full_model = ~Group:splines::ns(Time, df=degrees_of_freedom) + Group + 0
-	X = model.matrix(full_model, data=meta)
+	X = stats::model.matrix(full_model, data=meta)
     }else{
 	X = basis
     }

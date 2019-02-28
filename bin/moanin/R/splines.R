@@ -2,46 +2,46 @@
 
 library(splines)
 library(MASS)
+library(stats)
 
 
 #' Fit splines
 #'
-#' @param y the data
-#' @param X the basis
+#' @param data the data
+#' @param basis the basis
 #' @param weights weigts
 #'
 #' @return beta coefficients
 #'
 #' @export
-fit_splines = function(y, X, weights=NULL){
-    n = ncol(X)
-    nr = nrow(y)
-
+fit_splines = function(data, basis, weights=NULL){
+    n = ncol(basis)
+    nr = nrow(data)
     
     if(!is.null(weights)){
 	beta = matrix(nrow=nr, ncol=n)
 	for(i in 1:nr){
-	    beta[i,] = lm.wfit(X, y[i,], weights[i,])$coefficients
+	    beta[i,] = stats::lm.wfit(basis, data[i,], weights[i,])$coefficients
         }
 	row.names(beta) = row.names(data)
     }else{
 	# Don't inverse directly the matrix
-	beta = t(lm.fit(X, t(y))$coefficients)
+	beta = t(stats::lm.fit(basis, t(data))$coefficients)
     }
     return(beta)
 }
 
 #' Fit and predict splines
 #'
-#' @param y the data
-#' @param X the basis
+#' @param data the data
+#' @param basis the basis
 #' @param weights weigts
 #'
 #' @return y_fitted the fitted y values
 #'
 #' @export
-fit_predict_splines = function(y, X, weights=NULL){
-    y_fitted = t(lm.fit(X, t(y))$fitted.values)
+fit_predict_splines = function(data, basis, weights=NULL){
+    y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
     return(y_fitted)
 }
 
@@ -122,11 +122,13 @@ score_genes_centroid = function(data, centroid){
 }
 
 
-#' Fosher's method to combine pvalues
+#' Fisher's method to combine pvalues
 #'
 #' Combines all p-value per rows.
 #' 
 #' @param pvalues pvalues
+#'
+#' @keywords internal
 fisher_method = function(pvalues){
     # TODO Add a check that all pvalues are "valid"
     keep = (pvalues >= 0) & (pvalues <= 1)
@@ -135,6 +137,6 @@ fisher_method = function(pvalues){
     lnp = log(pvalues)
     chisq = (-2) * row_sum(lnp)
     df = 2 * length(lnp)
-    fisher_pval = pchisq(chisq, df, lower.tail=FALSE)
+    fisher_pval = stats::pchisq(chisq, df, lower.tail=FALSE)
     return(fisher_pval)
 }

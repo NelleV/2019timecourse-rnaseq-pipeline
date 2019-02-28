@@ -1,10 +1,5 @@
 # This file contains EDGE code adapted to work with limma contrasts
 
-library("edge")
-library("splines")
-library("MASS")
-
-
 center_data = function(y, ng_labels){
   for(g in levels(ng_labels)){
     whKeep = which(ng_labels == g)
@@ -140,10 +135,10 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels,
 	    df2 = n_samples - degrees_of_freedom * n_groups
 	}
 	df1 = df
-	pval = pf(stat * df2 / df1, df1=df1, df2=df2, lower.tail=FALSE)
+	pval = stats::pf(stat * df2 / df1, df1=df1, df2=df2, lower.tail=FALSE)
     }else{
 	lstat = lrtStat(resNull, resFull, ng_labels=ng_labels)
-	pval = pchisq(lstat, df=degrees_of_freedom, lower.tail=FALSE)
+	pval = stats::pchisq(lstat, df=degrees_of_freedom, lower.tail=FALSE)
     }
     return(pval)
 }
@@ -206,8 +201,8 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE,
     }
 
     if(is.null(basis)){
-	full_model = ~Group:ns(Time, df=df) + Group + 0
-	X = model.matrix(full_model, data=meta)
+	full_model = ~Group:splines::ns(Time, df=df) + Group + 0
+	X = stats::model.matrix(full_model, data=meta)
     }else{
 	X = basis
     }
@@ -219,7 +214,7 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE,
     }
 
     # Get the number of samples used for this particular contrast:
-    groups_of_interest = row.names(contrasts)[contrast != 0]
+    groups_of_interest = row.names(contrasts)[contrasts != 0]
     n_samples_fit = sum(with(meta, Group %in% groups_of_interest))
     n_groups = length(groups_of_interest)
     degrees_of_freedom = dim(X)[2] / ng
@@ -240,7 +235,7 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE,
 			  degrees_of_freedom=degrees_of_freedom,
 		          mask=mask,
 		          developmental=developmental)
-    pval_BH = p.adjust(pval, method="BH")
+    pval_BH = stats::p.adjust(pval, method="BH")
     pval_ftest = compute_pvalue(
 	X, y, beta, beta_null, ng_labels,
 	statistics="ftest",
@@ -249,7 +244,7 @@ edgeWithContrasts = function(data, meta, contrasts=NULL, center=FALSE,
 	n_groups=n_groups,
 	n_samples=n_samples_fit,
 	developmental=developmental)
-    pval_ftest_BH = p.adjust(pval_ftest, method="BH")
+    pval_ftest_BH = stats::p.adjust(pval_ftest, method="BH")
 
     fit = NULL
     fit$pval_lrt = pval

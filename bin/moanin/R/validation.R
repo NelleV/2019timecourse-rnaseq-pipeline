@@ -8,6 +8,8 @@
 #' @param check_replicates boolean, optional, default: FALSE
 #'	  If TRUE, checks whether metadata contains a column Replicate
 #' @return meta returns the metadata with additional columns if necessary.
+#'
+#' @keywords internal
 check_meta = function(meta, check_replicates=FALSE){
     metadata_column_names = colnames(meta)
     if(!("Group" %in% metadata_column_names)){
@@ -37,6 +39,7 @@ check_meta = function(meta, check_replicates=FALSE){
 
 
 #' Check data and meta
+#' @keywords internal
 check_data_meta = function(data, meta){
     dim_data = dim(data)
     dim_meta = dim(meta)
@@ -55,6 +58,8 @@ check_data_meta = function(data, meta){
 
 
 #' Check is 2D
+#'
+#' @keywords internal
 check_is_2d = function(X){
     dim_data = dim(X)
     if(is.null(dim_data)){
