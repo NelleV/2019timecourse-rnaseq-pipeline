@@ -211,6 +211,34 @@ points(lfc_epicon[(pvalue < 0.01) & (abs(lfc_epicon) > 1)],
 ```
 
 ```{r echo=FALSE, results="hide"}
+# Rename stuff for saving.
 outname = ".results/pvalues.txt"
-write.table(pvalues, outname, sep="\t")
+colnames(pvalues) = unlist(
+    lapply(colnames(pvalues), function(x){paste0(x, "-pval")}))
+    
+colnames(qvalues) = unlist(
+    lapply(colnames(qvalues), function(x){paste0(x, "-qval")}))
+
+colnames(log_fold_change_epicon) = unlist(
+    lapply(colnames(log_fold_change_epicon),
+    function(x){paste0(x, "-lfc_epicon")}))
+
+colnames(log_fold_change_max) = unlist(
+    lapply(colnames(log_fold_change_max),
+    function(x){paste0(x, "-lfc_max")}))
+
+de_analysis = merge(pvalues, qvalues, all=TRUE, by="row.names")
+row.names(de_analysis) = row.names(pvalues)
+de_analysis = subset(de_analysis, select=-c(Row.names))
+
+de_analysis = merge(de_analysis, log_fold_change_max, all=TRUE, by="row.names")
+row.names(de_analysis) = row.names(pvalues)
+de_analysis = subset(de_analysis, select=-c(Row.names))
+
+de_analysis = merge(de_analysis, log_fold_change_epicon, all=TRUE,
+		    by="row.names")
+row.names(de_analysis) = row.names(pvalues)
+de_analysis = subset(de_analysis, select=-c(Row.names))
+
+write.table(de_analysis, outname, sep="\t")
 ```

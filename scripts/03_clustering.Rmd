@@ -73,15 +73,15 @@ if(filter_genes){
 	pval_col_to_keep = colnames(pvalues)[grepl("-pval", colnames(pvalues))]
 	pvalues = pvalues[, pval_col_to_keep]
 	fishers_pval = moanin:::fisher_method(pvalues)
-    } else {
+        if(keep_all_significant){
+	   genes_to_keep = names(fishers_pval[fishers_pval < 0.05])
+	}else{
+	    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
+	}
+    }else{
 	genes_to_keep = names(pvalues)
     }
 
-    if(keep_all_significant){
-	genes_to_keep = names(fishers_pval[fishers_pval < 0.05])
-    }else{
-        genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
-    }
     y = as.matrix(data[genes_to_keep, ])
 }else{
     y = as.matrix(data)
