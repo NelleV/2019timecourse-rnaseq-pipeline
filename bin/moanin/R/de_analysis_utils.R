@@ -108,7 +108,7 @@ lfc_per_time = function(data, meta, contrasts){
 	for(time in meta$Time){
 	    mask = meta$Time == time
 	    colname = paste0(column, ".", as.character(time))
-	    log_fold_changes[, colname] = rowSums(coef_data[, mask])
+	    log_fold_changes[, colname] = rowMeans(coef_data[, mask])
 	}
     }
     return(log_fold_changes)

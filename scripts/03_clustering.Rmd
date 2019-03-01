@@ -24,16 +24,13 @@ is_count = FALSE
 take_log = FALSE    
 filter_expression = FALSE
 
-# Differential expression analysis
-timecourse_contrasts = c("C-K", "C-M")
-
 ###############################################################################
 # Clustering
 
 # Whether to filter genes
 filter_genes = TRUE
-keep_all_significant = TRUE
-n_genes_to_keep = 5000
+keep_all_significant = FALSE
+n_genes_to_keep = 10000
 n_clusters = 20
 percentage_genes_to_label = 0.5
 ```
@@ -48,33 +45,32 @@ meta = shoemaker2015$meta
 data = read.table(".results/quantile_normalized.txt") 
 
 # Right now, the package doesn't contain the normalized data
-pvalues = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
+de_analysis = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
 ```
-
-
 
 
 # Clustering of time-course data
 
-```{r}
+```{r filter_genes}
 if(filter_genes){
     # First, filter out any genes that doesn't have a log fold change of at
     # least 2
     # XXX I should actually filter on the max, but it is broken right now.
-    lfc_col_to_keep = colnames(pvalues)[
-	grepl("-lfc_max", colnames(pvalues))]
-    pvalues = pvalues[rowSums(abs(pvalues[, lfc_col_to_keep]) > 2) > 0, ]
+    lfc_col_to_keep = colnames(de_analysis)[
+	grepl("-lfc_max", colnames(de_analysis))]
+    de_analysis = de_analysis[rowSums(abs(de_analysis[, lfc_col_to_keep]) > 2) > 0, ]
 
-    if(dim(pvalues)[1] > n_genes_to_keep){
+    if(dim(de_analysis)[1] > n_genes_to_keep){
 
 	# Then rank by fisher's p-value and take max the number of genes of
 	# interest
 	# Filter out q-values for the pvalues table
-	pval_col_to_keep = colnames(pvalues)[grepl("-pval", colnames(pvalues))]
-	pvalues = pvalues[, pval_col_to_keep]
+	pval_col_to_keep = colnames(de_analysis)[grepl("-pval", colnames(de_analysis))]
+	pvalues = de_analysis[, pval_col_to_keep]
 	fishers_pval = moanin:::fisher_method(pvalues)
+	fishers_qval = stats::p.adjust(fishers_pval)
         if(keep_all_significant){
-	   genes_to_keep = names(fishers_pval[fishers_pval < 0.05])
+	   genes_to_keep = names(fishers_qval[fishers_qval < 0.05])
 	}else{
 	    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
 	}
@@ -86,6 +82,11 @@ if(filter_genes){
 }else{
     y = as.matrix(data)
 }
+```
+
+After filtering, we consider `r dim(y)[1]` genes for the clustering.
+
+```{r clustering}
 
 #############################################################################
 # Fit the splines
