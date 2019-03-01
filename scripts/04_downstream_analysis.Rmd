@@ -72,14 +72,15 @@ enables easy conversion from one gene annotation to another. Here, we will use
 it to convert the gene names from the Refseq annotation to the ensembl one.
 
 
-```{r}
+```{r results="hide"}
 library(biomaRt)
 ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
 ```
 
-```{r enrichment_analysis, results="hide"}
+```{r enrichment_analysis, results="hide", message=FALSE}
 clusters = sort(as.vector(unlist(unique(labels))))
+clusters = c(1, 2, 3)
 all_pathways = data.frame()
 for(cluster in clusters){
     genes = gene_names[labels == cluster]
@@ -129,9 +130,14 @@ kable(all_pathways, "html", escape=F, digits=4) %>%
 
 ### Finding enriched GO terms
 
-```{r go_to_gene_mapping, results="hide"}
+To find GO terms, we use `biomaRt` to find the mapping between GO terms and
+gene mapping.
 
-genes = getBM(attributes=c("go_id", "refseq_mrna"), values=gene_names, filters="refseq_mrna",
+```{r go_to_gene_mapping, results="hide", message=FALSE}
+
+genes = getBM(attributes=c("go_id", "refseq_mrna"),
+	      values=gene_names,
+	      filters="refseq_mrna",
 	      mart=ensembl)
 
 # Create gene to GO id mapping
@@ -147,26 +153,28 @@ for(gene in gene_names){
 }
 ```
 
-```{r go_term_enrichment, results="hide"}
+```{r go_term_enrichment, results="hide", message=FALSE}
 source("GO_terms_analysis.R")
 
 all_go_terms = data.frame()
 for(cluster in clusters){
+    for(ontogoly in c("BP", "NF", "CC")){ 
+	scores = as.numeric(labels == cluster)
+	names(scores) = gene_names
+	go_terms_enriched = find_enriched_go_terms(
+	    scores,
+	    gene_id_go_mapping)
 
-    scores = as.numeric(labels == cluster)
-    names(scores) = gene_names
-    go_terms_enriched = find_enriched_go_terms(
-	scores,
-    	gene_id_go_mapping)
-
-    if((dim(all_go_terms)[1] == 0) & (dim(go_terms_enriched)[1] != 0)){
-	go_terms_enriched["Cluster"] = cluster
-	all_go_terms = go_terms_enriched
-    }else if(dim(go_terms_enriched)[1] != 0){
-	go_terms_enriched["Cluster"] = cluster
-	all_go_terms = merge(all_go_terms, go_terms_enriched, all=TRUE)
+	if((dim(all_go_terms)[1] == 0) & (dim(go_terms_enriched)[1] != 0)){
+	    go_terms_enriched["Cluster"] = cluster
+	    go_terms_enriched["Ontology"] = ontology
+	    all_go_terms = go_terms_enriched
+	}else if(dim(go_terms_enriched)[1] != 0){
+	    go_terms_enriched["Cluster"] = cluster
+	    go_terms_enriched["Ontogoly"] = ontology
+	    all_go_terms = merge(all_go_terms, go_terms_enriched, all=TRUE)
+	}
     }
-
 }
 ```
 
@@ -175,8 +183,8 @@ for(cluster in clusters){
 library(kableExtra)
 
 all_go_terms = all_go_terms[
-    order(all_go_terms["Cluster",],
-	  all_go_terms["resultFisher.p.adj",])]
+    order(all_go_terms[, "Cluster"],
+	  all_go_terms[, "resultFisher_padj"]), ]
 
 kable(all_go_terms, "html", escape=F, digits=4) %>%
     kable_styling("striped", full_width=TRUE) 
