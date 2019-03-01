@@ -11,13 +11,25 @@ test_that("Estimating log fold change smoke tests", {
 
     # Reduce the data set
     data = data[1:10, ]
-    contrasts = c("C-K")
     methods = moanin:::ALL_LFC_METHODS
+
+    contrasts = limma::makeContrasts(contrasts="C-K",
+				     levels=meta$Group)
     for(method in methods){
         expect_silent(
 	    estimate_log_fold_change(
 		data, meta, contrasts, method=method))
     }
+
+    # Now same test, but several contrasts
+    contrasts = limma::makeContrasts(contrasts=c("C-K", "C-M"),
+				     levels=meta$Group)
+    for(method in methods){
+        expect_silent(
+	    estimate_log_fold_change(
+		data, meta, contrasts, method=method))
+    }
+
 })
 
 test_that("Estimating log fold change with unknown error", {

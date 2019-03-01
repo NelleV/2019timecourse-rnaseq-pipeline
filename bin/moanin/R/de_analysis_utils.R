@@ -23,20 +23,13 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 		  all_methods, sep=""))
     }
 
-    if(method == "sum"){
-
-	log_fold_changes = estimate_log_fold_change_sum(data, meta, contrasts)
-
-    }else if(method == "timely"){
-
+    if(method == "timely"){
 	log_fold_changes = lfc_per_time(data, meta, contrasts)
-
-    }else if(method %in% c("max", "min", "abs_sum", "abs_squared_sum", "epicon")){
-
+    }else if(method %in% c("sum", "max", "min", "abs_sum", "abs_squared_sum", "epicon")){
 	timely_lfc = lfc_per_time(data, meta, contrasts)
 	timely_lfc_meta = reconstruct_meta_from_lfc(timely_lfc)
     	log_fold_changes = data.frame(row.names=row.names(data))
-	for(contrast in contrasts){
+	for(contrast in colnames(contrasts)){
 	    mask = timely_lfc_meta$Group == contrast
 	    if(method == "max"){
 		log_fold_changes[, contrast] = rowMax(abs(timely_lfc[, mask]))
@@ -49,6 +42,8 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 	    }else if(method == "epicon"){
 		log_fold_changes[, contrast] = (
 		    rowMeans(abs(timely_lfc[, mask])) * sign(rowSums(timely_lfc[, mask])))
+	    }else if(method == "sum"){
+		log_fold_changes[, contrast] = rowSums(timely_lfc[, mask])
 	    }
 	}
 
@@ -60,9 +55,7 @@ estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
 
 
 estimate_log_fold_change_sum = function(data, meta, contrasts){
-    contrasts_coef = limma::makeContrasts(contrasts=contrasts,
-					  levels=levels(meta$Group))
-    sample_coefficients = lapply(meta$Group, function(x) return(contrasts_coef[x, ]))
+    sample_coefficients = lapply(meta$Group, function(x) return(contrasts[x, ]))
     sample_coefficients = as.matrix(sample_coefficients)
 
     # First, do weekly contrasts
@@ -103,13 +96,10 @@ reconstruct_meta_from_lfc = function(data_per_time){
 lfc_per_time = function(data, meta, contrasts){
     meta$Time = as.factor(meta$Time)
 
-    # Ok, now that we've cleaned up this, move on to contrsats
-    contrasts_coef = limma::makeContrasts(
-	contrasts=contrasts,
-	levels=levels(meta$Group))
-    sample_coefficients = lapply(meta$Group, function(x) return(contrasts_coef[x, ]))
-    sample_coefficients = as.matrix(sample_coefficients)
-    colnames(sample_coefficients) = contrasts
+    sample_coefficients = lapply(meta$Group, function(x) return(contrasts[x, ]))
+    sample_coefficients = as.matrix(unlist(sample_coefficients))
+    dim(sample_coefficients) = c(dim(meta)[1], dim(contrasts)[2])
+    colnames(sample_coefficients) = colnames(contrasts)
 
     log_fold_changes = data.frame(row.names=row.names(data))
     for(column in colnames(sample_coefficients)){
@@ -123,4 +113,3 @@ lfc_per_time = function(data, meta, contrasts){
     }
     return(log_fold_changes)
 }
-

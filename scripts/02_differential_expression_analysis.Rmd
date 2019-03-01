@@ -167,39 +167,21 @@ timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose")
 
 ### Time-course differential expression analysis between two groups
 
-FIXME add estimation of log fold change.
-
 ```{r de_analysis}
 # Define contrast
-de_analysis = data.frame(row.names=row.names(data))
-for(contrast_formula in timecourse_contrasts){
-    contrast = limma::makeContrasts(
-	contrasts=contrast_formula,
+contrasts = limma::makeContrasts(
+	contrasts=timecourse_contrasts,
 	levels=levels(meta$Group))
-    model = moanin::timecourse_differential_expression_analysis(
-	as.matrix(data), meta, contrast)
-    contrast_name = gsub(" ", "", contrast_formula, fixed=TRUE)
-    contrast_name_pval = paste(contrast_name, "-pval", sep="")
-    contrast_name_qval = paste(contrast_name, "-qval", sep="")
-    de_analysis[contrast_name_pval] = model$pval_lrt
-    de_analysis[contrast_name_qval] = model$qval_lrt
 
-    # Now compute log fold change using different methods
-    # XXX This fails very badly if the contrasts provided is wrong.
-    log_fold_change_epicon = moanin::estimate_log_fold_change(
-	data, meta, c(contrast_formula), method="epicon")
-    contrast_name_lfc_epicon = paste(contrast_name, "-lfc_epicon", sep="")
-    de_analysis[contrast_name_lfc_epicon] = log_fold_change_epicon
+pvalues = moanin::timecourse_differential_expression_analysis(
+    data, meta, contrasts)
+qvalues = apply(pvalues, 2, stats::p.adjust)
 
-    # XXX Something is wrong with method max
-    log_fold_change_max = moanin::estimate_log_fold_change(
-	data, meta, c(contrast_formula), method="max")
-    contrast_name_lfc_max = paste(contrast_name, "-lfc_max", sep="")
-    de_analysis[contrast_name_lfc_max] = log_fold_change_max
+log_fold_change_epicon = moanin::estimate_log_fold_change(
+    data, meta, contrasts,  method="epicon")
 
-}
-
-pvalues = de_analysis
+log_fold_change_max = moanin::estimate_log_fold_change(
+    data, meta, contrasts, method="max")
 ```
 
 Let's explore a bit the number of genes found differentially expressed.
@@ -212,8 +194,8 @@ And now a volcano plot for quick visualization
 
 ```{r fig.height=8, fig.width=8}
 
-pvalue = de_analysis[, "M-K-qval"]
-lfc_epicon = de_analysis[, "M-K-lfc_epicon"]
+pvalue = qvalues[, "M-K"]
+lfc_epicon = log_fold_change_epicon[, "M-K"]
 
 plot(lfc_epicon, -log10(pvalue), pch=20, main="Volcano plot",
      xlim=c(-2.5, 2))

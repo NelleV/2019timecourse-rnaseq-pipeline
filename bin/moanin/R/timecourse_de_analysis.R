@@ -89,23 +89,11 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels,
 			  n_samples=NULL,
 			  degrees_of_freedom=NULL,
 			  statistics="lrt",
-			  df2=NULL, weights=NULL, mask=NULL, developmental=FALSE){
+			  df2=NULL, weights=NULL){
 
     fitFull = beta %*% t(X)
-    if(developmental){
-      fitNull = row_mean(y[, mask])
-    }else{
-      fitNull = beta_null %*% t(X)
-    }
-  
-    if(!is.null(mask)){
-      fitFull = fitFull[, mask]
-      if(!developmental){
-        fitNull = fitNull[, mask]
-      }
-      y = y[, mask]
-      ng_labels = ng_labels[mask]
-    }
+
+    fitNull = beta_null %*% t(X)
 
     if(!is.null(weights)){
       resNull = weights^(1/2) * (y - fitNull)
@@ -165,46 +153,24 @@ summarise = function(X, ng_levels) {
 #' @param meta Meta data which should be consistent with the column names \code{data}.
 #' @param contrasts Contrast using \code{makeContrasts} from \code{limma}.
 #' @param center boolean, whether to center the data matrix
-#' @param developmental boolean, is that a developmental test?
 #' @param weights Weights matrix for the fitting.
 #' @param df Degrees of freedom to for the splines.
 #' @param basis the basis matrix. If provided, ignore some of the parameters
-#' @param mask boolean mask of which points to use for the tests. This is
-#'	  useful when you want to use all data points for fitting the splines,
-#'	  but not all the data points for the tests.
 #' @export
 timecourse_differential_expression_analysis = function(data,
 						       meta,
-						       contrasts=NULL,
+						       contrasts,
 						       center=FALSE,
 						       weights=NULL,
 						       df=4,
-						       basis=NULL,
-						       mask=NULL,
-						       developmental=FALSE){
+						       basis=NULL){
     ng = nlevels(meta$Group)
     ng_labels = meta$Group
 
     meta = check_meta(meta)
-
-    if(is.null(contrasts) & !developmental){
-	# FIXME need better error message
-	stop("Needs either contrasts or developmental")
-    }
-
-    contrasts_coef = c(contrasts)
     meta = droplevels(meta)
+    check_data_meta(data, meta)
 
-    if(!is.null(mask)){
-	if(length(mask) != dim(data)[2]){
-	stop("The mask provided doesn't have the correct length.")
-	}
-    }
-
-    if(length(contrasts_coef) != ng){
-	stop("The contrast coef vector should be of the same size" +
-	     " as the number of groups")
-    }
 
     if(is.null(basis)){
 	full_model = ~Group:splines::ns(Time, df=df) + Group + 0
@@ -219,56 +185,36 @@ timecourse_differential_expression_analysis = function(data,
 	X = t(center_data(t(X)))
     }
 
-    # Get the number of samples used for this particular contrast:
-    groups_of_interest = row.names(contrasts)[contrasts != 0]
-    n_samples_fit = sum(with(meta, Group %in% groups_of_interest))
-    n_groups = length(groups_of_interest)
-    degrees_of_freedom = dim(X)[2] / ng
-
     beta = fit_splines(y, X, weights=weights)
 
-    if(developmental){
-	# For developmental, only consider the group from the contrast
-	beta_full = compute_beta_null(X, beta, contrasts_coef)
-	beta_null = NULL
-    }else{
-	beta_null = compute_beta_null(X, beta, contrasts_coef)
+    if(dim(contrasts)[1] != ng){
+	stop("The contrast coef vector should be of the same size" +
+	     " as the number of groups")
     }
 
-    pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights,
-			  n_samples=n_samples_fit,
-			  n_groups=n_groups,
-			  degrees_of_freedom=degrees_of_freedom,
-		          mask=mask,
-		          developmental=developmental)
-    pval_BH = stats::p.adjust(pval, method="BH")
-    pval_ftest = compute_pvalue(
-	X, y, beta, beta_null, ng_labels,
-	statistics="ftest",
-	mask=mask,
-	degrees_of_freedom=degrees_of_freedom,
-	n_groups=n_groups,
-	n_samples=n_samples_fit,
-	developmental=developmental)
-    pval_ftest_BH = stats::p.adjust(pval_ftest, method="BH")
+    pvalues = data.frame(row.names=row.names(data))
+    for(col in 1:ncol(contrasts)){
+	contrast = contrasts[, col]
 
-    fit = NULL
-    fit$pval_lrt = pval
-    fit$pval = pval_ftest
-    fit$qval = pval_ftest_BH
-    fit$qval_lrt = pval_BH
-    fit$beta = beta
-    fit$beta_null = beta_null
-    if(is.null(basis)){
-	fit$full_model = full_model
-    }else{
-	fit$full_model = NULL
+	# Create the name of the column
+	contrast_name = colnames(contrasts)[col]
+	contrast_name = gsub(" ", "", contrast_name, fixed=TRUE)
+
+	# Get the number of samples used for this particular contrast:
+	groups_of_interest = names(contrast)[contrast != 0]
+	n_samples_fit = sum(with(meta, Group %in% groups_of_interest))
+	n_groups = length(groups_of_interest)
+	degrees_of_freedom = dim(X)[2] / ng
+
+	beta_null = compute_beta_null(X, beta, contrast)
+
+	pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights,
+			      n_samples=n_samples_fit,
+			      n_groups=n_groups,
+			      degrees_of_freedom=degrees_of_freedom)
+	pvalues[contrast_name] = pval
     }
-    fit$basis = X
-    fit$weights = weights
-    fit$center = center # Keep track of that for when predicting
-    fit$contrasts = contrasts
-    return(fit)
+    return(pvalues)
 }
 
 
