@@ -131,34 +131,50 @@ kable(all_pathways, "html", escape=F, digits=4) %>%
 ### Finding enriched GO terms
 
 To find GO terms, we use `biomaRt` to find the mapping between GO terms and
-gene mapping.
+gene mapping. The GO enrichment library `topGO` expects the GO term to gene
+mapping to be a list where each item is a mapping between a gene name and a GO
+term ID vector. 
+
+```text
+$NM_199153
+[1] "GO:0016020" "GO:0016021" "GO:0007186" "GO:0004930" "GO:0007165"
+[6] "GO:0050896" "GO:0050909"
+
+$NM_201361
+ [1] "GO:0016020" "GO:0016021" "GO:0003674" "GO:0008150" "GO:0005794"
+ [6] "GO:0005829" "GO:0005737" "GO:0005856" "GO:0005874" "GO:0005739"
+[11] "GO:0005819" "GO:0000922" "GO:0072686"
+```
+
+`biomaRt` queries results a matrix with two named columns of gene names and GO
+term ID. **FIXME** matrix or data.frame??
+
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
-
+# FIXME move this to the package
+source("GO_terms_analysis.R")
 genes = getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
 	      mart=ensembl)
 
 # Create gene to GO id mapping
-gene_id_go_mapping = NULL
-i = 1
-for(gene in gene_names){
-    go_terms = genes[genes[, "refseq_mrna"] == gene, "go_id"]
-    if(length(go_terms) != 0){
-        gene_id_go_mapping$gene = go_terms
-	names(gene_id_go_mapping)[i] = gene
-	i = i + 1
-    }
-}
+gene_id_go_mapping = create_go_term_mapping(genes)
 ```
 
-```{r go_term_enrichment, results="hide", message=FALSE}
-source("GO_terms_analysis.R")
+Once the gene ID to GO mapping list is created, `moanin` provides a simple
+interface to `topGO` to fetch enriched GO terms.
 
+```{r go_term_enrichment, results="hide", message=FALSE}
+
+cluster = c(3)
+ontologies = c("BP", "NF", "CC")
+# It's taking too long to compile with everything. Just limit ourselves for
+# now to BP
+ontologies = c("BP")
 all_go_terms = data.frame()
 for(cluster in clusters){
-    for(ontogoly in c("BP", "NF", "CC")){ 
+    for(ontology in c("BP", "NF", "CC")){ 
 	scores = as.numeric(labels == cluster)
 	names(scores) = gene_names
 	go_terms_enriched = find_enriched_go_terms(
@@ -171,7 +187,7 @@ for(cluster in clusters){
 	    all_go_terms = go_terms_enriched
 	}else if(dim(go_terms_enriched)[1] != 0){
 	    go_terms_enriched["Cluster"] = cluster
-	    go_terms_enriched["Ontogoly"] = ontology
+	    go_terms_enriched["Ontology"] = ontology
 	    all_go_terms = merge(all_go_terms, go_terms_enriched, all=TRUE)
 	}
     }

@@ -1,8 +1,18 @@
 library(topGO)
 
 
-# ontology: BP, CC, NF
-find_enriched_go_terms = function(scores, geneID2GO,
+#' Find enriched GO terms
+#'
+#' @param labels
+#' @param gene_id_to_go
+#' @param ontology string, optional, default: BP
+#'	specficies which ontology to use. Can be 'BP', 'CC', or 'NF'
+#' @param weighted, boolean, optional, default: FALSE
+#'	Whether to use the weighted algorithm or not.
+#' @param node_size integer, optional, default: 10
+#'	Consider only GO terms with node_size number of genes.
+#' @param ontology: BP, CC, NF
+find_enriched_go_terms = function(labels, gene_id_to_go,
 				  ontology="BP", 
 				  weighted=FALSE,
 				  node_size=10){
@@ -19,9 +29,9 @@ find_enriched_go_terms = function(scores, geneID2GO,
       return(data < 0.5)
     }
 
-    GOdata = new("topGOdata", ontology=ontology, allGenes=scores, nodeSize=node_size,
+    GOdata = new("topGOdata", ontology=ontology, allGenes=labels, nodeSize=node_size,
 		 geneSel=getTopDiffGenes,
-		 annot=annFUN.gene2GO, gene2GO=geneID2GO)
+		 annot=annFUN.gene2GO, gene2GO=gene_id_to_go)
 
     if(weighted){
         resultFisher = runTest(GOdata, algorithm="classic", statistic="fisher")
@@ -46,4 +56,23 @@ find_enriched_go_terms = function(scores, geneID2GO,
     allRes = allRes[wh,]
 
     return(allRes)
+}
+
+
+#' Create the Gene to GO Term mapping
+#'
+create_go_term_mapping = function(genes, gene_col="refseq_mrna"){
+    gene_id_go_mapping = NULL
+    gene_names = unique(genes[, "refseq_mrna"])
+
+    i = 1
+    for(gene in gene_names){
+	go_terms = genes[genes[, gene_col] == gene, "go_id"]
+	if(length(go_terms) != 0){
+	    gene_id_go_mapping$gene = go_terms
+	    names(gene_id_go_mapping)[i] = gene
+	    i = i + 1
+	}
+    }
+    return(gene_id_go_mapping)
 }
