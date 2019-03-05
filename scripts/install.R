@@ -1,28 +1,97 @@
 
-install.packages("devtools")
-install.packages("ggfortify")
-install.packages("kableExtra")
-install.packages("testthat")
-install.packages("viridis")
-install.packages("knitr")
-install.packages("rmarkdown")
-install.packages("roxygen2")
-install.packages("ClusteR")
-install.packages("splines")
-install.packages("NMF")
-install.packages("ggfortify")
-install.packages("reshape2")
+
+# This is a bit annoying, but I'm hoping to save time on travis-ci
+if(!require("devtools")){
+    install.packages("devtools")
+}
+
+if(!require(ggfortify)){
+    install.packages("ggfortify")
+}
+
+if(!require(kableExtra)){
+    install.packages("kableExtra")
+}
+
+if(!require(testthat)){
+    install.packages("testthat")
+}
+
+if(!require(viridis)){
+    install.packages("viridis")
+}
+
+if(!require(knitr)){
+    install.packages("knitr")
+}
+
+if(!require(rmarkdown)){
+    install.packages("rmarkdown")
+}
+
+if(!require(roxygen2)){
+    install.packages("roxygen2")
+}
+
+if(!require(ClusteR)){
+    install.packages("ClusteR")
+}
+
+if(!require(splines)){
+    install.packages("splines")
+}
+
+if(!require(NMF)){
+    install.packages("NMF")
+}
+
+if(!require(ggfortify)){
+    install.packages("ggfortify")
+}
+
+if(!require(reshape2)){
+    install.packages("reshape2")
+}
 
 source("https://bioconductor.org/biocLite.R")
-biocLite("genefilter")
-biocLite("limma")
-biocLite("edgeR")
-biocLite("edge")
-biocLite("EDASeq")
-biocLite("topGO")
-biocLite("Biobase")
-biocLite("MASS")
-biocLite("biomaRt")
-biocLite("KEGGprofile")
+if(!require(genefilter)){
+    biocLite("genefilter")
+}
+
+if(!require(limma)){
+    biocLite("limma")
+}
+
+if(!require(edgeR)){
+    biocLite("edgeR")
+}
+
+if(!require(edge)){
+    biocLite("edge")
+}
+
+if(!require(EDASeq)){
+    biocLite("EDASeq")
+}
+
+if(!require(topGO)){
+    biocLite("topGO")
+}
+
+if(!require(Biobase)){
+    biocLite("Biobase")
+}
+
+if(!require(MASS)){
+    biocLite("MASS")
+}
+
+if(!require("biomaRt")){
+    biocLite("biomaRt")
+}
+
+if(!require(KEGGprofile)){
+    biocLite("KEGGprofile")
+}
 
 
