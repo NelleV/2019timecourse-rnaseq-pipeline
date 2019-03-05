@@ -133,7 +133,21 @@ moanin:::plot_centroids(centroids, meta,
 ## How to choose the number of clusters.
 
 A common question that arises when performing clustering is how to choose the
-number of clusters. 
+number of clusters. A choice for the number of clusters K depends on the goal. 
+In this particular case, the end goal is not the clustering, but to facilitate
+interpretation of the differential expression analysis step. As a result, the
+number of clusters should not exceed the number of gene sets the user wants to
+interpret. This allows to set a maximum number of clusters. Let us assume here
+that this number is 20 clusters.
+
+Once the maximum number of clusters is set, several strategies allow to
+identify the number of clusters:
+
+    - *Within cluster similarity as a function of the number of cluster* XXX
+      GAP statistics
+    - *Stability analysis*: this method assumes that the results of the
+      clustering will be more stable for the "true" number of clusters than
+      for other number of clusters.
 
 
 ```{r results="hide", echo=FALSE}
