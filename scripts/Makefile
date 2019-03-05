@@ -8,10 +8,8 @@ PIPELINE_STEPS = step0_preprocessing \
 		 step4_clustering
 
 all: html
-	mkdir -p reports
 
 html: $(HTML_FILES)
-	mkdir -p reports
 
 pipeline:
 	for i in $(PIPELINE_STEPS); do $(MAKE) -C $$i all; done
