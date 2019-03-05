@@ -1,5 +1,8 @@
 language: R
 sudo: false
-cache: packages
+cache: 
+    - packages
+    - directories:
+        data
 install: source .build_tools/travis/install.sh
 script: source .build_tools/travis/test_script.sh
