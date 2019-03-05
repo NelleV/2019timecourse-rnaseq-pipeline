@@ -85,6 +85,7 @@ weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
 ```
 
 ```{r echo=FALSE, results="hide"}
+# Hide those results
 # Run the DE analysis on the rest of the influenza strain.
 contrasts = c("M.0-K.0",
 	      "M.3-K.3",
@@ -164,8 +165,24 @@ timely_barplot(weekly_de_analysis, time, title="Vietnam low-dose")
 timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose")
 ```
 
+The distribution of number of genes found differentially expressed by
+considering each time-point independantly highlights the challenges of such
+approach. Timepoint 6H and 18H of the Kawasaki strain have fewer numbers of
+genes found differentially expressed than timepoints 3H and 9H: this is likely
+due to biological or technical variances for specific genes at specific
+timepoints.
+
+As a summary, classic differential expression methods are appropriate for
+unordered treatments, but fail to use the temporal structure of the data.
 
 ### Time-course differential expression analysis between two groups
+
+To leverage this temporal structure, Storey et al [CITE FIXME] proposes to
+model time-course micro-array with splines functions, and to use a log-ratio
+likelihood test to detect differentially expressed genes. `moanin` extends
+this idea by providing functions to perform time-course differential
+expression analysis using `limma` contrasts.
+
 
 ```{r de_analysis}
 # Define contrast
@@ -173,6 +190,10 @@ contrasts = limma::makeContrasts(
 	contrasts=timecourse_contrasts,
 	levels=levels(meta$Group))
 
+# The function takes the data (data.frame or named matrix), the meta data
+# (data.frame containing a timepoint and group column, the first corresponding
+# to the time-course information, the latter corresponding to the
+# treatment).
 pvalues = moanin::timecourse_differential_expression_analysis(
     data, meta, contrasts)
 qvalues = apply(pvalues, 2, stats::p.adjust)
@@ -211,7 +232,7 @@ points(lfc_epicon[(pvalue < 0.01) & (abs(lfc_epicon) > 1)],
 ```
 
 ```{r echo=FALSE, results="hide"}
-# Rename stuff for saving.
+# Rename stuff for saving
 outname = ".results/pvalues.txt"
 colnames(pvalues) = unlist(
     lapply(colnames(pvalues), function(x){paste0(x, "-pval")}))
