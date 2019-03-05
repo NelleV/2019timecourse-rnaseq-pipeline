@@ -12,7 +12,7 @@ run_tests() {
     # first run the actual tests
     pushd bin/moanin
     make test
-    popd bin/moanin
+    popd
     pushd scripts
     make all
     popd
