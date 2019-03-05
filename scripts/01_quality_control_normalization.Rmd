@@ -3,7 +3,7 @@ title: "Normalization: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
 ---
 
-```{r echo=FALSE, results="hide"}
+```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
 library(devtools)
 library(limma)
@@ -143,9 +143,10 @@ n_samples`.
 
 
 ```{r}
-
 # Now load in the metadata
-meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
+# meta = read.delim("data/shoemaker2015/mice_meta.tsv", sep="\t")
+data(shoemaker2015)
+meta = shoemaker2015$meta
 write.table(data, ".results/quantile_normalized.txt")
 ```
 
