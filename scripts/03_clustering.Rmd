@@ -48,14 +48,14 @@ data = read.table(".results/quantile_normalized.txt")
 de_analysis = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
 ```
 
-
 # Clustering of time-course data
+
+The next step is to perform clustering.
 
 ```{r filter_genes}
 if(filter_genes){
     # First, filter out any genes that doesn't have a log fold change of at
-    # least 2
-    # XXX I should actually filter on the max, but it is broken right now.
+    # least 2 at at least one of the time points.
     lfc_col_to_keep = colnames(de_analysis)[
 	grepl("-lfc_max", colnames(de_analysis))]
     de_analysis = de_analysis[rowSums(abs(de_analysis[, lfc_col_to_keep]) > 2) > 0, ]
