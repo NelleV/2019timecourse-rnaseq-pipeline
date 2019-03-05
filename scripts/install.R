@@ -45,18 +45,7 @@ if(!require(NMF)){
     install.packages("NMF")
 }
 
-if(!require(ggfortify)){
-    install.packages("ggfortify")
-}
-
-if(!require(reshape2)){
-    install.packages("reshape2")
-}
-
 source("https://bioconductor.org/biocLite.R")
-if(!require(genefilter)){
-    biocLite("genefilter")
-}
 
 if(!require(limma)){
     biocLite("limma")

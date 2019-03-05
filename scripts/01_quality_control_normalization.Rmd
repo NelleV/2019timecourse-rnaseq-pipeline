@@ -10,6 +10,9 @@ library(limma)
 library(splines)
 library(stats)
 library(moanin)
+library(ggplot2)
+library(stats)
+
 source("utils.R")
 
 # library(moanin)
@@ -42,12 +45,6 @@ knitr::opts_chunk$set(
   duplicate.label="allow"
 )
 
-library(genefilter)
-library(dplyr)
-library(ggplot2)
-library(NMF)
-library(reshape2)
-library(limma)
 ```
 
 
@@ -84,8 +81,8 @@ RG = limma::read.maimages(
 
 # Preform background correction using norm-exponential strategy and normalize
 # across samples using quantile normalization.
-RG = backgroundCorrect(RG, method="normexp")
-RG.q = normalizeBetweenArrays(RG, method="quantile")
+RG = limma::backgroundCorrect(RG, method="normexp")
+RG.q = limma::normalizeBetweenArrays(RG, method="quantile")
 ```
 
 Plotting the smoothed empirical densities of the probe values before
@@ -96,8 +93,8 @@ empirical densities of each sample perfectly overlap.
 ```{r plotting_densities, results="hide", fig.width=8, fig.height=4}
 # Plot the densities of the probes before and after normalization.
 par(mfrow=c(1, 2))
-plotDensities(RG, col="black", legend=FALSE)
-plotDensities(RG.q, col="black", legend=FALSE)
+limma::plotDensities(RG, col="black", legend=FALSE)
+limma::plotDensities(RG.q, col="black", legend=FALSE)
 ```
 
 
@@ -170,14 +167,14 @@ variable genes.
 ```{r}
 variance_cutoff = 0.5
 variance_per_genes = apply(data, 1, mad)
-min_variance = quantile(variance_per_genes, c(variance_cutoff))
+min_variance = stats::quantile(variance_per_genes, c(variance_cutoff))
 data = data[variance_per_genes > min_variance,]
 ```
 
 ```{r echo=FALSE, fig.width=8, fig.height=4}
-hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
-     ylab="# probes")
-abline(v=min_variance, col="#AB0000", lw=2)
+graphics::hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
+	       ylab="# probes")
+graphics::abline(v=min_variance, col="#AB0000", lw=2)
 ```
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
@@ -186,8 +183,7 @@ centered and scaled gene expression data.
 ```{r pca, fig.width=8, fig.height=8}
 # Reorder genes on condition, time, and replicate
 
-library(ggfortify)
-pca_data = prcomp(t(data), rank=3, center=TRUE, scale=TRUE) 
+pca_data = stats::prcomp(t(data), rank=3, center=TRUE, scale=TRUE) 
 percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
 
@@ -197,24 +193,28 @@ We also plot the second and third components in the second row.
 
 ```{r pca_plots, fig.width=8, fig.height=8}
 # FIXME Add legend
-par(mfrow=c(2, 2))
-plot(pca_data$x[, "PC2"], pca_data$x[, "PC1"],
-     col=ann_colors$Group[meta$Group],
-     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-     xlab="PC2", ylab="PC1")
-plot(pca_data$x[, "PC2"], pca_data$x[, "PC1"],
-     col=ann_colors$Time[as.factor(meta$Time)],
-     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-     xlab="PC2", ylab="PC1")
+graphics::par(mfrow=c(2, 2))
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+    col=ann_colors$Group[meta$Group],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC1")
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+    col=ann_colors$Time[as.factor(meta$Time)],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC1")
 
-plot(pca_data$x[, "PC2"], pca_data$x[, "PC3"],
-     col=ann_colors$Group[meta$Group],
-     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-     xlab="PC2", ylab="PC3")
-plot(pca_data$x[, "PC2"], pca_data$x[, "PC3"],
-     col=ann_colors$Time[as.factor(meta$Time)],
-     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-     xlab="PC2", ylab="PC3")
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC3"],
+    col=ann_colors$Group[meta$Group],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC3")
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC3"],
+    col=ann_colors$Time[as.factor(meta$Time)],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC3")
 ```
 
 Then, we plot the pearson correlation across each samples. We order the
@@ -235,16 +235,17 @@ ord = order(
 data = data[, ord]
 meta = meta[ord, ]
 
-data_corr = cor(data, method="pearson")
+data_corr = stats::cor(data, method="pearson")
 
 meta$Time = as.factor(meta$Time)
-aheatmap(data_corr,
-         Colv=NA, Rowv=NA,
-         annCol=meta[,
-		     c("Group", "Time")],
-         annLegend=FALSE, 
-	 annColors=ann_colors,
-         main="Correlation plot")
+NMF::aheatmap(
+    data_corr,
+    Colv=NA, Rowv=NA,
+    annCol=meta[,
+		c("Group", "Time")],
+    annLegend=FALSE, 
+    annColors=ann_colors,
+    main="Correlation plot")
 ```
 
 We can already see interesting patterns emerging from the correlation plot.

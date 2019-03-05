@@ -46,6 +46,15 @@ data = read.table(".results/quantile_normalized.txt")
 
 # Right now, the package doesn't contain the normalized data
 de_analysis = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
+
+# Extract pvalues and log_fold change
+lfc_col_to_keep = colnames(de_analysis)[
+    grepl("-lfc_max", colnames(de_analysis))]
+lfc_max = de_analysis[, lfc_col_to_keep]
+
+pval_col_to_keep = colnames(de_analysis)[
+    grepl("-pval", colnames(de_analysis))]
+pvalues = de_analysis[, pval_col_to_keep]
 ```
 
 # Clustering of time-course data
@@ -56,17 +65,15 @@ The next step is to perform clustering.
 if(filter_genes){
     # First, filter out any genes that doesn't have a log fold change of at
     # least 2 at at least one of the time points.
-    lfc_col_to_keep = colnames(de_analysis)[
-	grepl("-lfc_max", colnames(de_analysis))]
-    de_analysis = de_analysis[rowSums(abs(de_analysis[, lfc_col_to_keep]) > 2) > 0, ]
+    
+    genes_to_keep = row.names(lfc_max[rowSums(lfc_max > 2) > 0, ])
+    pvalues = pvalues[genes_to_keep, ]
 
-    if(dim(de_analysis)[1] > n_genes_to_keep){
+    if(length(genes_to_keep) > n_genes_to_keep){
 
 	# Then rank by fisher's p-value and take max the number of genes of
 	# interest
 	# Filter out q-values for the pvalues table
-	pval_col_to_keep = colnames(de_analysis)[grepl("-pval", colnames(de_analysis))]
-	pvalues = de_analysis[, pval_col_to_keep]
 	fishers_pval = moanin:::fisher_method(pvalues)
 	fishers_qval = stats::p.adjust(fishers_pval)
         if(keep_all_significant){
@@ -74,8 +81,6 @@ if(filter_genes){
 	}else{
 	    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
 	}
-    }else{
-	genes_to_keep = names(pvalues)
     }
 
     y = as.matrix(data[genes_to_keep, ])
@@ -100,32 +105,36 @@ kmeans_clusters = moanin:::splines_kmeans(
 
 # Rescale the centroids
 centroids = moanin:::rescale_values(kmeans_clusters$centroids, meta)
-all_scores = data.frame(row.names=row.names(data))
-for(k in 1:n_clusters){
-    scores = moanin:::score_genes_centroid(data, centroids[k,])
-    all_scores[paste0("cluster_", k)] = scores
-}
+
+
+# XXX is there a bug here?
+# all_scores = data.frame(row.names=row.names(data))
+# for(k in 1:n_clusters){
+#     scores = moanin:::score_genes_centroid(data, centroids[k,])
+#     all_scores[paste0("cluster_", k)] = scores
+# }
 
 # Only assign labels to X% of the genes
-max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
-genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
-labels = moanin:::row_argmin(all_scores)
-labels[genes_to_not_consider] = NA
+# max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
+# genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
+# labels = moanin:::row_argmin(all_scores)
+# labels[genes_to_not_consider] = NA
 ```
 
 ```{r}
 table(kmeans_clusters$clusters)
 ```
 
-```{r}
-table(labels)
-```
-
-
 ```{r fig.height=8, fig.width=8}
 moanin:::plot_centroids(centroids, meta,
 			colors=as.vector(unlist(ann_colors["Group"])))
 ```
+
+## How to choose the number of clusters.
+
+A common question that arises when performing clustering is how to choose the
+number of clusters. 
+
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step
