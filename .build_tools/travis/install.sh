@@ -7,6 +7,7 @@
 # License: 3-clause BSD
 
 set -e
+Rscript scripts/install.R
 pushd bin/moanin
 make install
 popd
