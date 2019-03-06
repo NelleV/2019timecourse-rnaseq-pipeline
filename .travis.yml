@@ -1,0 +1,18 @@
+language: r
+
+r:
+    - bioc-release
+
+sudo: false
+cache: packages
+
+install: source .build_tools/travis/install.sh
+script: source .build_tools/travis/test_script.sh
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GH_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: true
+  on:
+    branch: master

@@ -1,0 +1,209 @@
+---
+title: "Downstream analysis: A pipeline to analyse time-course gene expression data"
+output: rmarkdown::html_vignette
+---
+
+
+```{r echo=FALSE, results="hide", message=FALSE}
+# Loading dependencies
+library(devtools)
+library(limma)
+library(splines)
+library(stats)
+library(KEGGprofile)
+library(kableExtra)
+library(viridis)
+
+library(moanin)
+```
+
+```{r echo=FALSE, results="hide"}
+# Set options
+df = 6
+
+# Preprocessing & filtering
+is_count = FALSE
+take_log = FALSE    
+filter_expression = FALSE
+
+# Differential expression analysis
+timecourse_contrasts = c("C-K", "C-M")
+
+# Clustering
+filter_genes = TRUE
+n_genes_to_keep = 5000
+n_clusters = 20
+percentage_genes_to_label = 0.5
+```
+
+## Downstream analysis of clusters.
+
+Once good clusters are obtained, the next step is to leverage the clustering
+to ease interpretation. Classic enrichment analysis step can then be performed
+in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
+term enrichment analysis, motif enrichment analysis, etc.
+
+```{r echo=FALSE, results="hide"}
+# Set data files and options
+data("shoemaker2015")
+data = shoemaker2015$data
+meta = shoemaker2015$meta
+
+labels = read.table(".results/clustering_labels.txt", sep="\t",
+		    check.names=FALSE)
+```
+
+First, let us clean up the gene obtained and only select the genes we are
+going to use in the enrichment analysis. One can either use the whole set of
+genes, only the set of differentially expressed genes in each cluster, or a
+subset of genes that fit well to a cluster (based on some criterion).
+
+```{r}
+gene_names = row.names(labels)
+gene_names = gene_names[!is.na(labels)]
+labels = labels[!is.na(labels)]
+```
+
+### Finding enriched pathways using `biomaRt` and `KEGGprofile`
+
+Let us first tackle the case of pathway enrichment analysis. We will leverage
+the packages `biomaRt` and `KEGGprofile` for this step. `KEGGprofile` is a
+package that easily allows to perform pathway enrichment analysis on a set of
+genes labeled with the ensembl annotation. We thus need to convert the gene
+names into the appropriate format. This is where `biomaRt` comes in handy: it
+enables easy conversion from one gene annotation to another. Here, we will use
+it to convert the gene names from the Refseq annotation to the ensembl one.
+
+
+```{r results="hide"}
+library(biomaRt)
+ensembl = useMart("ensembl")
+ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
+```
+
+```{r enrichment_analysis, results="hide", message=FALSE}
+clusters = sort(as.vector(unlist(unique(labels))))
+clusters = c(1, 2, 3)
+all_pathways = data.frame()
+for(cluster in clusters){
+    genes = gene_names[labels == cluster]
+
+    # convert gene names
+    genes = getBM(attributes=c("ensembl_gene_id", "entrezgene"),
+		  filters="refseq_mrna", values=genes,
+		  mart=ensembl)["entrezgene"]
+    genes = as.vector(unlist(genes))
+    pathways = KEGGprofile::find_enriched_pathway(
+	genes, species="mmu",
+	download_latest=TRUE)
+
+    if((dim(all_pathways)[1] == 0) & (dim(pathways$stastic)[1] != 0)){
+	print("Initialize")
+	pathways$stastic["Cluster"] = cluster
+	all_pathways = pathways$stastic
+    }else if(dim(pathways$stastic)[1] != 0) {
+	print("Merge")
+	pathways$stastic["Cluster"] = cluster
+	all_pathways = merge(all_pathways, pathways$stastic, all=TRUE)
+    }
+}
+```
+
+```{r echo=FALSE}
+
+all_pathways = all_pathways[
+    order(all_pathways["Cluster"],
+	  all_pathways["pvalueAdj"]),]
+
+# Select the columns to print
+all_pathways = subset(
+    all_pathways,
+    select=c(
+	"Pathway_Name", "Percentage",
+	"pvalueAdj", "Cluster"))
+
+colnames(all_pathways) = c("Pathway", "Percentage", "Adj. p-value", "Cluster")
+all_pathways["Percentage"] = all_pathways["Percentage"] * 100
+kable(all_pathways, "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
+```
+
+
+### Finding enriched GO terms
+
+To find GO terms, we use `biomaRt` to find the mapping between GO terms and
+gene mapping. The GO enrichment library `topGO` expects the GO term to gene
+mapping to be a list where each item is a mapping between a gene name and a GO
+term ID vector. 
+
+```text
+$NM_199153
+[1] "GO:0016020" "GO:0016021" "GO:0007186" "GO:0004930" "GO:0007165"
+[6] "GO:0050896" "GO:0050909"
+
+$NM_201361
+ [1] "GO:0016020" "GO:0016021" "GO:0003674" "GO:0008150" "GO:0005794"
+ [6] "GO:0005829" "GO:0005737" "GO:0005856" "GO:0005874" "GO:0005739"
+[11] "GO:0005819" "GO:0000922" "GO:0072686"
+```
+
+`biomaRt` queries results a matrix with two named columns of gene names and GO
+term ID. **FIXME** matrix or data.frame??
+
+
+```{r go_to_gene_mapping, results="hide", message=FALSE}
+# FIXME move this to the package
+source("GO_terms_analysis.R")
+genes = getBM(attributes=c("go_id", "refseq_mrna"),
+	      values=gene_names,
+	      filters="refseq_mrna",
+	      mart=ensembl)
+
+# Create gene to GO id mapping
+gene_id_go_mapping = create_go_term_mapping(genes)
+```
+
+Once the gene ID to GO mapping list is created, `moanin` provides a simple
+interface to `topGO` to fetch enriched GO terms.
+
+```{r go_term_enrichment, results="hide", message=FALSE}
+
+cluster = c(1, 2, 3)
+ontologies = c("BP", "NF", "CC")
+# It's taking too long to compile with everything. Just limit ourselves for
+# now to BP
+ontologies = c("BP")
+all_go_terms = data.frame()
+for(cluster in clusters){
+    for(ontology in ontologies){ 
+	scores = as.numeric(labels == cluster)
+	names(scores) = gene_names
+	go_terms_enriched = find_enriched_go_terms(
+	    scores,
+	    gene_id_go_mapping, ontology=ontology)
+
+	if((dim(all_go_terms)[1] == 0) & (dim(go_terms_enriched)[1] != 0)){
+	    go_terms_enriched["Cluster"] = cluster
+	    go_terms_enriched["Ontology"] = ontology
+	    all_go_terms = go_terms_enriched
+	}else if(dim(go_terms_enriched)[1] != 0){
+	    go_terms_enriched["Cluster"] = cluster
+	    go_terms_enriched["Ontology"] = ontology
+	    all_go_terms = merge(all_go_terms, go_terms_enriched, all=TRUE)
+	}
+    }
+}
+```
+
+
+```{r echo=FALSE}
+
+all_go_terms = all_go_terms[
+    order(all_go_terms[, "Cluster"],
+	  all_go_terms[, "Ontology"],
+	  all_go_terms[, "resultFisher_padj"]), ]
+
+kable(all_go_terms, "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
+```
+

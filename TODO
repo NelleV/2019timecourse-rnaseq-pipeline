@@ -1,0 +1,8 @@
+
+- ns function
+
+# TODO list
+
+- Rename WeeklyGroup to TimeGroup
+- Check computation of degrees of freedom when number of samples differ for
+  each group.
