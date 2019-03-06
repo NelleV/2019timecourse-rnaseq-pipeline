@@ -8,6 +8,14 @@
 
 set -e
 
+get_data() {
+    # Hopefully this gets cached
+    pushd data
+    make
+    popd
+}
+
+
 run_tests() {
     # first run the actual tests
     pushd bin/moanin
@@ -17,5 +25,6 @@ run_tests() {
     make all
     popd
 }
+
 
 run_tests

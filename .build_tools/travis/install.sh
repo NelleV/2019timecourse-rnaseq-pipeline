@@ -7,10 +7,6 @@
 # License: 3-clause BSD
 
 set -e
-# Download data. Should be in parallel of the installation
-pushd data
-make
-popd
 
 Rscript scripts/install.R
 
