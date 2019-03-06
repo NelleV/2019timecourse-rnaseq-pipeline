@@ -4,9 +4,7 @@ r:
     - bioc-release
 
 sudo: false
-cache:  
-    - packages
-    - data/shoemaker2015
+cache: packages
 
 install: source .build_tools/travis/install.sh
 script: source .build_tools/travis/test_script.sh
