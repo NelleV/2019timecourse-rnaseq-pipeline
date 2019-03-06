@@ -26,5 +26,5 @@ run_tests() {
     popd
 }
 
-
+get_data
 run_tests
