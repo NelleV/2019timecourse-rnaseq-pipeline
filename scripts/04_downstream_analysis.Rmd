@@ -180,7 +180,7 @@ for(cluster in clusters){
 	names(scores) = gene_names
 	go_terms_enriched = find_enriched_go_terms(
 	    scores,
-	    gene_id_go_mapping)
+	    gene_id_go_mapping, ontology=ontology)
 
 	if((dim(all_go_terms)[1] == 0) & (dim(go_terms_enriched)[1] != 0)){
 	    go_terms_enriched["Cluster"] = cluster

@@ -8,3 +8,4 @@ cache:  packages
 
 install: source .build_tools/travis/install.sh
 script: source .build_tools/travis/test_script.sh
+after_success: source .build_tools/travis/after_success.sh
