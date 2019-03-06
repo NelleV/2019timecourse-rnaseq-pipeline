@@ -22,12 +22,12 @@ commit_website_files() {
 }
 
 upload_files() {
-  git remote add origin-pages https://${GH_TOKEN}@github.com:NelleV/2019timecourse-rnaseq-pipeline_html_outputs.git > /dev/null 2>&1
+  git remote add origin-pages https://${GH_TOKEN}@github.com/NelleV/2019timecourse-rnaseq-pipeline_html_outputs.git > /dev/null 2>&1
   git push --quiet --set-upstream origin-pages master 
 }
 
 if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    git clone git@github.com:NelleV/2019timecourse-rnaseq-pipeline_html_outputs.git /tmp/html_outputs
+    git clone https://$(GH_TOKEN)@github.com/NelleV/2019timecourse-rnaseq-pipeline_html_outputs.git /tmp/html_outputs
     cp -r scripts/reports/*.html /tmp/html_outputs
     cd /tmp/html_outputs
     setup_git
