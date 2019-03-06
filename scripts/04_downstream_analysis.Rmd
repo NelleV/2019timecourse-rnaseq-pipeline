@@ -175,7 +175,7 @@ ontologies = c("BP", "NF", "CC")
 ontologies = c("BP")
 all_go_terms = data.frame()
 for(cluster in clusters){
-    for(ontology in c("BP", "NF", "CC")){ 
+    for(ontology in ontologies){ 
 	scores = as.numeric(labels == cluster)
 	names(scores) = gene_names
 	go_terms_enriched = find_enriched_go_terms(
