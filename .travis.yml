@@ -1,8 +1,11 @@
-language: R
+language: r
+
+r:
+    - bioc-release
+
 sudo: false
-cache: 
-    - packages
-    - directories:
-        data
+cache:  packages
+
 install: source .build_tools/travis/install.sh
-script: source .build_tools/travis/test_script.sh
+# script: source .build_tools/travis/test_script.sh
+script: true
