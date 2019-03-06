@@ -16,5 +16,3 @@ deploy:
   keep-history: true
   on:
     branch: master
-
-after_success: source .build_tools/travis/after_success.sh
