@@ -7,11 +7,17 @@ output: rmarkdown::html_vignette
 
 
 The phenotypic diversity of cells is governed by a complex equilibrium between
-their genetic identity and their environmental interactions, and understanding
-the dynamics of gene expression is a fundamental question of biology. However,
-analysing time-course transcriptomic data raises challenging statistical and
-computational questions, requiring the development of novel methods and
-software. 
+their genetic identity and their environmental interactions: Understanding the
+dynamics of gene expression is a fundamental question of biology. However,
+analysing time-course transcriptomic data raises unique challenging
+statistical and computational questions, requiring the development of novel
+methods and software.  Using as case study time-course transcriptomics data
+from mice exposed to different strains of influenza, ihis workflows provides a
+step-by-step tutorial of the methodology used to analyse time-course data:
+(1) normalization of the micro-array dataset; (2) differential expression
+analysis using functional data analysis; (3) clustering fo time-course data;
+(4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
+
 
 # Introduction
 
