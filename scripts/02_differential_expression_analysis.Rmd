@@ -138,6 +138,7 @@ contrasts = c("M.0-VH.0",
 VH_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
      data, meta, contrasts,
      use_voom_weights=FALSE)
+
 ``` 
 
 
@@ -207,8 +208,12 @@ log_fold_change_max = moanin::estimate_log_fold_change(
 
 Let's explore a bit the number of genes found differentially expressed.
 
-```{r}
-print(colSums(pvalues[, grepl("-qval", colnames(pvalues))] < 0.05))
+```{r echo=FALSE, fig.width=6}
+num_de = colSums(qvalues < 0.05)
+names(num_de) = c(
+    "Kawasaki", "California", "Vietnam low-dose", "Vietname high-dose")
+barplot(num_de, col="black", ylab="Number of DE genes")
+
 ```
 
 And now a volcano plot for quick visualization

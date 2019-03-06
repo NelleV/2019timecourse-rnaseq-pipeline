@@ -1,6 +1,6 @@
 ---
 title: "Introduction: a pipeline to analyse time-course gene expression data"
-output: html_document
+output: rmarkdown::html_vignette
 ---
 
 # Abstract

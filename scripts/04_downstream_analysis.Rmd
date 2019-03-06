@@ -4,14 +4,17 @@ output: rmarkdown::html_vignette
 ---
 
 
-```{r echo=FALSE, results="hide"}
+```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
 library(devtools)
 library(limma)
 library(splines)
 library(stats)
-library(moanin)
 library(KEGGprofile)
+library(kableExtra)
+library(viridis)
+
+library(moanin)
 ```
 
 ```{r echo=FALSE, results="hide"}
@@ -107,8 +110,6 @@ for(cluster in clusters){
 ```
 
 ```{r echo=FALSE}
-library(kableExtra)
-library(viridis)
 
 all_pathways = all_pathways[
     order(all_pathways["Cluster"],
@@ -167,7 +168,7 @@ interface to `topGO` to fetch enriched GO terms.
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
 
-cluster = c(3)
+cluster = c(1, 2, 3)
 ontologies = c("BP", "NF", "CC")
 # It's taking too long to compile with everything. Just limit ourselves for
 # now to BP
@@ -196,10 +197,10 @@ for(cluster in clusters){
 
 
 ```{r echo=FALSE}
-library(kableExtra)
 
 all_go_terms = all_go_terms[
     order(all_go_terms[, "Cluster"],
+	  all_go_terms[, "Ontology"],
 	  all_go_terms[, "resultFisher_padj"]), ]
 
 kable(all_go_terms, "html", escape=F, digits=4) %>%

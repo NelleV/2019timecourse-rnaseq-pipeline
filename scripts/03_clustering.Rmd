@@ -59,7 +59,14 @@ pvalues = de_analysis[, pval_col_to_keep]
 
 # Clustering of time-course data
 
-The next step is to perform clustering.
+The next step is to perform clustering. First, we reduce the set of genes of
+interest to genes that are (1) significant; (2) "highly" differentially
+expressed. First, we select the genes that have a log-fold change of at least
+2 across at least one experiment for one time point. We thus use the object
+`lfc_max`. 
+
+XXX
+
 
 ```{r filter_genes}
 if(filter_genes){

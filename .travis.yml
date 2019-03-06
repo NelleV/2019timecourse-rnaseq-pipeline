@@ -7,5 +7,4 @@ sudo: false
 cache:  packages
 
 install: source .build_tools/travis/install.sh
-# script: source .build_tools/travis/test_script.sh
-script: true
+script: source .build_tools/travis/test_script.sh
