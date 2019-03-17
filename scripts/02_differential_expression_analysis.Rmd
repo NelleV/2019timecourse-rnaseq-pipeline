@@ -47,7 +47,9 @@ meta = shoemaker2015$meta
 data = read.table(".results/quantile_normalized.txt") 
 source("utils.R")
 ```
-
+```{r}
+splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
+```
 
 ## Differential expression analysis of time-course data
 
@@ -80,7 +82,7 @@ contrasts = c("M.0-VL.0",
 	      "M.120-VL.120",
 	      "M.168-VL.168")
 weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
-     data, meta, contrasts,
+     data, splines_model, contrasts,
      use_voom_weights=FALSE)
 ```
 
@@ -102,7 +104,7 @@ contrasts = c("M.0-K.0",
 	      "M.120-K.120",
 	      "M.168-K.168")
 K_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
-     data, meta, contrasts,
+     data, splines_model, contrasts,
      use_voom_weights=FALSE)
 contrasts = c("M.0-C.0",
 	      "M.3-C.3",
@@ -119,7 +121,7 @@ contrasts = c("M.0-C.0",
 	      "M.120-C.120",
 	      "M.168-C.168")
 C_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
-     data, meta, contrasts,
+     data, splines_model, contrasts,
      use_voom_weights=FALSE)
 contrasts = c("M.0-VH.0",
 	      "M.3-VH.3",
@@ -136,7 +138,7 @@ contrasts = c("M.0-VH.0",
 	      "M.120-VH.120",
 	      "M.168-VH.168")
 VH_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
-     data, meta, contrasts,
+     data, splines_model, contrasts,
      use_voom_weights=FALSE)
 
 ``` 
@@ -196,14 +198,14 @@ contrasts = limma::makeContrasts(
 # to the time-course information, the latter corresponding to the
 # treatment).
 pvalues = moanin::timecourse_differential_expression_analysis(
-    data, meta, contrasts)
+    data, splines_model, contrasts)
 qvalues = apply(pvalues, 2, stats::p.adjust)
 
 log_fold_change_epicon = moanin::estimate_log_fold_change(
-    data, meta, contrasts,  method="epicon")
+    data, splines_model, contrasts,  method="epicon")
 
 log_fold_change_max = moanin::estimate_log_fold_change(
-    data, meta, contrasts, method="max")
+    data, splines_model, contrasts, method="max")
 ```
 
 Let's explore a bit the number of genes found differentially expressed.

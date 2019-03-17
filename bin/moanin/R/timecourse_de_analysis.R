@@ -9,9 +9,9 @@ center_data = function(y, ng_labels){
   return(y)
 }
 
-compute_beta_null = function(X, beta, contrasts_coef){
+compute_beta_null = function(basis, beta, contrasts_coef){
   ng = length(contrasts_coef)
-  df = ncol(X) / ng
+  df = ncol(basis) / ng
   contrasts_coef_ = rep(contrasts_coef, times=df)
 
   # Reshape b so that each row corresponds to a group and drop the intercept
@@ -21,8 +21,8 @@ compute_beta_null = function(X, beta, contrasts_coef){
 
   # The observations can not be assumed to be balanced...
   # We need to get rid of the intercept for this part
-  # FIXME don't invert this matrix…
-  part_K = MASS::ginv(t(X) %*% X)
+  # FIbasisME don't invert this matrix…
+  part_K = MASS::ginv(t(basis) %*% basis)
   K = part_K * contrasts_coef_**2
 
   # We now need to sum all elements associated to the same pairs of splines.
@@ -49,7 +49,7 @@ compute_beta_null = function(X, beta, contrasts_coef){
 
 
 lrtStat = function(resNull, resFull, ng_labels=NULL) {
-  # FIXME I'm pretty sure that in the case of contrasts, the degrees of
+  # FIbasisME I'm pretty sure that in the case of contrasts, the degrees of
   # freedom computed here are wrong as they include part of the data that is
   # not used for the test. This needs to be fixed
   stat = 0
@@ -84,16 +84,16 @@ lrtStat = function(resNull, resFull, ng_labels=NULL) {
   return(stat)
 }
 
-compute_pvalue = function(X, y, beta, beta_null, ng_labels,
+compute_pvalue = function(basis, y, beta, beta_null, ng_labels,
 			  n_groups=NULL,
 			  n_samples=NULL,
 			  degrees_of_freedom=NULL,
 			  statistics="lrt",
 			  df2=NULL, weights=NULL){
 
-    fitFull = beta %*% t(X)
+    fitFull = beta %*% t(basis)
 
-    fitNull = beta_null %*% t(X)
+    fitNull = beta_null %*% t(basis)
 
     if(!is.null(weights)){
       resNull = weights^(1/2) * (y - fitNull)
@@ -106,12 +106,12 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels,
     # estimate degrees of freedom.
     if(is.null(n_groups)){
         n_groups = nlevels(ng_labels)
-	# FIXME Raise warning
+	# FIbasisME Raise warning
     }
 
     if(is.null(n_samples)){
-	n_samples = ncol(X)
-	# FIXME raise warning
+	n_samples = ncol(basis)
+	# FIbasisME raise warning
     }
     
     df = degrees_of_freedom
@@ -119,7 +119,7 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels,
     if(statistics == "ftest"){
 	stat = lrtStat(resNull, resFull)
 	if(is.null(df2)){
-	    # FIXME Check this.
+	    # FIbasisME Check this.
 	    df2 = n_samples - degrees_of_freedom * n_groups
 	}
 	df1 = df
@@ -131,61 +131,54 @@ compute_pvalue = function(X, y, beta, beta_null, ng_labels,
     return(pval)
 }
 
-summarise = function(X, ng_levels) {
-  X_mean = matrix(,nrow=nrow(X), ncol=nlevels(ng_levels))
-  colnames(X_mean) = levels(ng_levels)
-  rownames(X_mean) = rownames(X)
+summarise = function(basis, ng_levels) {
+  basis_mean = matrix(,nrow=nrow(basis), ncol=nlevels(ng_levels))
+  colnames(basis_mean) = levels(ng_levels)
+  rownames(basis_mean) = rownames(basis)
 
   for(g in levels(ng_levels)){
     whKeep = which(ng_levels == g)
     if(length(whKeep) > 1){
-      X_mean[, g] = rowMeans(X[, whKeep])
+      basis_mean[, g] = rowMeans(basis[, whKeep])
     }else if(length(whKeep) != 0){
-      X_mean[, g] = X[, whKeep]
+      basis_mean[, g] = basis[, whKeep]
     }
   }
-  return(X_mean)
+  return(basis_mean)
 }
 
 #' Run edge with contrasts.
 #' 
 #' @param data The data matrix.
-#' @param meta Meta data which should be consistent with the column names \code{data}.
+#' @param splines_model splines_model
+#'	Object containing all related information to the splines model used.
 #' @param contrasts Contrast using \code{makeContrasts} from \code{limma}.
 #' @param center boolean, whether to center the data matrix
 #' @param weights Weights matrix for the fitting.
-#' @param df Degrees of freedom to for the splines.
-#' @param basis the basis matrix. If provided, ignore some of the parameters
 #' @export
 timecourse_differential_expression_analysis = function(data,
-						       meta,
+						       splines_model,
 						       contrasts,
 						       center=FALSE,
-						       weights=NULL,
-						       df=4,
-						       basis=NULL){
+						       weights=NULL){
+
+    basis = splines_model$basis
+    meta = splines_model$meta
+
     ng = nlevels(meta$Group)
     ng_labels = meta$Group
 
-    meta = check_meta(meta)
-    meta = droplevels(meta)
     check_data_meta(data, meta)
 
 
-    if(is.null(basis)){
-	full_model = ~Group:splines::ns(Time, df=df) + Group + 0
-	X = stats::model.matrix(full_model, data=meta)
-    }else{
-	X = basis
-    }
     y = data
 
     if(center){
 	y = center_data(y)
-	X = t(center_data(t(X)))
+	basis = t(center_data(t(basis)))
     }
 
-    beta = fit_splines(y, X, weights=weights)
+    beta = fit_splines(y, splines_model, weights=weights)
 
     if(dim(contrasts)[1] != ng){
 	stop("The contrast coef vector should be of the same size" +
@@ -204,11 +197,11 @@ timecourse_differential_expression_analysis = function(data,
 	groups_of_interest = names(contrast)[contrast != 0]
 	n_samples_fit = sum(with(meta, Group %in% groups_of_interest))
 	n_groups = length(groups_of_interest)
-	degrees_of_freedom = dim(X)[2] / ng
+	degrees_of_freedom = dim(basis)[2] / ng
 
-	beta_null = compute_beta_null(X, beta, contrast)
+	beta_null = compute_beta_null(basis, beta, contrast)
 
-	pval = compute_pvalue(X, y, beta, beta_null, ng_labels, weights=weights,
+	pval = compute_pvalue(basis, y, beta, beta_null, ng_labels, weights=weights,
 			      n_samples=n_samples_fit,
 			      n_groups=n_groups,
 			      degrees_of_freedom=degrees_of_freedom)

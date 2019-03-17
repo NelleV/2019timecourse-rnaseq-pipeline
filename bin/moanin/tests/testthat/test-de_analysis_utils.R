@@ -9,6 +9,8 @@ test_that("Estimating log fold change smoke tests", {
     data = shoemaker2015$data
     meta = shoemaker2015$meta
 
+    splines_model = moanin::create_splines_model(meta)
+
     # Reduce the data set
     data = data[1:10, ]
     methods = moanin:::ALL_LFC_METHODS
@@ -18,7 +20,7 @@ test_that("Estimating log fold change smoke tests", {
     for(method in methods){
         expect_silent(
 	    estimate_log_fold_change(
-		data, meta, contrasts, method=method))
+		data, splines_model, contrasts, method=method))
     }
 
     # Now same test, but several contrasts
@@ -27,7 +29,7 @@ test_that("Estimating log fold change smoke tests", {
     for(method in methods){
         expect_silent(
 	    estimate_log_fold_change(
-		data, meta, contrasts, method=method))
+		data, splines_model, contrasts, method=method))
     }
 
 })
@@ -37,9 +39,11 @@ test_that("Estimating log fold change with unknown error", {
     data = shoemaker2015$data
     meta = shoemaker2015$meta
 
+    splines_model = moanin::create_splines_model(meta)
+
     # Reduce the data set
     data = data[1:10, ]
     contrasts = c("C-K")
-    expect_error(estimate_log_fold_change(data, meta, contrast, method="hahaha"))
-
+    expect_error(estimate_log_fold_change(data, splines_model,
+					  contrast, method="hahaha"))
 })

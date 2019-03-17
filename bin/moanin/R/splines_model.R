@@ -37,4 +37,5 @@ create_splines_model = function(meta, formula=NULL, basis=NULL,
     splines_model$"basis" = basis
     splines_model$"meta" = meta
     splines_model$"formula" = formula
+    return(splines_model)
 }

@@ -8,16 +8,18 @@ library(stats)
 #' Fit splines
 #'
 #' @param data the data
-#' @param basis the basis
+#' @param splines_model splines_model 
 #' @param weights weigts
 #'
 #' @return beta coefficients
 #'
 #' @export
-fit_splines = function(data, basis, weights=NULL){
+fit_splines = function(data, splines_model, weights=NULL){
+    basis = splines_model$basis
     n = ncol(basis)
     nr = nrow(data)
-    
+    basis = splines_model$basis 
+
     if(!is.null(weights)){
 	beta = matrix(nrow=nr, ncol=n)
 	for(i in 1:nr){
@@ -25,7 +27,6 @@ fit_splines = function(data, basis, weights=NULL){
         }
 	row.names(beta) = row.names(data)
     }else{
-	# Don't inverse directly the matrix
 	beta = t(stats::lm.fit(basis, t(data))$coefficients)
     }
     return(beta)
@@ -34,13 +35,14 @@ fit_splines = function(data, basis, weights=NULL){
 #' Fit and predict splines
 #'
 #' @param data the data
-#' @param basis the basis
+#' @param splines_model splines_model
 #' @param weights weigts
 #'
 #' @return y_fitted the fitted y values
 #'
 #' @export
-fit_predict_splines = function(data, basis, weights=NULL){
+fit_predict_splines = function(data, splines_model, weights=NULL){
+    basis = splines_model$basis
     y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
     return(y_fitted)
 }
