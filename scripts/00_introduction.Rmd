@@ -21,11 +21,8 @@ analysis using functional data analysis; (3) clustering fo time-course data;
 
 # Introduction
 
-- TODO why is time-course gene expression analysis important for biology. Why
-  are novel workflows necessary.
-
 Time-course gene expression analysis workflows include steps used more broadly
-for gene expression data analasys such as quality control (QC), exploratory
+for gene expression data analysis such as quality control (QC), exploratory
 data analysis (EDA), pre-processing, normalization, and visualization. Yet, a
 typical gene expression data analysis workflow is not entirely adequate for
 analysing time-course data. In particular, differential expression analysis
@@ -35,9 +32,13 @@ clustering step to group genes sharing similar patterns of expression.
 Here, we propose an integrated workflow for downstream analysis of time-course
 data, with the following main steps: (1) quality control and normalization;
 (2) differential expression analysis of time-course data; (3) clustering; (4)
-downstream analysis of clusters with GO term and pathway enrichment.
+downstream analysis of clusters with GO term, pathway, and motif enrichment.
 
-XXX Add the packages used in the workflow
+This workflow relies on several standard packages for analysing gene
+expression data, some specific for time-course data, others broadly used by
+the community. We also provide alongside this workflow a package that nicely
+wraps all calls to dependencies with a common API by defining a model object
+holding all necessary metadata to perform all steps of the pipeline.
 
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
@@ -54,6 +55,7 @@ pathogenic H5N1 avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were
 injected with 10^5 PFU of each virus. An adidtional 42 mice were injected with
 a lower dose of the Vietnam avian influenza virus (10^3 PFU).
 
+The authors find that 
 
 **XXX Add summary of the key findings of the the paper**
 

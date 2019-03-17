@@ -6,15 +6,15 @@ library("edgeR")
 #' Fit weekly differential expression analysis
 #'
 #' @param counts Gene expression data
-#' @param meta Metadata data frame
+#' @param splines_model splines_model
 #' @param contrasts Contrast to use.
 #' @param use_voom_weights boolean: whether to use voom weights or not
 #'
 #' @export
-weekly_differential_expression_analysis = function(counts, meta,
+weekly_differential_expression_analysis = function(counts, splines_model,
 						   contrasts,
 						   use_voom_weights=TRUE){
-    meta = check_meta(meta)
+    meta = splines_model$meta
 
     design = stats::model.matrix(~WeeklyGroup + 0, data=meta)
 

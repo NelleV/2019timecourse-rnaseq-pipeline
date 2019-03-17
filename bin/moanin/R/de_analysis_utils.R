@@ -5,14 +5,15 @@ ALL_LFC_METHODS = c("sum", "max", "timely", "epicon", "abs_sum", "abs_squared_su
 #' Estimates log fold change
 #'
 #' @param data The data in a matrix
-#' @param meta The metadata containing Groups and Time
+#' @param splines_model 
 #' @param contrasts The contrasts to consider
 #' @param method ["sum", "max", "min", "timely", "epicon"]
 #'
 #' @export
-estimate_log_fold_change = function(data, meta, contrasts, method="epicon"){
+estimate_log_fold_change = function(data, splines_model, 
+				    contrasts, method="epicon"){
     # Should check that data and meta is sorted identically
-    meta = check_meta(meta)
+    meta = splines_model$meta
     # Should check that the method is a known method
 
     if(!(method %in% ALL_LFC_METHODS)){
