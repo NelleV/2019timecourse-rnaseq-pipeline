@@ -1,6 +1,6 @@
 library(moanin)
 
-context("Testing validation functions")
+context("moanin::validation")
 
 test_that("validation:check_meta", {
     data(shoemaker2015)
