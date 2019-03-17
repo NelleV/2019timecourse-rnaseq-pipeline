@@ -202,7 +202,7 @@ graphics::plot(
     xlab="PC2", ylab="PC1")
 graphics::plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC1"],
-    col=ann_colors$Time[as.factor(meta$Time)],
+    col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     xlab="PC2", ylab="PC1")
 
@@ -213,13 +213,13 @@ graphics::plot(
     xlab="PC2", ylab="PC3")
 graphics::plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC3"],
-    col=ann_colors$Time[as.factor(meta$Time)],
+    col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     xlab="PC2", ylab="PC3")
 ```
 
 Then, we plot the pearson correlation across each samples. We order the
-samples by their Group (treatment) and Time (the time of sampling).
+samples by their Group (treatment) and Timepoint (the time of sampling).
 Additionally, in this example, we order each treatment by strength of the
 pathogenicity of the treatment: Control, Kawasaki, California, low dose of
 Vietnam, then high dose of Vietnam.
@@ -231,19 +231,19 @@ library(NMF)
 meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 1, 2, 5, 4)])
 ord = order(
   meta$Group,
-  meta$Time,
+  meta$Timepoint,
   meta$Replicate)
 data = data[, ord]
 meta = meta[ord, ]
 
 data_corr = stats::cor(data, method="pearson")
 
-meta$Time = as.factor(meta$Time)
+meta$Timepoint = as.factor(meta$Timepoint)
 NMF::aheatmap(
     data_corr,
     Colv=NA, Rowv=NA,
     annCol=meta[,
-		c("Group", "Time")],
+		c("Group", "Timepoint")],
     annLegend=FALSE, 
     annColors=ann_colors,
     main="Correlation plot")

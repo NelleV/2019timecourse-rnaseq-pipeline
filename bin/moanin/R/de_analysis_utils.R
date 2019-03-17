@@ -85,17 +85,18 @@ data_summarize_per_time = function(data, meta){
 
 # XXX helper function to reconstruct metadat from adat
 reconstruct_meta_from_lfc = function(data_per_time){
-    meta_per_time = t(as.data.frame(strsplit(colnames(data_per_time), ".", fixed=TRUE)))
+    meta_per_time = t(
+	as.data.frame(strsplit(colnames(data_per_time), ".", fixed=TRUE)))
     row.names(meta_per_time) = colnames(data_per_time)
-    colnames(meta_per_time) = c("Group", "Time")
+    colnames(meta_per_time) = c("Group", "Timepoint")
     meta_per_time = as.data.frame(meta_per_time)
-    meta_per_time[, "Time"] = as.numeric(meta_per_time[, "Time"])
+    meta_per_time[, "Timepoint"] = as.numeric(meta_per_time[, "Timepoint"])
     return(meta_per_time) 
 }
 
 
 lfc_per_time = function(data, meta, contrasts){
-    meta$Time = as.factor(meta$Time)
+    meta$Timepoint = as.factor(meta$Timepoint)
 
     sample_coefficients = lapply(meta$Group, function(x) return(contrasts[x, ]))
     sample_coefficients = as.matrix(unlist(sample_coefficients))
@@ -106,9 +107,9 @@ lfc_per_time = function(data, meta, contrasts){
     for(column in colnames(sample_coefficients)){
 	sample_coefficient = as.vector(unlist(sample_coefficients[, column]))
 	coef_data = t(t(data) * sample_coefficient)
-	for(time in meta$Time){
-	    mask = meta$Time == time
-	    colname = paste0(column, ".", as.character(time))
+	for(timepoint in meta$Timepoint){
+	    mask = meta$Timepoint == timepoint
+	    colname = paste0(column, ".", as.character(timepoint))
 	    log_fold_changes[, colname] = rowMeans(coef_data[, mask])
 	}
     }

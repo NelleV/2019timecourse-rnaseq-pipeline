@@ -18,10 +18,10 @@ check_meta = function(meta, check_replicates=FALSE){
 	    " Group column is missing.")
     }
 
-    if(!("Time" %in% metadata_column_names)){
+    if(!("Timepoint" %in% metadata_column_names)){
 	stop(
 	    "Metadata doesn't contain expected information." +
-	    " Time column is missing.")
+	    " Timepoint column is missing.")
     }
 
     if(check_replicates & !("Replicate" %in% metadata_column_names)){
@@ -32,7 +32,8 @@ check_meta = function(meta, check_replicates=FALSE){
 
     # Just create this one.
     if(!("WeeklyGroup" %in% metadata_column_names)){
-	meta["WeeklyGroup"] = as.factor(make.names(meta$Group:as.factor(meta$Time)))
+	meta["WeeklyGroup"] = as.factor(
+	    make.names(meta$Group:as.factor(meta$Timepoint)))
     }
     return(meta) 
 }

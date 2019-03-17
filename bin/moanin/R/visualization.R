@@ -44,7 +44,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL){
     meta = splines_model$meta
     groups = levels(meta$Group)
 
-    xrange = range(meta$Time)
+    xrange = range(meta$Timepoint)
     yrange = range(centroid)
     
     graphics::plot(xrange, yrange, type="n")
@@ -58,7 +58,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL){
         color = colors[i]
         
         mask = meta$Group == group
-        time = meta$Time[mask]
+        time = meta$Timepoint[mask]
         indx = order(time)
         graphics::lines(time[indx], centroid[mask][indx], type="b",
 		        col=color, pch=16,
@@ -78,6 +78,6 @@ plot_gene_splines = function(data, meta, gene_name, colors=NULL){
     # All of this should be extracted from the amazing model object that we
     # don't have implemented yet.
     degrees_of_freedom = 6
-    model = ~Group:splines::ns(Time, degrees_of_freedom) + Group + 0
+    model = ~Group:splines::ns(Timepoint, degrees_of_freedom) + Group + 0
     
 }

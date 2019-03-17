@@ -6,10 +6,10 @@
 #' the formula, the basis, the meta data.
 #'
 #' @param meta	data.frame containing the metadata. Metadata needs to contain
-#'	column "Group" and "Time"
+#'	column "Group" and "Timepoint"
 #' @param formula formula object, optional, default: NUlL
 #'	Formula of the splines, e.g:
-#'	    formula = ~Group:splines::ns(Time, df=4) + Group + 0
+#'	    formula = ~Group:splines::ns(Timepoint, df=4) + Group + 0
 #' @param basis	matrix, optional, default: NULL
 #'	A basis object.
 #' @param degrees_of_freedom int, optional, default: 4
@@ -28,7 +28,8 @@ create_splines_model = function(meta, formula=NULL, basis=NULL,
 
     if(is.null(basis)){
         if(is.null(formula)){
-	    formula = ~Group:splines::ns(Time, df=degrees_of_freedom) + Group + 0
+	    formula = (
+		~Group:splines::ns(Timepoint, df=degrees_of_freedom) + Group + 0)
 	}
 	basis = stats::model.matrix(formula, data=meta)
     } 

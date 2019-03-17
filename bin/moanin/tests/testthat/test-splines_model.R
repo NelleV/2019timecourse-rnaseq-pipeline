@@ -6,7 +6,7 @@ test_that("splines_model::create_splines_model", {
     data(shoemaker2015)
     meta = shoemaker2015$meta
     expect_silent(create_splines_model(meta))
-    formula = ~Group:splines::ns(Time) + 0
+    formula = ~Group:splines::ns(Timepoint) + 0
     expect_silent(create_splines_model(meta, formula=formula))
     basis = stats::model.matrix(formula, data=meta)
     expect_silent(create_splines_model(meta, basis=basis))

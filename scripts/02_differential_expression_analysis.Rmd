@@ -64,7 +64,7 @@ mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
 (H5N1), but the function works with any form contrasts.
 
 ```{r weekly_differential_analysis}
-meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Time))
+meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Timepoint))
 
 # Define contrast	
 contrasts = c("M.0-VL.0",
@@ -158,7 +158,7 @@ timely_barplot = function(de_analysis, labels, qval_threshold=0.05, title=""){
     number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
     names(number_de_genes_per_time) = labels
     barplot(number_de_genes_per_time, col="black", ylim=c(0, 20000),
-	    xlab="Time", ylab="Number of DE genes", main=title)
+	    xlab="Timepoint", ylab="Number of DE genes", main=title)
     
 }
 

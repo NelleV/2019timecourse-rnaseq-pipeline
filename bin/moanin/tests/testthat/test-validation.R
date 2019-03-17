@@ -7,12 +7,12 @@ test_that("validation:check_meta", {
     meta = shoemaker2015$meta
     expect_silent(check_meta(meta))
 
-    meta_without_group = subset(meta, select=c("Replicate", "Time"))
+    meta_without_group = subset(meta, select=c("Replicate", "Timepoint"))
     meta_without_time = subset(meta, select=c("Group", "Replicate"))
     expect_error(check_meta(meta_without_group))
     expect_error(check_meta(meta_without_time))
 
-    meta_without_replicate = subset(meta, select=c("Time", "Group"))
+    meta_without_replicate = subset(meta, select=c("Timepoint", "Group"))
     expect_silent(check_meta(meta_without_replicate))
     expect_error(check_meta(meta_without_replicate, check_replicates=TRUE))
 })
