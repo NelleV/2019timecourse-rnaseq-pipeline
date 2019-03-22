@@ -161,7 +161,6 @@ identify the number of clusters:
 
 ```{r}
 possible_n_clusters = 5:20
-
 ```
 
 ### Elbow method
@@ -172,7 +171,7 @@ possible_n_clusters = 5:20
 within_cluster_sum_of_squares = function(n_cluster){
     return(moanin:::splines_kmeans(y, splines_model,
 				   n_clusters=n_cluster, random_seed=42,
-				   n_init=10)$tot.withinss)
+				   n_init=10)$WCSS_per_cluster)
 }
 
 i = 0
