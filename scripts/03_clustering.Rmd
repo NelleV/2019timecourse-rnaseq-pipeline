@@ -152,10 +152,69 @@ Once the maximum number of clusters is set, several strategies allow to
 identify the number of clusters:
 
     - *Within cluster similarity as a function of the number of cluster* XXX
-      GAP statistics
+      Elbow method
+    - *Silhouette method* 
     - *Stability analysis*: this method assumes that the results of the
       clustering will be more stable for the "true" number of clusters than
       for other number of clusters.
+
+
+```{r}
+possible_n_clusters = 5:20
+
+```
+
+### Elbow method
+
+```{r elbow_method}
+
+# function to compute total within-cluster sum of square 
+within_cluster_sum_of_squares = function(n_cluster){
+    return(moanin:::splines_kmeans(y, splines_model,
+				   n_clusters=n_cluster, random_seed=42,
+				   n_init=10)$tot.withinss)
+}
+
+i = 0
+wss_values = list()
+for(n_cluster in possible_n_clusters){
+    wss_values[i] = within_cluster_sum_of_squares(n_cluster)
+    i = i + 1
+}
+
+plot(possible_n_clusters, wss_values,
+     type="b", pch=19, frame=FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+
+```
+
+
+### Average silhouette method
+
+```{r average_silhouette_method}
+# function to compute average silhouette for k clusters
+average_silhoutte = function(n_cluster) {
+    skmeans_results = moanin:::splines_kmeans(
+	y, splines_model, n_clusters=n_cluster,
+	random_seed=42, n_init=10)
+    silhouette_results = cluster::silhouette(skmeans_results$cluster, dist(y))
+    return(mean(silhouette_results[, 3]))
+}
+
+# extract the average silhoutte
+average_silhoutte_values = list()
+i = 1
+for(n_cluster in possible_n_clusters){
+    average_silhoutte_values[i] = average_silhoutte(n_cluster)
+    i = i + 1
+}
+
+plot(possible_n_clusters, average_silhoutte_values,
+     type="b", pch=19, frame=FALSE,
+     xlab="Number of clusters K",
+     ylab="Average Silhouettes")
+```
 
 
 ```{r results="hide", echo=FALSE}

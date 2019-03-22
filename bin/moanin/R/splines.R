@@ -43,6 +43,9 @@ fit_splines = function(data, splines_model, weights=NULL){
 #' @export
 fit_predict_splines = function(data, splines_model, weights=NULL){
     basis = splines_model$basis
+    if(!is.null(weights)){
+	stop("moanin::fit_predict_splines: not implemented")
+    }
     y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
     return(y_fitted)
 }
