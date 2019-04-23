@@ -54,6 +54,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
     graphics::plot(xrange, yrange, type="n")
     if(is.null(colors)){
         colors = viridis::viridis(length(groups))
+	names(colors) = groups
     }
     if(smooth){
 	# FIXME this is supposed to be on the fitted lines, but I'm not able
@@ -71,7 +72,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
     # scatter points for values
     for(i in 1:length(groups)){
         group = groups[i]
-        color = colors[i]
+        color = colors[group]
         
 	# Start by individual points
         mask = meta$Group == group
@@ -85,7 +86,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
 	    time = meta_prediction$Timepoint[mask]
 	    indx = order(time)
 	}
-	graphics::lines(time[indx], centroid_fitted[mask][indx], type="o",
+	graphics::lines(time[indx], centroid_fitted[mask][indx], type="l",
 			col=color, lwd=1)
 
     }

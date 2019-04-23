@@ -134,7 +134,7 @@ table(kmeans_clusters$clusters)
 
 ```{r fig.height=8, fig.width=8}
 moanin:::plot_centroids(centroids, splines_model,
-			colors=as.vector(unlist(ann_colors["Group"])),
+			colors=ann_colors$Group,
 			smooth=TRUE)
 ```
 
