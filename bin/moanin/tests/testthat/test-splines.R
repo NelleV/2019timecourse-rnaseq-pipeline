@@ -2,6 +2,20 @@ library("moanin")
 
 context("moanin::splines.R")
 
+test_that("splines::fit_predict_splines", {
+    data(shoemaker2015) 
+    meta = shoemaker2015$meta
+    data = shoemaker2015$data[1:5, ]
+
+    splines_model = create_splines_model(meta)
+    meta_prediction = create_meta_prediction(splines_model)
+
+    expect_silent(fit_predict_splines(data, splines_model))
+    expect_silent(fit_predict_splines(data, splines_model,
+    				      meta_prediction=meta_prediction))
+
+})
+
 test_that("splines:align_data_onto_centroid", {
     set.seed(42)
     n_samples = 20
@@ -30,7 +44,6 @@ test_that("splines:align_data_onto_centroid", {
 
 
 test_that("splines:rescale_values", {
-
     n_genes = 5
     data(shoemaker2015)
     data = shoemaker2015$data

@@ -36,20 +36,66 @@ fit_splines = function(data, splines_model, weights=NULL){
 #'
 #' @param data the data
 #' @param splines_model splines_model
-#' @param weights weigts
+#' @param weights weights
 #'
 #' @return y_fitted the fitted y values
 #'
 #' @export
-fit_predict_splines = function(data, splines_model, weights=NULL){
+fit_predict_splines = function(data, splines_model, weights=NULL, meta_prediction=NULL){
     basis = splines_model$basis
+    meta = splines_model$meta
     if(!is.null(weights)){
 	stop("moanin::fit_predict_splines: not implemented")
     }
-    y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
+    if(is.null(meta_prediction)){
+        y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
+    }else{
+	degrees_of_freedom = splines_model$degrees_of_freedom
+	fitting_data = t(as.matrix(data))
+	formula_data = list(
+	    "Group"=meta$Group,
+	    "Timepoint"=meta$Timepoint,
+	    "fitting_data"=fitting_data,
+	    "degrees_of_freedom"=splines_model$degrees_of_freedom)
+
+	updated_formula = update(splines_model$formula, fitting_data ~ .)
+	model = lm(updated_formula, formula_data)	
+	y_fitted = predict(model, meta_prediction)
+    }
     return(y_fitted)
 }
 
+
+#' Create prediction meta data from splines model
+#'
+#' @param splines_model a Splines model object
+#' @param num_timepoints integer, optional, default: 100
+#'	Number of timepoints to use for the prediction metadata
+#'
+#' @export
+create_meta_prediction = function(splines_model, num_timepoints=100){
+    # Create splines_model for prediction
+    timepoints_pred = NULL
+    groups_pred = NULL
+    meta = splines_model$meta
+    groups = levels(meta$Group) 
+    for(group in groups){
+	mask = meta$Group == group
+	time = meta$Timepoint[mask]
+
+	timepoints_pred = c(
+	    timepoints_pred,
+	    seq(min(time), max(time), length=100))
+	groups_pred = c(
+	    groups_pred,
+	    rep(group, 100))
+    }
+    meta_prediction = data.frame(
+	"Timepoint"=timepoints_pred,
+	"Replicates"=rep(1, length(timepoints_pred)),
+	"Group"=groups_pred)
+    return(meta_prediction)
+}
 
 rescale_values = function(y, meta, group=NULL){
     if(is.null(group)){

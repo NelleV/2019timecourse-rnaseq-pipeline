@@ -35,6 +35,7 @@ create_splines_model = function(meta, formula=NULL, basis=NULL,
     } 
 
     splines_model = list()
+    splines_model$degrees_of_freedom = degrees_of_freedom
     splines_model$"basis" = basis
     splines_model$"meta" = meta
     splines_model$"formula" = formula
