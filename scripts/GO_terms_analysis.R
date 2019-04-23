@@ -48,11 +48,11 @@ find_enriched_go_terms = function(labels, gene_id_to_go,
         
     # P-value correct
     allRes[, "resultFisher_padj"] = stats::p.adjust(allRes$resultFisher, method="BH")
-    wh = which(allRes[, "resultFisher_padj"] <= 0.05)
+    wh = which(allRes[, "resultFisher"] <= 0.05)
 
     allRes = allRes[wh,]
     wh = which(apply(allRes[, c("Significant", "Expected")],
-    	              1, function(x){x["Significant"] > x["Expected"]}))
+    	             1, function(x){x["Significant"] > x["Expected"]}))
     allRes = allRes[wh,]
 
     return(allRes)

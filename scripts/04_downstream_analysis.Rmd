@@ -81,9 +81,8 @@ ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
 ```
 
-```{r enrichment_analysis, results="hide", message=FALSE}
+```{r enrichment_analysis, results="hide", message=FALSE, eval=FALSE}
 clusters = sort(as.vector(unlist(unique(labels))))
-clusters = c(1, 2, 3)
 all_pathways = data.frame()
 for(cluster in clusters){
     genes = gene_names[labels == cluster]
@@ -107,6 +106,11 @@ for(cluster in clusters){
 	all_pathways = merge(all_pathways, pathways$stastic, all=TRUE)
     }
 }
+```
+
+```{r echo=FALSE}
+all_pathways = read.table("results/all_pathways.tsv",
+			  sep="\t")
 ```
 
 ```{r echo=FALSE}
@@ -166,12 +170,8 @@ gene_id_go_mapping = create_go_term_mapping(genes)
 Once the gene ID to GO mapping list is created, `moanin` provides a simple
 interface to `topGO` to fetch enriched GO terms.
 
-```{r go_term_enrichment, results="hide", message=FALSE}
+```{r go_term_enrichment, results="hide", message=FALSE, eval=FALSE}
 
-cluster = c(1, 2, 3)
-ontologies = c("BP", "NF", "CC")
-# It's taking too long to compile with everything. Just limit ourselves for
-# now to BP
 ontologies = c("BP")
 all_go_terms = data.frame()
 for(cluster in clusters){
@@ -193,6 +193,12 @@ for(cluster in clusters){
 	}
     }
 }
+```
+
+```{r echo=FALSE}
+all_go_terms = read.table(
+    "results/all_go_terms.tsv",
+    sep="\t")
 ```
 
 

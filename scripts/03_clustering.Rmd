@@ -105,7 +105,6 @@ After filtering, we consider `r dim(y)[1]` genes for the clustering.
 #############################################################################
 # Fit the splines
 
-
 kmeans_clusters = moanin:::splines_kmeans(
     y, splines_model, n_clusters=20,
     random_seed=42,
@@ -154,15 +153,13 @@ identify the number of clusters:
     - *Within cluster similarity as a function of the number of cluster* XXX
       Elbow method
     - *Silhouette method* 
-
-
     - *Stability analysis*: this method assumes that the results of the
       clustering will be more stable for the "true" number of clusters than
       for other number of clusters.
 
 
 ```{r running_clustering_on_all_k}
-all_possible_n_clusters = 5:20
+all_possible_n_clusters = c(5, 7, 9, 11)
 all_clustering = list()
 wss_values = list()
 
@@ -173,14 +170,14 @@ for(n_cluster in all_possible_n_clusters){
 	n_clusters=n_cluster, random_seed=42,
 	n_init=10)
     wss_values[i] = sum(clustering_results$WCSS_per_cluster)
-    all_clustering[i] = clustering_results
+    all_clustering[[i]] = clustering_results$clusters
     i = i + 1
 }
 ```
 
 ### Elbow method
 
-```{r elbow_method}
+```{r elbow_method, fig.width=6, fig.height=4}
 
 # function to compute total within-cluster sum of square 
 
@@ -193,23 +190,23 @@ plot(all_possible_n_clusters, wss_values,
 
 ### Average silhouette method
 
-```{r average_silhouette_method}
+```{r average_silhouette_method, fig.width=6, fig.height=4}
 # function to compute average silhouette for k clusters
-average_silhoutte = function(labels, y) {
+average_silhouette = function(labels, y) {
     silhouette_results = cluster::silhouette(unlist(labels[1]), dist(y))
     return(mean(silhouette_results[, 3]))
 }
 
-# extract the average silhoutte
-average_silhoutte_values = list()
+# extract the average silhouette
+average_silhouette_values = list()
 i = 1
 for(i in 1:length(all_clustering)){
     labels = all_clustering[i]
-    average_silhoutte_values[i] = average_silhoutte(labels, y)
+    average_silhouette_values[i] = average_silhouette(labels, y)
     i = i + 1
 }
 
-plot(all_possible_n_clusters, average_silhoutte_values,
+plot(all_possible_n_clusters, average_silhouette_values,
      type="b", pch=19, frame=FALSE,
      xlab="Number of clusters K",
      ylab="Average Silhouettes")
