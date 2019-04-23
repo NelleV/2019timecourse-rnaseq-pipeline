@@ -36,7 +36,8 @@ plot_centroids = function(centroids, splines_model, colors=NULL, smooth=FALSE){
     }
 
     for(i in 1:n_centroids){
-        plot_centroid_individual(centroids[i, ], splines_model, colors=colors,
+        plot_centroid_individual(as.vector(centroids[i, ]),
+				 splines_model, colors=colors,
 				 smooth=smooth)
     }
 }
@@ -48,9 +49,8 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
 
     xrange = range(meta$Timepoint)
     yrange = range(centroid)
-
     centroid = t(as.matrix(centroid))
-    
+
     graphics::plot(xrange, yrange, type="n")
     if(is.null(colors)){
         colors = viridis::viridis(length(groups))
@@ -60,11 +60,11 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
 	# to get this to work fine in R.
 	meta_prediction = create_meta_prediction(splines_model)
 	centroid_fitted = fit_predict_splines(
-	    as.matrix(centroid), splines_model,
+	    centroid, splines_model,
 	    meta_prediction=meta_prediction)
     }else{
 	centroid_fitted = fit_predict_splines(
-	    as.matrix(centroid), splines_model)
+	    centroid, splines_model)
     }
 
 
@@ -85,7 +85,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
 	    time = meta_prediction$Timepoint[mask]
 	    indx = order(time)
 	}
-	graphics::lines(time[indx], centroid_fitted[mask][indx], type="n",
+	graphics::lines(time[indx], centroid_fitted[mask][indx], type="o",
 			col=color, lwd=1)
 
     }
@@ -99,9 +99,5 @@ plot_gene_splines = function(data, meta, gene_name, colors=NULL){
     }
     gene_data = data[gene_name, ]
 
-    # All of this should be extracted from the amazing model object that we
-    # don't have implemented yet.
-    degrees_of_freedom = 6
-    model = ~Group:splines::ns(Timepoint, degrees_of_freedom) + Group + 0
 
 }
