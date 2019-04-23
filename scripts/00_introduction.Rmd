@@ -28,16 +28,17 @@ through to single-cell technologies. While many expression studies are
 designed to compare the gene expression in distinct groups, there is also a
 long history of time-course expression studies, where the the gene expression
 is compared across time by measuring mRNA levels from different samples across
-time.\footnote{Because the collection of the mRNA is often destructive,
-samples at different time points are generally from different biological
-samples; longitudinal studies, for example tracking the same subject over
-time, are certainly possible in certain settings, but not directly considered
-here.} Such time course studies can vary from measuring a few distinct time
+time [^1]. Such time course studies can vary from measuring a few distinct time
 points, to sampling ten to twenty time points. Many longer time series are
 particularly interested in investigating development over time. More recently,
 single-cell studies track single cells through their development, and a single
 cell is measured at a particular moment in its developmental progression -- a
 value that is not know but estimated from the data as its "pseudo-time."
+
+[^1]: Because the collection of the mRNA is often destructive, samples at
+different time points are generally from different biological samples;
+longitudinal studies, for example tracking the same subject over time, are
+certainly possible in certain settings, but not directly considered here. 
 
 While there are many methods that have been proposed for discrete aspects of
 time course data, the entire workflow for analysis of such data remains
