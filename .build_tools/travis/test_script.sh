@@ -27,4 +27,4 @@ run_tests() {
 }
 
 get_data
-run_tests
+#run_tests
