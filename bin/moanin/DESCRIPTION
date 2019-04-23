@@ -13,6 +13,7 @@ Imports: MASS (>= 1.0.0),
 	 stats,
 	 graphics,
 	 grDevices,
+	 reshape2,
 	 ClusterR
 Suggests: testthat (>= 1.0.0),
 	  knitr,
