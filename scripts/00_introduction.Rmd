@@ -21,6 +21,57 @@ analysis using functional data analysis; (3) clustering fo time-course data;
 
 # Introduction
 
+Gene expression studies provide simultaneous quantification of the level of
+mRNA from all genes in a sample. High-throughput studies of gene expression
+have a long history, starting with microarray technologies in the 1990s
+through to single-cell technologies. While many expression studies are
+designed to compare the gene expression in distinct groups, there is also a
+long history of time-course expression studies, where the the gene expression
+is compared across time by measuring mRNA levels from different samples across
+time.\footnote{Because the collection of the mRNA is often destructive,
+samples at different time points are generally from different biological
+samples; longitudinal studies, for example tracking the same subject over
+time, are certainly possible in certain settings, but not directly considered
+here.} Such time course studies can vary from measuring a few distinct time
+points, to sampling ten to twenty time points. Many longer time series are
+particularly interested in investigating development over time. More recently,
+single-cell studies track single cells through their development, and a single
+cell is measured at a particular moment in its developmental progression -- a
+value that is not know but estimated from the data as its "pseudo-time."
+
+While there are many methods that have been proposed for discrete aspects of
+time course data, the entire workflow for analysis of such data remains
+difficult, particularly for long, developmental time series. Most methods
+proposed for time course data are concerned with detecting genes that are
+changing over time (differential expression analysis), examples being
+\texttt{edge}\todo[Other methods to mention: impulse models, what else?
+Citations!]. However, with long time course datasets, particularly in
+developmental systems, a massive number of genes will show *some* change.
+For example, in the \xxx system, over \xxx\% of genes are shown to be changing
+over time. The task in these settings is often not to detect changes in genes,
+but to categorize into biologically interpretable patterns the vast number of
+changes discovered. 
+
+We present here a workflow for such an analysis that consists of \xxx main
+parts (Figure \ref{fig:workflow}):
+
+- Identification of genes that are differentially expressed
+- Clustering of genes into distinct temporal patterns
+- Biological interpretation of the clusters
+
+**FIXME EP This is probably not best enumeration of steps, but need
+something...**
+
+This workflow represents an integration of both novel implementations of
+previously established methods and new methodologies for the settings of
+developmental time series. We provide the various steps of the workflow as
+functions in a R package, \citettt{\xxx}, along with command-line tools for
+running the entire workflow in a single command. 
+
+
+---
+# Old intro
+
 Time-course gene expression analysis workflows include steps used more broadly
 for gene expression data analysis such as quality control (QC), exploratory
 data analysis (EDA), pre-processing, normalization, and visualization. Yet, a
@@ -39,6 +90,7 @@ expression data, some specific for time-course data, others broadly used by
 the community. We also provide alongside this workflow a package that nicely
 wraps all calls to dependencies with a common API by defining a model object
 holding all necessary metadata to perform all steps of the pipeline.
+---
 
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
