@@ -28,3 +28,4 @@ run_tests() {
 
 get_data
 #run_tests
+mkdir -p scripts/reports
