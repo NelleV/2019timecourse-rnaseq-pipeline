@@ -1,16 +1,18 @@
 ---
 title: "Clustering: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 ---
 
 
-```{r echo=FALSE, results="hide"}
+```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
 library(devtools)
 library(limma)
 library(splines)
 library(stats)
 library(moanin)
+library(NMF)
 source("utils.R")
 # library(moanin)
 ```
@@ -111,7 +113,7 @@ kmeans_clusters = moanin:::splines_kmeans(
     n_init=20)
 
 # Rescale the centroids
-centroids = moanin:::rescale_values(kmeans_clusters$centroids, splines_model)
+centroids = moanin:::rescale_values(kmeans_clusters$centroids)
 
 
 # XXX is there a bug here?
@@ -138,6 +140,45 @@ moanin:::plot_centroids(centroids, splines_model,
 			smooth=TRUE)
 ```
 
+Now, let's look at genes in cluster 15
+
+```{r fig.width=8, fig.height=8}
+gene_names = row.names(data)
+genes_to_plot =  names(kmeans_clusters$clusters[kmeans_clusters$clusters == 15])
+data_to_plot = data[genes_to_plot, ]
+submeta = meta
+submeta$Group = factor(submeta$Group, levels(submeta$Group)[c(3, 1, 2, 5, 4)])
+ord = order(
+  submeta$Group,
+  submeta$Timepoint,
+  submeta$Replicate)
+submeta$Timepoint = as.factor(submeta$Timepoint)
+
+data_to_plot = data_to_plot[, ord]
+submeta = submeta[ord, ]
+
+NMF::aheatmap(
+    data_to_plot,
+    Colv=NA,
+    annCol=submeta[,
+                c("Group", "Timepoint")],
+    annLegend=FALSE,
+    annColors=ann_colors,
+    main="Cluster 15",
+    treeheight=0)
+
+NMF::aheatmap(
+    moanin:::rescale_values(data_to_plot),
+    Colv=NA,
+    annCol=submeta[,
+                c("Group", "Timepoint")],
+    annLegend=FALSE,
+    annColors=ann_colors,
+    main="Cluster 15",
+    treeheight=0)
+
+```
+
 ## How to choose the number of clusters.
 
 A common question that arises when performing clustering is how to choose the
@@ -151,13 +192,9 @@ that this number is 20 clusters.
 Once the maximum number of clusters is set, several strategies allow to
 identify the number of clusters:
 
-    - *Within cluster similarity as a function of the number of cluster* XXX
-      Elbow method
+    - Elbow method
     - *Silhouette method* 
-    - *Stability analysis*: this method assumes that the results of the
-      clustering will be more stable for the "true" number of clusters than
-      for other number of clusters.
-
+    - *Model explorer*
 
 ```{r running_clustering_on_all_k}
 all_possible_n_clusters = c(5, 7, 9, 11)
@@ -211,6 +248,44 @@ plot(all_possible_n_clusters, average_silhouette_values,
      type="b", pch=19, frame=FALSE,
      xlab="Number of clusters K",
      ylab="Average Silhouettes")
+```
+
+### Looking at the stability of the clustering
+
+The last strategy is to look at the stability of the clustering.
+
+```{r fig.width=6, fig.height=4}
+library(NMF)
+stability_5 = read.table("results/stability_5.tsv", sep="\t")
+consensus_matrix_stability_5 = moanin::consensus_matrix(stability_5,
+							scale=FALSE)
+NMF::aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
+	      Colv=FALSE,
+	      treeheight=0)
+
+stability_20 = read.table("results/stability_15.tsv", sep="\t")
+consensus_matrix_stability_20 = moanin::consensus_matrix(stability_20,
+							 scale=FALSE)
+NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
+	      Colv=FALSE,
+	      treeheight=0)
+
+```
+
+
+```{r}
+n_clusters = 5:20
+all_labels = list()
+for(i in n_clusters){
+    filename = paste0("results/stability_", i, ".tsv")
+    stability = read.table(filename, sep="\t")
+    all_labels[[paste0("C", i)]] = stability
+}
+```
+
+```{r fig.width=8, fig.height=8}
+library(moanin)
+moanin::plot_model_explorer(all_labels)
 ```
 
 

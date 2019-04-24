@@ -97,7 +97,7 @@ create_meta_prediction = function(splines_model, num_timepoints=100){
     return(meta_prediction)
 }
 
-rescale_values = function(y, meta, group=NULL){
+rescale_values = function(y, meta=NULL, group=NULL){
     if(is.null(group)){
 	ymin = row_min(y) 
 	y = y - ymin

@@ -47,6 +47,44 @@ splines_kmeans = function(data, splines_model, n_clusters=10,
     kmeans_clusters = ClusterR::KMeans_rcpp(
 	fitted_data, n_clusters, num_init=n_init, max_iters=max_iter,
 	seed=random_seed, initializer=init)
+    kmeans_clusters$centroids = rescale_values(
+	kmeans_clusters$centroids, splines_model)
+    names(kmeans_clusters$clusters) = row.names(data)
 
+    kmeans_clusters$splines_model = splines_model
+    kmeans_clusters$fit_splines = fit_splines
+    kmeans_clusters$rescale = rescale
+    return(kmeans_clusters)
+}
+
+
+splines_kmeans_prediction = function(data, kmeans_clusters){
+    splines_model = kmeans_clusters$splines_model
+    fit_splines = kmeans_clusters$fit_splines
+    rescale = kmeans_clusters$rescale
+
+    meta = splines_model$meta
+    basis = splines_model$basis
+    check_data_meta(data, meta)
+
+    if(fit_splines){
+        fitted_data = fit_predict_splines(data, splines_model)
+    }else{
+	fitted_data = data
+    }
+
+    if(rescale){
+        fitted_data = rescale_values(fitted_data, meta)
+    }
+
+    closest.cluster <- function(x) {
+	cluster.dist <- apply(
+	    kmeans_clusters$centroids, 1, function(y){sqrt(sum((x-y)^2))})
+	return(which.min(cluster.dist)[1])
+    }
+
+    all_labels <- apply(fitted_data, 1, closest.cluster) 
+    kmeans_clusters$clusters = all_labels
+    names(kmeans_clusters$clusters) = row.names(data)
     return(kmeans_clusters)
 }

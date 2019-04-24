@@ -83,4 +83,7 @@ if(!require(KEGGprofile)){
     biocLite("KEGGprofile")
 }
 
+if(!require("NMI")){
+    install.packages("NMI")
+}
 

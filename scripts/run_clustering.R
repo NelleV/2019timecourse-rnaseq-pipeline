@@ -7,9 +7,6 @@ args = commandArgs(trailingOnly=TRUE)
 n_clusters = strtoi(args[1])
 random_seed = strtoi(args[2])
 
-n_clusters = 20
-random_seed = 5
-
 # Other options
 n_genes_to_keep = 5000
 filter_genes = TRUE
@@ -82,9 +79,12 @@ kmeans_clusters = moanin:::splines_kmeans(
     random_seed=random_seed,
     n_init=20)
 
+# Perform prediction on the whole set of data.
+kmeans_clusters = moanin:::splines_kmeans_prediction(
+    y, kmeans_clusters)
+
 # Let's save only the labels here.
 labels = kmeans_clusters$clusters
-names(labels) = row.names(random_subsample_y)
 if(!dir.exists(dirname(outname))){
     dir.create(dirname(outname))
 }
