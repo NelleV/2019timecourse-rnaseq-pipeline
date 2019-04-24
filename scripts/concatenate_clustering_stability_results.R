@@ -2,7 +2,7 @@
 
 
 folders = list.files("results/")
-folders = folders[grep("stability", folders)]
+folders = folders[grepl("stability", folders) & !grepl("tsv", folders)]
 
 for(folder in folders){
     filenames = list.files(paste0("results/", folder))
@@ -18,6 +18,9 @@ for(folder in folders){
 	row.names(all_labels) = all_labels$Row.names
 	all_labels = subset(all_labels, select=-c(Row.names))
     }
+    colnames(all_labels) = lapply(
+	1:dim(all_labels)[2],
+	function(x){paste0("C", x)})
     outname = paste0("results/", folder, ".tsv")
     write.table(all_labels, outname, sep="\t")
 }
