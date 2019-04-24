@@ -83,7 +83,7 @@ splines_kmeans_prediction = function(data, kmeans_clusters){
 	return(which.min(cluster.dist)[1])
     }
 
-    all_labels <- apply(data, 1, closest.cluster) 
+    all_labels <- apply(fitted_data, 1, closest.cluster) 
     kmeans_clusters$clusters = all_labels
     names(kmeans_clusters$clusters) = row.names(data)
     return(kmeans_clusters)
