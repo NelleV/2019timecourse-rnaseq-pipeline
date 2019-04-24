@@ -1,16 +1,18 @@
 ---
 title: "Clustering: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 ---
 
 
-```{r echo=FALSE, results="hide"}
+```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
 library(devtools)
 library(limma)
 library(splines)
 library(stats)
 library(moanin)
+library(NMF)
 source("utils.R")
 # library(moanin)
 ```
@@ -190,13 +192,9 @@ that this number is 20 clusters.
 Once the maximum number of clusters is set, several strategies allow to
 identify the number of clusters:
 
-    - *Within cluster similarity as a function of the number of cluster* XXX
-      Elbow method
+    - Elbow method
     - *Silhouette method* 
-    - *Stability analysis*: this method assumes that the results of the
-      clustering will be more stable for the "true" number of clusters than
-      for other number of clusters.
-
+    - *Model explorer*
 
 ```{r running_clustering_on_all_k}
 all_possible_n_clusters = c(5, 7, 9, 11)
@@ -254,6 +252,7 @@ plot(all_possible_n_clusters, average_silhouette_values,
 
 ### Looking at the stability of the clustering
 
+The last strategy is to look at the stability of the clustering.
 
 ```{r fig.width=6, fig.height=4}
 library(NMF)
@@ -272,6 +271,23 @@ NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
 	      treeheight=0)
 
 ```
+
+
+```{r}
+n_clusters = 5:20
+all_labels = list()
+for(i in n_clusters){
+    filename = paste0("results/stability_", i, ".tsv")
+    stability = read.table(filename, sep="\t")
+    all_labels[[paste0("C", i)]] = stability
+}
+```
+
+```{r fig.width=8, fig.height=8}
+library(moanin)
+moanin::plot_model_explorer(all_labels)
+```
+
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step

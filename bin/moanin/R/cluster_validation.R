@@ -1,4 +1,5 @@
 library(reshape2)
+library(NMI)
 
 
 #' Compute consensus matrix from labels
@@ -24,3 +25,70 @@ consensus_matrix = function(labels, scale=TRUE){
     }
     return(consensus)
 }
+
+
+#' Plot model explorer
+#'
+#' @param labels list of labels
+#' @export
+plot_model_explorer = function(labels){
+    all_labels = labels
+    n_clusters = names(all_labels)
+    nmi = function(x, y){
+	x_dataframe = as.data.frame(x)
+	colnames(x_dataframe) = c("Label")
+	x_dataframe$Gene = row.names(x_dataframe)
+	x_dataframe = x_dataframe[c("Gene", "Label")]
+
+	y_dataframe = as.data.frame(y)
+	colnames(y_dataframe) = c("Label")
+	y_dataframe$Gene = row.names(y_dataframe)
+	y_dataframe = y_dataframe[c("Gene", "Label")]
+
+	return(NMI::NMI(x_dataframe, y_dataframe))
+    }
+
+    nmi_scores = list()
+    colors = viridis::viridis(length(n_clusters))
+    max_trial = 0
+    min_score = 1
+    max_score = 0
+    for(i in 1:length(n_clusters)){
+	n_cluster = n_clusters[i]
+	color = colors[i]
+
+	labels = all_labels[[n_cluster]]
+	n_trials = dim(labels)[2]
+	scores = NULL
+	for(trial in 1:n_trials){
+	    if(trial == n_trials){
+		break
+	    }
+	    column = colnames(labels)[trial]
+	    columns_to_consider = colnames(labels)[(trial+1):n_trials]
+	    label = labels[column]
+	    scores = c(scores, as.vector(
+		unlist(apply(labels[columns_to_consider], 2, function(x){nmi(x, label)}))))
+	}
+	nmi_scores[[n_cluster]] = sort(scores)
+	max_trial = max(n_trials, max_trial)
+	min_score = min(min_score, min(scores))
+	max_score = max(max_score, max(scores))
+     }
+
+    xrange = c(min_score, max_score)
+    yrange = c(1, max_trial)
+
+    graphics::plot(xrange, yrange, type="n")
+
+     for(i in 1:length(n_clusters)){
+	color = colors[i]
+	scores = nmi_scores[[i]]
+	graphics::lines(sort(scores), 1:length(scores), type="b",
+			pch=16,
+			col=color,
+			lwd=0)
+
+    }
+}
+

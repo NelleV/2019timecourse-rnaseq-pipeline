@@ -14,6 +14,7 @@ Imports: MASS (>= 1.0.0),
 	 graphics,
 	 grDevices,
 	 reshape2,
+	 NMI,
 	 ClusterR
 Suggests: testthat (>= 1.0.0),
 	  knitr,
