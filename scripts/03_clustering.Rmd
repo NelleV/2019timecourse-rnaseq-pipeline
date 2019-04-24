@@ -213,6 +213,22 @@ plot(all_possible_n_clusters, average_silhouette_values,
      ylab="Average Silhouettes")
 ```
 
+### Looking at the stability of the clustering
+
+
+```{r fig.width=6, fig.height=4}
+library(pheatmap)
+stability_5 = read.table("results/stability_5.tsv", sep="\t")
+consensus_matrix_stability_5 = moanin::consensus_matrix(stability_5)
+pheatmap::pheatmap(consensus_matrix_stability_5[1:1000, 1:1000], symm=TRUE,
+		   treeheight_row=0, treeheight_col=0)
+
+stability_20 = read.table("results/stability_20.tsv", sep="\t")
+consensus_matrix_stability_20 = moanin::consensus_matrix(stability_20)
+pheatmap::pheatmap(consensus_matrix_stability_20[1:1000, 1:1000], symm=TRUE,
+		   treeheight_row=0, treeheight_col=0)
+
+```
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step
