@@ -42,6 +42,21 @@ test_that("splines:align_data_onto_centroid", {
     expect_error(align_data_onto_centroid(data[, 1:10], centroid))
 })
 
+test_that("splines:score_genes_centroid", {
+    set.seed(42)
+    n_samples = 20
+    n_genes = 5
+    centroid = runif(n_samples)
+
+    shift = runif(n_genes)
+    scale = 1 + runif(n_genes)
+
+    data = rep(centroid, each=n_genes)
+    dim(data) = c(n_genes, n_samples)
+    expect_silent(score_genes_centroid(data, centroid))
+    expect_equal(sum(score_genes_centroid(data, centroid)), 0)
+
+})
 
 test_that("splines:rescale_values", {
     n_genes = 5

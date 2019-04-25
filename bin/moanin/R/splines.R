@@ -166,9 +166,11 @@ score_genes_centroid = function(data, centroid){
     n_genes = dim(data)[1]
     data_fitted = align_data_onto_centroid(data, centroid)
 
-    scores = row_sum((data_fitted - rep(centroid, times=n_genes))**2)
+    scores = apply(data_fitted, 1, function(y){sqrt(sum((centroid - y)^2))})
 
-    scores = scores / max(scores)
+    all_zeros_gene = data_fitted[1, ] * 0
+    max_score = sqrt(sum((centroid - all_zeros_gene)^2))
+    scores = scores / max_score
     return(scores)
 }
 

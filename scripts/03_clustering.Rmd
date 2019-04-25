@@ -115,19 +115,17 @@ kmeans_clusters = moanin:::splines_kmeans(
 # Rescale the centroids
 centroids = moanin:::rescale_values(kmeans_clusters$centroids)
 
-
-# XXX is there a bug here?
-# all_scores = data.frame(row.names=row.names(data))
-# for(k in 1:n_clusters){
-#     scores = moanin:::score_genes_centroid(data, centroids[k,])
-#     all_scores[paste0("cluster_", k)] = scores
-# }
+all_scores = data.frame(row.names=row.names(data))
+for(k in 1:n_clusters){
+     scores = moanin:::score_genes_centroid(data, centroids[k,])
+     all_scores[paste0("cluster_", k)] = scores
+}
 
 # Only assign labels to X% of the genes
-# max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
-# genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
-# labels = moanin:::row_argmin(all_scores)
-# labels[genes_to_not_consider] = NA
+max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
+genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
+labels = moanin:::row_argmin(all_scores)
+labels[genes_to_not_consider] = NA
 ```
 
 ```{r}
@@ -291,7 +289,7 @@ moanin::plot_model_explorer(all_labels)
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step
-kmeans_labels = as.data.frame(kmeans_clusters$clusters)
+kmeans_labels = as.data.frame(labels)
 row.names(kmeans_labels) = row.names(y)
 write.table(kmeans_labels,
 	    ".results/clustering_labels.txt",
