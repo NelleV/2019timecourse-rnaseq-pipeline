@@ -223,24 +223,44 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>Gene expression studies provide simultaneous quantification of the level of mRNA from all genes in a sample. High-throughput studies of gene expression have a long history, starting with microarray technologies in the 1990s through to single-cell technologies. While many expression studies are designed to compare the gene expression in distinct groups, there is also a long history of time-course expression studies, where the the gene expression is compared across time by measuring mRNA levels from different samples across time <a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Such time course studies can vary from measuring a few distinct time points, to sampling ten to twenty time points. Many longer time series are particularly interested in investigating development over time. More recently, single-cell studies track single cells through their development, and a single cell is measured at a particular moment in its developmental progression – a value that is not know but estimated from the data as its “pseudo-time.”</p>
-<p>While there are many methods that have been proposed for discrete aspects of time course data, the entire workflow for analysis of such data remains difficult, particularly for long, developmental time series. Most methods proposed for time course data are concerned with detecting genes that are changing over time (differential expression analysis), examples being . However, with long time course datasets, particularly in developmental systems, a massive number of genes will show <em>some</em> change. For example, in the system, over % of genes are shown to be changing over time. The task in these settings is often not to detect changes in genes, but to categorize into biologically interpretable patterns the vast number of changes discovered.</p>
-<p>We present here a workflow for such an analysis that consists of main parts (Figure ):</p>
+<p>Gene expression studies provide simultaneous quantification of the level of mRNA from all genes in a sample. High-throughput studies of gene expression have a long history, starting with microarray technologies in the 1990s through to single-cell technologies. While many expression studies are designed to compare the gene expression in distinct groups, there is also a long history of time-course expression studies, where the the gene expression is compared across time by measuring mRNA levels from different samples across time.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> Such time course studies can vary from measuring a few distinct time points, to sampling ten to twenty time points. Many longer time series are particularly interested in investigating development over time. More recently, single-cell studies track single cells through their development, and a single cell is measured at a particular moment in its developmental progression – a value that is not know but estimated from the data as its “pseudo-time.”</p>
+<p>While there are many methods that have been proposed for discrete aspects of time course data, the entire workflow for analysis of such data remains difficult, particularly for long, developmental time series. Most methods proposed for time course data are concerned with detecting genes that are changing over time (differential expression analysis), examples being <code>edge</code> <span class="citation">(Storey et al. 2005)</span>, functional component analysis based models <span class="citation">(Wu and Wu 2013)</span>, time-course permutation tests <span class="citation">(Park et al. 2003)</span>, XXX <span class="citation">(Wenguang and Zhi 2011)</span> <strong>TODO: Other methods to mention: impulse models, what else? Citations!</strong>. However, with long time course datasets, particularly in developmental systems, a massive number of genes will show <em>some</em> change. For example, in the system, over % of genes are shown to be changing over time. The task in these settings is often not to detect changes in genes, but to categorize into biologically interpretable patterns the vast number of changes discovered.</p>
+<p>We present here a workflow for such an analysis that consists of 4 main parts (Figure ):</p>
 <ul>
-<li>Identification of genes that are differentially expressed</li>
-<li>Clustering of genes into distinct temporal patterns</li>
-<li>Biological interpretation of the clusters</li>
+<li>Quality control and normalization;</li>
+<li>Identification of genes that are differentially expressed;</li>
+<li>Clustering of genes into distinct temporal patterns;</li>
+<li>Biological interpretation of the clusters.</li>
 </ul>
-<p><strong>FIXME EP This is probably not best enumeration of steps, but need something…</strong></p>
-<p>This workflow represents an integration of both novel implementations of previously established methods and new methodologies for the settings of developmental time series. We provide the various steps of the workflow as functions in a R package, , along with command-line tools for running the entire workflow in a single command.</p>
+<p>This workflow represents an integration of both novel implementations of previously established methods and new methodologies for the settings of developmental time series. We provide the various steps of the workflow as functions in a R package <strong>FIXME</strong>.</p>
 </div>
 <div id="analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza" class="section level1">
 <h1>Analysis of the dynamical response of mouse lung tissue to influenza</h1>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>This workflow is illustrated using data from a micro-array time-course experiment, exposing mice to three different strains of influenza, and collecting lung tissue during 14 time-points after infection (0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60 hours, then 3, 5, and 7 days later). The three strains of influenza used in the study are (1) a low pathogenicity seasonal H1N1 influenza virus (A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009 pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1 avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with 10^5 PFU of each virus. An adidtional 42 mice were injected with a lower dose of the Vietnam avian influenza virus (10^3 PFU).</p>
+<p>This workflow is illustrated using data from a micro-array time-course experiment, exposing mice to three different strains of influenza, and collecting lung tissue during 14 time-points after infection (0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60 hours, then 3, 5, and 7 days later) <span class="citation">(Shoemaker 2015)</span>. The three strains of influenza used in the study are (1) a low pathogenicity seasonal H1N1 influenza virus (A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009 pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1 avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with 10^5 PFU of each virus. An adidtional 42 mice were injected with a lower dose of the Vietnam avian influenza virus (10^3 PFU).</p>
 <p>The authors find that</p>
 <p><strong>XXX Add summary of the key findings of the the paper</strong></p>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2>References</h2>
+<div id="refs" class="references">
+<div id="ref-park:statistical">
+<p>Park, Taesung, Dong-Hyun Yoo, Jun-Ik Ahn, Seung Yeoun Lee, Seungmook Lee, Sung-Gon Yi, and Yong-Sung Lee. 2003. “Statistical tests for identifying differentially expressed genes in time-course microarray experiments.” <em>Bioinformatics</em> 19 (6): 694–703. <a href="https://doi.org/10.1093/bioinformatics/btg068" class="uri">https://doi.org/10.1093/bioinformatics/btg068</a>.</p>
+</div>
+<div id="ref-shoemaker:ultrasensitive">
+<p>Shoemaker, S. AND Eisfeld, J. E. AND Fukuyama. 2015. “An Ultrasensitive Mechanism Regulates Influenza Virus-Induced Inflammation.” <em>PLoS Pathogens</em> 11 (6): 1–25.</p>
+</div>
+<div id="ref-storey:significance">
+<p>Storey, J. D., W. Xiao, J. T. Leek, R. G. Tompkins, and R. W. Davis. 2005. “Significance analysis of time course microarray experiments.” <em>Proc. Natl. Acad. Sci. U.S.A.</em> 102 (36): 12837–42.</p>
+</div>
+<div id="ref-sun:multiple">
+<p>Wenguang, Sun, and Wei Zhi. 2011. “Multiple Testing for Pattern Identification, with Applications to Microarray Time-Course Experiments.” <em>Journal of the American Statistical Association</em> 106 (493). Taylor &amp; Francis: 73–88. <a href="https://doi.org/10.1198/jasa.2011.ap09587" class="uri">https://doi.org/10.1198/jasa.2011.ap09587</a>.</p>
+</div>
+<div id="ref-wu:more">
+<p>Wu, Shuang, and Hulin Wu. 2013. “More Powerful Significant Testing for Time Course Gene Expression Data Using Functional Principal Component Analysis Approaches.” <em>BMC Bioinformatics</em> 14 (1): 6. <a href="https://doi.org/10.1186/1471-2105-14-6" class="uri">https://doi.org/10.1186/1471-2105-14-6</a>.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="footnotes">
