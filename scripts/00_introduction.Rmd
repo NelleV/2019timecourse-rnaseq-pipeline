@@ -1,6 +1,7 @@
 ---
 title: "Introduction: a pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 ---
 
 # Abstract
@@ -45,29 +46,29 @@ time course data, the entire workflow for analysis of such data remains
 difficult, particularly for long, developmental time series. Most methods
 proposed for time course data are concerned with detecting genes that are
 changing over time (differential expression analysis), examples being
-\texttt{edge}\todo[Other methods to mention: impulse models, what else?
-Citations!]. However, with long time course datasets, particularly in
+`edge` [@storey:significance], functional component analysis based models
+[@wu:more], time-course permutation tests [@park:statistical], XXX
+[@sun:multiple]
+**TODO: Other methods to mention: impulse models, what else?
+Citations!**. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show *some* change.
 For example, in the \xxx system, over \xxx\% of genes are shown to be changing
 over time. The task in these settings is often not to detect changes in genes,
 but to categorize into biologically interpretable patterns the vast number of
 changes discovered. 
 
-We present here a workflow for such an analysis that consists of \xxx main
+We present here a workflow for such an analysis that consists of 4 main
 parts (Figure \ref{fig:workflow}):
 
-- Identification of genes that are differentially expressed
-- Clustering of genes into distinct temporal patterns
-- Biological interpretation of the clusters
-
-**FIXME EP This is probably not best enumeration of steps, but need
-something...**
+- Quality control and normalization;
+- Identification of genes that are differentially expressed;
+- Clustering of genes into distinct temporal patterns;
+- Biological interpretation of the clusters.
 
 This workflow represents an integration of both novel implementations of
 previously established methods and new methodologies for the settings of
 developmental time series. We provide the various steps of the workflow as
-functions in a R package, \citettt{\xxx}, along with command-line tools for
-running the entire workflow in a single command. 
+functions in a R package **FIXME**. 
 
 
 ---
@@ -100,15 +101,18 @@ holding all necessary metadata to perform all steps of the pipeline.
 This workflow is illustrated using data from a micro-array time-course
 experiment, exposing mice to three different strains of influenza, and
 collecting lung tissue during 14 time-points after infection (0, 3, 6, 9, 12,
-18, 24, 30, 36, 48, 60 hours, then 3, 5, and 7 days later). The three strains
-of influenza used in the study are (1) a low pathogenicity seasonal H1N1
-influenza virus (A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from
-the 2009 pandemic season (A/California/04/2009 [H1N1]), and a highly
-pathogenic H5N1 avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were
-injected with 10^5 PFU of each virus. An adidtional 42 mice were injected with
-a lower dose of the Vietnam avian influenza virus (10^3 PFU).
+18, 24, 30, 36, 48, 60 hours, then 3, 5, and 7 days later)
+[@shoemaker:ultrasensitive]. The three strains of influenza used in the
+study are (1) a low pathogenicity seasonal H1N1 influenza virus
+(A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009
+pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1
+avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
+10^5 PFU of each virus. An adidtional 42 mice were injected with a lower dose
+of the Vietnam avian influenza virus (10^3 PFU).
 
 The authors find that 
 
 **XXX Add summary of the key findings of the the paper**
+
+## References
 

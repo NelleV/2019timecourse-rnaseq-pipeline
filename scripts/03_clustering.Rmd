@@ -115,24 +115,47 @@ kmeans_clusters = moanin:::splines_kmeans(
 # Rescale the centroids
 centroids = moanin:::rescale_values(kmeans_clusters$centroids)
 
-
-# XXX is there a bug here?
-# all_scores = data.frame(row.names=row.names(data))
-# for(k in 1:n_clusters){
-#     scores = moanin:::score_genes_centroid(data, centroids[k,])
-#     all_scores[paste0("cluster_", k)] = scores
-# }
+all_scores = data.frame(row.names=row.names(data))
+for(k in 1:n_clusters){
+     scores = moanin:::score_genes_centroid(data, centroids[k,])
+     all_scores[paste0("cluster_", k)] = scores
+}
 
 # Only assign labels to X% of the genes
-# max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
-# genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
-# labels = moanin:::row_argmin(all_scores)
-# labels[genes_to_not_consider] = NA
+max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
+genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
+labels = moanin:::row_argmin(all_scores)
+labels[genes_to_not_consider] = NA
+names(labels) = row.names(data)
 ```
+
+Summary of number of genes assigned with original scoring, and "better"
+scoring.
 
 ```{r}
 table(kmeans_clusters$clusters)
+barplot(table(kmeans_clusters$clusters), col="black")
 ```
+
+```{r}
+table(labels)
+barplot(table(labels), col="black")
+```
+
+Just a hack, cause I didn't update the code
+```{r}
+kmeans_clusters$clusters = labels[!is.na(labels)]
+```
+
+```{r results="hide", echo=FALSE}
+# Save the clustering for the next step
+kmeans_labels = as.data.frame(labels[!is.na(labels)])
+write.table(kmeans_labels,
+	    ".results/clustering_labels.txt",
+	    sep="\t")
+```
+
+Now let's visualize the centroids.
 
 ```{r fig.height=8, fig.width=8}
 moanin:::plot_centroids(centroids, splines_model,
@@ -289,11 +312,4 @@ moanin::plot_model_explorer(all_labels)
 ```
 
 
-```{r results="hide", echo=FALSE}
-# Save the clustering for the next step
-kmeans_labels = as.data.frame(kmeans_clusters$clusters)
-row.names(kmeans_labels) = row.names(y)
-write.table(kmeans_labels,
-	    ".results/clustering_labels.txt",
-	    sep="\t")
-```
+

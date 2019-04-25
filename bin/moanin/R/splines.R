@@ -149,9 +149,10 @@ align_data_onto_centroid = function(data, centroid){
     if(n_samples != length(centroid)){
 	stop("align_data_onto_centroid: problem in dimensions")
     }
-    scaling_factors = (
-	rowSums(rep(centroid - mean(centroid), each=n_genes) * data) /
-	rowSums((data - rowMeans(data)) * data))
+    centered_centroid = centroid - mean(centroid)
+    scaling_factors = apply(
+	data, 1,
+	function(x){sum(centered_centroid * x)/sum((x - mean(x))*x)}) 
     scaling_factors[scaling_factors < 0] = 0
     shift_factors = rowMeans(
 	rep(centroid, each=n_genes) - rep(scaling_factors, times=n_samples) * data)
@@ -166,9 +167,11 @@ score_genes_centroid = function(data, centroid){
     n_genes = dim(data)[1]
     data_fitted = align_data_onto_centroid(data, centroid)
 
-    scores = row_sum((data_fitted - rep(centroid, times=n_genes))**2)
+    scores = apply(data_fitted, 1, function(y){sqrt(sum((centroid - y)^2))})
 
-    scores = scores / max(scores)
+    all_zeros_gene = data_fitted[1, ] * 0
+    max_score = sqrt(sum((centroid - all_zeros_gene)^2))
+    scores = scores / max_score
     return(scores)
 }
 
