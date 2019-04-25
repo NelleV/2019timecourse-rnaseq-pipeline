@@ -149,9 +149,10 @@ align_data_onto_centroid = function(data, centroid){
     if(n_samples != length(centroid)){
 	stop("align_data_onto_centroid: problem in dimensions")
     }
-    scaling_factors = (
-	rowSums(rep(centroid - mean(centroid), each=n_genes) * data) /
-	rowSums((data - rowMeans(data)) * data))
+    centered_centroid = centroid - mean(centroid)
+    scaling_factors = apply(
+	data, 1,
+	function(x){sum(centered_centroid * x)/sum((x - mean(x))*x)}) 
     scaling_factors[scaling_factors < 0] = 0
     shift_factors = rowMeans(
 	rep(centroid, each=n_genes) - rep(scaling_factors, times=n_samples) * data)

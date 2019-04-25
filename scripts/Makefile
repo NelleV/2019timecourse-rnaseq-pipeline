@@ -11,6 +11,11 @@ all: html
 
 html: $(HTML_FILES)
 
+complete: html
+	make results/all_go_terms.tsv
+	rm -f reports/04_downstream_analysis.html
+	make html
+
 pipeline:
 	for i in $(PIPELINE_STEPS); do $(MAKE) -C $$i all; done
 
@@ -27,6 +32,12 @@ reports/%.html: %.Rmd
 	mkdir -p .results
 	mkdir -p reports
 	Rscript .scripts/compile_rmarkdown.R $< $@
+
+
+results/all_go_terms.tsv: .results/clustering_labels.txt
+	Rscript run_pathways.R
+	Rscript run_go_terms.R
+
 
 clean:
 	rm *.html
