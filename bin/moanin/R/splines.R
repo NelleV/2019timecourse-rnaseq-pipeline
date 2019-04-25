@@ -143,7 +143,7 @@ row_argmin = function(X){
 
 
 # Worst name ever
-align_data_onto_centroid = function(data, centroid){
+align_data_onto_centroid = function(data, centroid, positive_scaling=TRUE){
     n_samples = dim(data)[2]
     n_genes = dim(data)[1]
     if(n_samples != length(centroid)){
@@ -153,7 +153,9 @@ align_data_onto_centroid = function(data, centroid){
     scaling_factors = apply(
 	data, 1,
 	function(x){sum(centered_centroid * x)/sum((x - mean(x))*x)}) 
-    scaling_factors[scaling_factors < 0] = 0
+    if(positive_scaling){
+        scaling_factors[scaling_factors < 0] = 0
+    }
     shift_factors = rowMeans(
 	rep(centroid, each=n_genes) - rep(scaling_factors, times=n_samples) * data)
 
@@ -163,15 +165,18 @@ align_data_onto_centroid = function(data, centroid){
 }
 
 
-score_genes_centroid = function(data, centroid){
+score_genes_centroid = function(data, centroid, positive_scaling=TRUE, scale=TRUE){
     n_genes = dim(data)[1]
-    data_fitted = align_data_onto_centroid(data, centroid)
+    data_fitted = align_data_onto_centroid(
+	data, centroid, positive_scaling=positive_scaling)
 
     scores = apply(data_fitted, 1, function(y){sqrt(sum((centroid - y)^2))})
 
-    all_zeros_gene = data_fitted[1, ] * 0
-    max_score = sqrt(sum((centroid - all_zeros_gene)^2))
-    scores = scores / max_score
+    if(scale){
+        all_zeros_gene = data_fitted[1, ] * 0
+	max_score = sqrt(sum((centroid - all_zeros_gene)^2))
+	scores = scores / max_score
+    }
     return(scores)
 }
 
