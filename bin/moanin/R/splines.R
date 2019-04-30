@@ -170,7 +170,10 @@ score_genes_centroid = function(data, centroid, positive_scaling=TRUE, scale=TRU
     data_fitted = align_data_onto_centroid(
 	data, centroid, positive_scaling=positive_scaling)
 
-    scores = apply(data_fitted, 1, function(y){sqrt(sum((centroid - y)^2))})
+    scores = apply(
+	data_fitted,
+	1,
+	function(y){sqrt(sum((centroid - y)^2))})
 
     if(scale){
         all_zeros_gene = data_fitted[1, ] * 0

@@ -8,7 +8,6 @@ n_clusters = strtoi(args[1])
 random_seed = strtoi(args[2])
 
 # Other options
-n_genes_to_keep = 5000
 filter_genes = TRUE
 sample_proportion = 0.8
 keep_all_significant = FALSE
@@ -21,7 +20,7 @@ outname = paste0(
 # Clustering and everything 
 data("shoemaker2015")
 
-data = shoemaker2015$data
+data = shoemaker2015$data[1:100,]
 meta = shoemaker2015$meta
 
 data = read.table(".results/quantile_normalized.txt") 

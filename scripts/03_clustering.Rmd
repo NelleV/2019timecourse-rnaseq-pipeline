@@ -121,6 +121,7 @@ for(k in 1:n_clusters){
      all_scores[, k] = scores
 }
 
+all_scores = as.matrix(all_scores)
 # Only assign labels to X% of the genes
 max_score = quantile(rowMin(all_scores), c(percentage_genes_to_label))
 genes_to_not_consider = rowMin(all_scores) >= max_score
@@ -129,25 +130,16 @@ labels[genes_to_not_consider] = NA
 names(labels) = row.names(data)
 ```
 
-```{r fig.height=8, fig.width=8}
-par(mfrow=c(4, 5), mar=c(0.1, 0.1, 0.1, 0.1))
-for(k in 1:n_clusters){
-    hist(all_scores[k, ], breaks=20, col="black")
-    abline(v=max_score, col="#AB0000")
-}
-```
-
 Summary of number of genes assigned with original scoring, and "better"
 scoring.
 
 ```{r}
-table(kmeans_clusters$clusters)
 barplot(table(kmeans_clusters$clusters), col="black")
 ```
 
 ```{r}
-table(labels)
 barplot(table(labels), col="black")
+labels = kmeans_clusters$clusters
 ```
 
 Just a hack, cause I didn't update the code
@@ -174,8 +166,9 @@ moanin:::plot_centroids(kmeans_clusters$centroids, splines_model,
 Now, let's look at genes in cluster 15
 
 ```{r fig.width=8, fig.height=8}
+cluster_to_plot = 13
 gene_names = row.names(data)
-genes_to_plot =  names(kmeans_clusters$clusters[kmeans_clusters$clusters == 15])
+genes_to_plot =  names(kmeans_clusters$clusters[kmeans_clusters$clusters == cluster_to_plot])
 data_to_plot = data[genes_to_plot, ]
 submeta = meta
 submeta$Group = factor(submeta$Group, levels(submeta$Group)[c(3, 1, 2, 5, 4)])
@@ -205,7 +198,7 @@ NMF::aheatmap(
                 c("Group", "Timepoint")],
     annLegend=FALSE,
     annColors=ann_colors,
-    main="Cluster 15",
+    main=paste("Cluster", cluster_to_plot),
     treeheight=0)
 
 ```

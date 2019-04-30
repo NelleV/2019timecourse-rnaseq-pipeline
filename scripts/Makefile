@@ -20,6 +20,10 @@ pipeline:
 	for i in $(PIPELINE_STEPS); do $(MAKE) -C $$i all; done
 
 
+reports/02_differential_expression_analysis.html: 02_differential_expression_analysis.Rmd reports/01_quality_control_normalization.html
+	mkdir -p reports
+	Rscript .scripts/compile_rmarkdown.R $< $@
+
 reports/03_clustering.html: 03_clustering.Rmd reports/02_differential_expression_analysis.html
 	mkdir -p reports
 	Rscript .scripts/compile_rmarkdown.R $< $@
@@ -41,5 +45,6 @@ results/all_go_terms.tsv: .results/clustering_labels.txt
 
 clean:
 	rm *.html
-	for i in $(PIPELINE_STEPS); do $(MAKE) -C $$i clean; done
+	rm -rf reports
+	rm -rf .results
 	mkdir -p reports

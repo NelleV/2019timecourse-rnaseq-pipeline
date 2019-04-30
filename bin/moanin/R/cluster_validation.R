@@ -49,7 +49,7 @@ plot_model_explorer = function(labels){
     }
 
     nmi_scores = list()
-    colors = viridis::viridis(length(n_clusters))
+    colors = grDevices::rainbow(length(n_clusters))
     max_trial = 0
     min_score = 1
     max_score = 0
@@ -90,5 +90,9 @@ plot_model_explorer = function(labels){
 			lwd=0)
 
     }
+
+    legend(1, 95, legend=n_clusters,
+       col=colors, lty=1:2, cex=0.8,
+       title="Clusters", text.font=4, bg='lightblue')
 }
 
