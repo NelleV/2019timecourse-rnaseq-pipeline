@@ -174,10 +174,11 @@ score_genes_centroid = function(data, centroid, positive_scaling=TRUE, scale=TRU
 
     if(scale){
         all_zeros_gene = data_fitted[1, ] * 0
-	max_score = sqrt(sum((centroid - all_zeros_gene)^2))
-	scores = scores / max_score
+	max_score = max(scores)
+    }else{
+	max_score = 1
     }
-    return(scores)
+    return(scores / max_score)
 }
 
 

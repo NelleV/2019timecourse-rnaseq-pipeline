@@ -32,7 +32,7 @@ filter_expression = FALSE
 # Whether to filter genes
 filter_genes = TRUE
 keep_all_significant = FALSE
-n_genes_to_keep = 5000
+n_genes_to_keep = 10000
 n_clusters = 20
 percentage_genes_to_label = 0.5
 ```
@@ -112,21 +112,29 @@ kmeans_clusters = moanin:::splines_kmeans(
     random_seed=42,
     n_init=20)
 
-# Rescale the centroids
-centroids = moanin:::rescale_values(kmeans_clusters$centroids)
+all_scores = matrix(NA, nrow=dim(data)[1], ncol=n_clusters)
 
-all_scores = data.frame(row.names=row.names(data))
 for(k in 1:n_clusters){
-     scores = moanin:::score_genes_centroid(data, centroids[k,])
-     all_scores[paste0("cluster_", k)] = scores
+     scores = moanin:::score_genes_centroid(
+	data,
+	kmeans_clusters$centroids[k,])
+     all_scores[, k] = scores
 }
 
 # Only assign labels to X% of the genes
-max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
-genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
-labels = moanin:::row_argmin(all_scores)
+max_score = quantile(rowMin(all_scores), c(percentage_genes_to_label))
+genes_to_not_consider = rowMin(all_scores) >= max_score
+labels = apply(all_scores, 1, which.min)
 labels[genes_to_not_consider] = NA
 names(labels) = row.names(data)
+```
+
+```{r fig.height=8, fig.width=8}
+par(mfrow=c(4, 5), mar=c(0.1, 0.1, 0.1, 0.1))
+for(k in 1:n_clusters){
+    hist(all_scores[k, ], breaks=20, col="black")
+    abline(v=max_score, col="#AB0000")
+}
 ```
 
 Summary of number of genes assigned with original scoring, and "better"
@@ -158,7 +166,7 @@ write.table(kmeans_labels,
 Now let's visualize the centroids.
 
 ```{r fig.height=8, fig.width=8}
-moanin:::plot_centroids(centroids, splines_model,
+moanin:::plot_centroids(kmeans_clusters$centroids, splines_model,
 			colors=ann_colors$Group,
 			smooth=TRUE)
 ```
