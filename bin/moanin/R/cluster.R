@@ -88,3 +88,38 @@ splines_kmeans_prediction = function(data, kmeans_clusters){
     names(kmeans_clusters$clusters) = row.names(data)
     return(kmeans_clusters)
 }
+
+#' Assign score and labels from raw data
+#'
+#' @param data array or dataframe.
+#'	Data to assign score and labels to
+#' @param kmeans_cluster list of list
+#'	List returned by moanin::splines_kmeans
+#' @param percentage_genes_to_label float, optional, default: 0.5
+#'	Percentage of genes to label.
+#' @export
+splines_kmeans_score_and_label = function(data, kmeans_clusters, percentage_genes_to_label=0.5){
+
+    n_clusters = dim(kmeans_clusters$centroids)[1]
+    all_scores = matrix(NA, nrow=dim(data)[1], ncol=n_clusters)
+
+    for(k in 1:n_clusters){
+	scores = score_genes_centroid(
+	    data,
+	    kmeans_clusters$centroids[k,])
+	all_scores[, k] = scores
+    }
+
+    # Give names to rows
+    all_scores = as.matrix(all_scores)
+    row.names(all_scores) = row.names(data) 
+
+    # Only assign labels to X% of the genes
+    max_score = quantile(rowMin(all_scores), c(percentage_genes_to_label))
+    genes_to_not_consider = rowMin(all_scores) >= max_score
+    labels = apply(all_scores, 1, which.min)
+    labels[genes_to_not_consider] = NA
+    names(labels) = row.names(data)
+
+    return(list("labels"=labels, "scores"=all_scores))
+}

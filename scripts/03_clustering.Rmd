@@ -66,11 +66,7 @@ splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
 The next step is to perform clustering. First, we reduce the set of genes of
 interest to genes that are (1) significant; (2) "highly" differentially
 expressed. First, we select the genes that have a log-fold change of at least
-2 across at least one experiment for one time point. We thus use the object
-`lfc_max`. 
-
-XXX
-
+2 across at least one experiment for one time point. 
 
 ```{r filter_genes}
 if(filter_genes){
@@ -103,31 +99,17 @@ if(filter_genes){
 After filtering, we consider `r dim(y)[1]` genes for the clustering.
 
 ```{r clustering}
-
-#############################################################################
-# Fit the splines
-
+# First fit the kmeans clusters
 kmeans_clusters = moanin:::splines_kmeans(
     y, splines_model, n_clusters=20,
     random_seed=42,
     n_init=20)
 
-all_scores = matrix(NA, nrow=dim(data)[1], ncol=n_clusters)
-
-for(k in 1:n_clusters){
-     scores = moanin:::score_genes_centroid(
-	data,
-	kmeans_clusters$centroids[k,])
-     all_scores[, k] = scores
-}
-
-all_scores = as.matrix(all_scores)
-# Only assign labels to X% of the genes
-max_score = quantile(rowMin(all_scores), c(percentage_genes_to_label))
-genes_to_not_consider = rowMin(all_scores) >= max_score
-labels = apply(all_scores, 1, which.min)
-labels[genes_to_not_consider] = NA
-names(labels) = row.names(data)
+# Then assign scores and labels to all the data, using a goodness-of-fit
+# scoring function.
+scores_and_labels = moanin::splines_kmeans_score_and_label(
+    data, kmeans_clusters)
+labels = scores_and_labels$labels
 ```
 
 Summary of number of genes assigned with original scoring, and "better"
@@ -139,7 +121,6 @@ barplot(table(kmeans_clusters$clusters), col="black")
 
 ```{r}
 barplot(table(labels), col="black")
-labels = kmeans_clusters$clusters
 ```
 
 Just a hack, cause I didn't update the code
