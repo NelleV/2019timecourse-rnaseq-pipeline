@@ -53,7 +53,7 @@ knitr::opts_chunk$set(
 The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
 with accession number GSE63786. The dataset has a total of 209 samples, with
 45018 probes (1 sample was removed by the authors prior to uploading the
-dataset on GEo).
+dataset on GEO).
 
 Note that in the following, we assume that the user has access to a data
 folder `data/shoemaker2015/rawdata`, containing the microarray data. 
@@ -155,15 +155,15 @@ write.table(data, ".results/quantile_normalized.txt")
 
 Plotting the smoothed empirical densities of probe values for each sample and
 estimating the variations across samples before and after normalization is a
-first quality control. Typically, two other quality control and exploratory
-analysis steps are also performed before and after normalization: (1) low
-dimensionality embedding of the samples; (2) correlation plots between each
-samples. In both cases, we expect a strong biological signal, while replicate
-samples should be strongly clustered or correlated with one another.
+first quality control step. Typically, two other quality control and
+exploratory analysis steps are also performed before and after normalization:
+(1) low dimensionality embedding of the samples; (2) correlation plots between
+each samples. In both cases, we expect a strong biological signal, while
+replicate samples should be strongly clustered or correlated with one another.
 
 
 Before performing any additional exploratory analysis, let us only keep highly
-variable genes. 
+variable genes: we keep for this step only the top 50% most variable genes.
 
 ```{r}
 variance_cutoff = 0.5
@@ -224,11 +224,16 @@ Additionally, in this example, we order each treatment by strength of the
 pathogenicity of the treatment: Control, Kawasaki, California, low dose of
 Vietnam, then high dose of Vietnam.
 
+
 ```{r  correlation_plot, fig.width=6, fig.height=6}
 library(NMF)
 
-# Reorder genes on condition, time, and replicate
+# Reorder the conditions such that:
+#	- Control is before any influenza treatment
+#	- Each treatment is ordered from low to high pathogeny
 meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 1, 2, 5, 4)])
+
+# Reorder genes on condition, time, and replicate
 ord = order(
   meta$Group,
   meta$Timepoint,
@@ -242,9 +247,9 @@ meta$Timepoint = as.factor(meta$Timepoint)
 NMF::aheatmap(
     data_corr,
     Colv=NA, Rowv=NA,
-    annCol=meta[,
-		c("Group", "Timepoint")],
-    annLegend=FALSE, 
+    annCol=meta[, c("Group", "Timepoint")],
+    annRow=meta[, c("Group", "Timepoint")],
+    annLegend=TRUE, 
     annColors=ann_colors,
     main="Correlation plot")
 ```
