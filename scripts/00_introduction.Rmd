@@ -110,9 +110,12 @@ avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
 10^5 PFU of each virus. An adidtional 42 mice were injected with a lower dose
 of the Vietnam avian influenza virus (10^3 PFU).
 
-The authors find that 
-
-**XXX Add summary of the key findings of the the paper**
+By combining gene expression time-course data with virus growth data, the
+authors show that the inflammatory response of lung tissue is gated until a
+threshold of the virus concentration is  exceeded in the lung. Once this
+threshold is exceeded, a strong inflammatory and cytokin production occurs.
+This results provides evidence that the pathology response is non-linearly
+regulated by virus concentration.
 
 ## References
 
