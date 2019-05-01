@@ -231,7 +231,7 @@ library(NMF)
 # Reorder the conditions such that:
 #	- Control is before any influenza treatment
 #	- Each treatment is ordered from low to high pathogeny
-meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 1, 2, 5, 4)])
+meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
 
 # Reorder genes on condition, time, and replicate
 ord = order(
