@@ -150,12 +150,16 @@ align_data_onto_centroid = function(data, centroid, positive_scaling=TRUE){
 	stop("align_data_onto_centroid: problem in dimensions")
     }
     centered_centroid = centroid - mean(centroid)
+    # Identify if some rows of the data are only zeros.
+    only_zero_genes = rowSums(abs(data)) == 0
     scaling_factors = apply(
 	data, 1,
 	function(x){sum(centered_centroid * x)/sum((x - mean(x))*x)}) 
     if(positive_scaling){
         scaling_factors[scaling_factors < 0] = 0
     }
+    # Now replace the scaling factors of only 0 genes by 0
+    scaling_factors[only_zero_genes] = 0
     shift_factors = rowMeans(
 	rep(centroid, each=n_genes) - rep(scaling_factors, times=n_samples) * data)
 
@@ -176,8 +180,13 @@ score_genes_centroid = function(data, centroid, positive_scaling=TRUE, scale=TRU
 	function(y){sqrt(sum((centroid - y)^2))})
 
     if(scale){
-        all_zeros_gene = data_fitted[1, ] * 0
-	max_score = max(scores)
+	all_zeros_gene = matrix(0, 1, dim(data)[2])
+        all_zeros_gene = align_data_onto_centroid(
+	    all_zeros_gene,
+	    centroid,
+	    positive_scaling=positive_scaling)
+	score = sqrt(sum((centroid - all_zeros_gene)**2))
+	max_score = score
     }else{
 	max_score = 1
     }
