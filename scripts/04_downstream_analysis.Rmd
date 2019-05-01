@@ -150,16 +150,15 @@ gene_id_go_mapping = create_go_term_mapping(genes)
 ```
 
 Once the gene ID to GO mapping list is created, `moanin` provides a simple
-interface to `topGO` to fetch enriched GO terms.
+interface to `topGO` to fetch enriched GO terms. Here, we show an example of
+running a GO term enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
-
 scores = as.numeric(labels == cluster)
 names(scores) = gene_names
 go_terms_enriched = find_enriched_go_terms(
     scores,
     gene_id_go_mapping, ontology="BP")
-
 ```
 
 
