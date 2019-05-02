@@ -60,7 +60,7 @@ plot_cdf_consensus = function(labels){
     }
 
     graphics::legend(1, 0.8, legend=n_clusters,
-       col=colors, lty=1:2, cex=0.8,
+       col=colors,
        title="Clusters", text.font=4)
 
 }
@@ -70,33 +70,40 @@ plot_cdf_consensus = function(labels){
 #' @param labels list of lables
 #'
 #' @export
-get_auc_consensus_scores = function(labels){
+get_auc_similarity_scores = function(labels, method="consensus"){
+    if(!(method %in% c("consensus", "nmi"))){
+	msg = paste(
+	    "moanin::get_auc_similarity_score.",
+	    "Unknown similarity measure provided", method)
+	stop(msg)
+    }
+
     all_labels = labels
     n_clusters = names(all_labels)
 
     auc_scores = rep(0, length(n_clusters))
     for(i in 1:length(n_clusters)){
 	cluster = n_clusters[i]
-
 	labels = all_labels[[cluster]]
-	consensus = consensus_matrix(labels, scale=FALSE)
-	consensus = consensus / max(consensus)
-	consensus = sort(consensus[upper.tri(consensus)])
-	y_axis = 1:length(consensus) / length(consensus)
-	auc_score = sum(diff(consensus) * zoo::rollmean(y_axis, 2))
+	if(method == "consensus"){
+	    consensus = consensus_matrix(labels, scale=FALSE)
+	    consensus = consensus / max(consensus)
+	    scores = consensus[upper.tri(consensus)]
+	}else if(method == "nmi"){
+	    scores = get_nmi_scores(labels) 
+	}
+	scores = sort(scores)
+	y_axis = 1:length(scores) / length(scores)
+	auc_score = sum(diff(scores) * zoo::rollmean(y_axis, 2))
+	
 	auc_scores[i] = auc_score
     }
     return(auc_scores)
 }
 
 
-#' Plot model explorer
-#'
-#' @param labels list of labels
-#' @export
-plot_model_explorer = function(labels){
-    all_labels = labels
-    n_clusters = names(all_labels)
+get_nmi_scores = function(labels){
+
     nmi = function(x, y){
 	x_dataframe = as.data.frame(x)
 	colnames(x_dataframe) = c("Label")
@@ -111,6 +118,30 @@ plot_model_explorer = function(labels){
 	return(NMI::NMI(x_dataframe, y_dataframe))
     }
 
+    n_trials = dim(labels)[2]
+    scores = NULL
+    for(trial in 1:n_trials){
+	if(trial == n_trials){
+	    break
+	}
+	column = colnames(labels)[trial]
+	columns_to_consider = colnames(labels)[(trial+1):n_trials]
+	label = labels[column]
+	scores = c(scores, as.vector(
+	    unlist(apply(labels[columns_to_consider], 2, function(x){nmi(x, label)}))))
+    }
+    return(scores)
+}
+
+
+#' Plot model explorer
+#'
+#' @param labels list of labels
+#' @export
+plot_model_explorer = function(labels){
+    all_labels = labels
+    n_clusters = names(all_labels)
+
     nmi_scores = list()
     colors = grDevices::rainbow(length(n_clusters))
     max_trial = 0
@@ -121,20 +152,10 @@ plot_model_explorer = function(labels){
 	color = colors[i]
 
 	labels = all_labels[[n_cluster]]
-	n_trials = dim(labels)[2]
-	scores = NULL
-	for(trial in 1:n_trials){
-	    if(trial == n_trials){
-		break
-	    }
-	    column = colnames(labels)[trial]
-	    columns_to_consider = colnames(labels)[(trial+1):n_trials]
-	    label = labels[column]
-	    scores = c(scores, as.vector(
-		unlist(apply(labels[columns_to_consider], 2, function(x){nmi(x, label)}))))
-	}
+	scores = get_nmi_scores(labels)
+
 	nmi_scores[[n_cluster]] = sort(scores)
-	max_trial = max(n_trials, length(scores))
+	max_trial = max(max_trial, length(scores))
 	min_score = min(min_score, min(scores))
 	max_score = max(max_score, max(scores))
      }
@@ -142,7 +163,7 @@ plot_model_explorer = function(labels){
     xrange = c(min_score, max_score)
     yrange = c(1, max_trial)
 
-    graphics::plot(xrange, yrange, type="n")
+    graphics::plot(xrange, yrange, type="n", xlab="NMI", ylab="")
 
      for(i in 1:length(n_clusters)){
 	color = colors[i]
@@ -155,7 +176,7 @@ plot_model_explorer = function(labels){
     }
 
     graphics::legend(min_score, length(scores)*0.9, legend=n_clusters,
-       col=colors, lty=1:2, cex=0.8,
+       col=colors, 
        title="Clusters", text.font=4)
 }
 

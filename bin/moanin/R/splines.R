@@ -58,9 +58,9 @@ fit_predict_splines = function(data, splines_model, weights=NULL, meta_predictio
 	    "fitting_data"=fitting_data,
 	    "degrees_of_freedom"=splines_model$degrees_of_freedom)
 
-	updated_formula = update(splines_model$formula, fitting_data ~ .)
-	model = lm(updated_formula, formula_data)	
-	y_fitted = predict(model, meta_prediction)
+	updated_formula = stats::update(splines_model$formula, fitting_data ~ .)
+	model = stats::lm(updated_formula, formula_data)	
+	y_fitted = stats::predict(model, meta_prediction)
     }
     return(y_fitted)
 }

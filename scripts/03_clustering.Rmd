@@ -69,31 +69,19 @@ expressed. First, we select the genes that have a log-fold change of at least
 2 across at least one experiment for one time point. 
 
 ```{r filter_genes}
-if(filter_genes){
-    # First, filter out any genes that doesn't have a log fold change of at
-    # least 2 at at least one of the time points.
-    
-    genes_to_keep = row.names(lfc_max[rowSums(lfc_max > 2) > 0, ])
-    pvalues = pvalues[genes_to_keep, ]
+# First, filter out any genes that doesn't have a log fold change of at
+# least 2 at at least one of the time points.
 
-    if(length(genes_to_keep) > n_genes_to_keep){
+genes_to_keep = row.names(lfc_max[rowSums(lfc_max > 2) > 0, ])
+pvalues = pvalues[genes_to_keep, ]
 
-	# Then rank by fisher's p-value and take max the number of genes of
-	# interest
-	# Filter out q-values for the pvalues table
-	fishers_pval = moanin:::fisher_method(pvalues)
-	fishers_qval = stats::p.adjust(fishers_pval)
-        if(keep_all_significant){
-	   genes_to_keep = names(fishers_qval[fishers_qval < 0.05])
-	}else{
-	    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
-	}
-    }
+# Then rank by fisher's p-value and take max the number of genes of interest
+# Filter out q-values for the pvalues table
+fishers_pval = moanin:::fisher_method(pvalues)
+fishers_qval = stats::p.adjust(fishers_pval)
+genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
 
-    y = as.matrix(data[genes_to_keep, ])
-}else{
-    y = as.matrix(data)
-}
+y = as.matrix(data[genes_to_keep, ])
 ```
 
 After filtering, we consider `r dim(y)[1]` genes for the clustering.
@@ -257,7 +245,29 @@ plot(all_possible_n_clusters, average_silhouette_values,
 
 ### Looking at the stability of the clustering
 
-The last strategy is to look at the stability of the clustering.
+On real data, the number of clusters is not only unknown but also 
+ambiguous: it will depend on the desired clustering resolution of the user.
+Yet, in the case of biological data, stability and reproducibility of the
+results is necessary to ensure that the biological interpretation of the
+results hold when the data or the model is exposed to reasonable
+perturbations.
+
+Methods that rely on the stability of the clustering results to choose $k$
+thus ensure that the biological interpretation of the clusters hold with
+perturbtation to the data. In addition, simulation where the data is generated
+with a well defined $k$ show that the clustering is more stable for the
+correct of number of the clusters.
+
+Most methods method to find the number of clusters with stability measures
+only provide visual aids to guide the user. The first element often visualized
+is the consensus matrix: the consensus matrix is an $n \times n$ matrix that
+stores the proportion of clustering in which two items are clustered together.
+A perfect consensus matrix ordered such as each elements that belong to the
+same cluster are adjacent to one another which show blocks along the diagonal
+close to 1.
+
+
+Here we plot to stability matrix of the top 1000 genes for $k=5$ and $k=20$.
 
 ```{r fig.width=6, fig.height=4}
 library(NMF)
@@ -268,7 +278,7 @@ NMF::aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
 	      Colv=FALSE,
 	      treeheight=0)
 
-stability_20 = read.table("results/stability_15.tsv", sep="\t")
+stability_20 = read.table("results/stability_20.tsv", sep="\t")
 consensus_matrix_stability_20 = moanin::consensus_matrix(stability_20,
 							 scale=FALSE)
 NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
@@ -278,7 +288,8 @@ NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
 ```
 
 
-```{r}
+
+```{r echo=FALSE, results="hide"}
 n_clusters = 2:20
 all_labels = list()
 for(i in n_clusters){
@@ -291,15 +302,58 @@ for(i in n_clusters){
 
 #### The model explorer strategy
 
+The model explorer algorithm [@ben-hur:stability] proposes to estimate the
+number of clusters exploiting the observation that if the number of clusters
+is correct, the clustering results are stable to bootstrapping.  The
+distribution of similaries between bootstrapped results for each $k$ can thus
+be compared for different values of $k$ and guide the user in the choice of
+number of clusters.
+
+The model explorer strategy works as follows. First, choose a similarity
+measure between two partitions or clusters $S(C_1, C_2)$. Examples are the
+normalized mutual information or Fowlkes-Mallows. Then perform $n$ bootstrap
+experiments to estimate the cluster centroids, followed by a step of assigning
+a label to all data points. Finally, compute the pairwise similarity measure
+between all bootstrapped partition, and plot the cumulative density of the
+obtained scores.
+
 ```{r fig.width=8, fig.height=8}
 moanin::plot_model_explorer(all_labels)
 ```
 
-#### Looking at the CDF of the consensus matrix
+From this plot, we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
+but not as stable as $k=2$. Similarly, $k=14$ is more stable than $k=11$,
+$k=12$, $k=13$. The model explorer strategy, in addition to visualizing the
+diversity of the centroids, can thus help assessing an adequate number of
+clusters.
 
-```{r fig.width=8, fig.height=8}
-#moanin::plot_cdf_consensus(all_labels)
+#### Consensus clustering as a way to find $k$
+
+
+The  consensus clustering [@monti:consensus] relies on a similar idea but
+instead of looking at the cumulative density of similarity measures of
+bootstrapped clustering, the authors suggests plotting the cumulative density
+of elements of the consensus matrix. 
+
+```{r eval=FALSE}
+moanin::plot_cdf_consensus(all_labels)
 ```
 
+```{r echo="FALSE"}
+library(knitr)
+knitr::include_graphics("images/clustering_CDF_consensus.png")
+```
+
+The stability of the clustering based on the consensus matrix can then be
+measured via a single number by looking at the area under the curve: the more
+stable the clustering, the closer to 0 or 1 will be the entries of consensus
+matrix. The consensus clustering strategy thus suggest at looking at either
+the AUC as a function of the number of the clusters or the "improvement" in
+the AUC as a function of the number of cluster.
+
+```{r echo="FALSE"}
+library(knitr)
+knitr::include_graphics("images/clustering_CDF_consensus.png")
+```
 
 
