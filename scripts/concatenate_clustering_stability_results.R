@@ -5,6 +5,7 @@ folders = list.files("results/")
 folders = folders[grepl("stability", folders) & !grepl("tsv", folders)]
 
 for(folder in folders){
+    print(folder)
     filenames = list.files(paste0("results/", folder))
     all_labels = NULL
     for(filename in filenames){

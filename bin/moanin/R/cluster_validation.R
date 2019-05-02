@@ -83,7 +83,7 @@ get_auc_consensus_scores = function(labels){
 	consensus = consensus / max(consensus)
 	consensus = sort(consensus[upper.tri(consensus)])
 	y_axis = 1:length(consensus) / length(consensus)
-	auc_score = sum(diff(consensus) * rollmean(y_axis, 2))
+	auc_score = sum(diff(consensus) * zoo::rollmean(y_axis, 2))
 	auc_scores[i] = auc_score
     }
     return(auc_scores)
