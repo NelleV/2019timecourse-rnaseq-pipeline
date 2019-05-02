@@ -279,7 +279,7 @@ NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
 
 
 ```{r}
-n_clusters = 5:20
+n_clusters = 2:20
 all_labels = list()
 for(i in n_clusters){
     filename = paste0("results/stability_", i, ".tsv")
@@ -288,17 +288,17 @@ for(i in n_clusters){
 }
 ```
 
-#### Looking at the CDF of the consensus matrix
-
-```{r fig.width=8, fig.height=8}
-moanin::plot_cdf_consensus(all_labels)
-```
-
 
 #### The model explorer strategy
 
 ```{r fig.width=8, fig.height=8}
 moanin::plot_model_explorer(all_labels)
+```
+
+#### Looking at the CDF of the consensus matrix
+
+```{r fig.width=8, fig.height=8}
+#moanin::plot_cdf_consensus(all_labels)
 ```
 
 
