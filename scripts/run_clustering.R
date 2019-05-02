@@ -10,6 +10,7 @@ random_seed = strtoi(args[2])
 # Other options
 filter_genes = TRUE
 sample_proportion = 0.8
+n_genes_to_keep = 10000
 keep_all_significant = FALSE
 
 outname = paste0(
