@@ -1,4 +1,5 @@
 library(reshape2)
+library(zoo)
 library(NMI)
 
 
@@ -24,6 +25,68 @@ consensus_matrix = function(labels, scale=TRUE){
 	diag(consensus) = 0
     }
     return(consensus)
+}
+
+#' Plot CDF consensus matrix
+#'
+#' @param labels list of labels
+#'
+#' @export
+plot_cdf_consensus = function(labels){
+    all_labels = labels
+    n_clusters = names(all_labels)
+
+    colors = grDevices::rainbow(length(n_clusters))
+    xrange = c(0, 1)
+    yrange = c(0, 1)
+
+    graphics::plot(xrange, yrange, type="n")
+
+    for(i in 1:length(n_clusters)){
+	cluster = n_clusters[i]
+	color = colors[i]
+
+	labels = all_labels[[cluster]]
+	consensus = consensus_matrix(labels, scale=FALSE)
+	consensus = consensus / max(consensus)
+	consensus = sort(consensus[upper.tri(consensus)])
+	x_axis = 1:length(consensus) / length(consensus)
+
+	graphics::lines(consensus, x_axis, type="b",
+			pch=16,
+			col=color,
+			lwd=1)
+
+    }
+
+    graphics::legend(1, 0.8, legend=n_clusters,
+       col=colors, lty=1:2, cex=0.8,
+       title="Clusters", text.font=4)
+
+}
+
+#' Plot AUC consensus matrix
+#'
+#' @param labels list of lables
+#'
+#' @export
+get_auc_consensus_scores = function(labels){
+    all_labels = labels
+    n_clusters = names(all_labels)
+
+    auc_scores = rep(0, length(n_clusters))
+    for(i in 1:length(n_clusters)){
+	cluster = n_clusters[i]
+
+	labels = all_labels[[cluster]]
+	consensus = consensus_matrix(labels, scale=FALSE)
+	consensus = consensus / max(consensus)
+	consensus = sort(consensus[upper.tri(consensus)])
+	y_axis = 1:length(consensus) / length(consensus)
+	auc_score = sum(diff(consensus) * rollmean(y_axis, 2))
+	auc_scores[i] = auc_score
+    }
+    return(auc_scores)
 }
 
 
@@ -71,7 +134,7 @@ plot_model_explorer = function(labels){
 		unlist(apply(labels[columns_to_consider], 2, function(x){nmi(x, label)}))))
 	}
 	nmi_scores[[n_cluster]] = sort(scores)
-	max_trial = max(n_trials, max_trial)
+	max_trial = max(n_trials, length(scores))
 	min_score = min(min_score, min(scores))
 	max_score = max(max_score, max(scores))
      }
@@ -87,12 +150,12 @@ plot_model_explorer = function(labels){
 	graphics::lines(sort(scores), 1:length(scores), type="b",
 			pch=16,
 			col=color,
-			lwd=0)
+			lwd=1)
 
     }
 
-    legend(1, 95, legend=n_clusters,
+    graphics::legend(min_score, length(scores)*0.9, legend=n_clusters,
        col=colors, lty=1:2, cex=0.8,
-       title="Clusters", text.font=4, bg='lightblue')
+       title="Clusters", text.font=4)
 }
 

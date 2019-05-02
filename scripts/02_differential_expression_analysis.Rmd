@@ -47,13 +47,18 @@ meta = shoemaker2015$meta
 data = read.table(".results/quantile_normalized.txt") 
 source("utils.R")
 ```
+
+
+## Differential expression analysis of time-course data
+
+The next step is typically to run a differential expression analysis. Most of
+`moanin`'s function rely on an object containing a number of information such
+as the metadata and the splines model used.
+
 ```{r}
 splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
 ```
 
-## Differential expression analysis of time-course data
-
-The next step is typically to run a differential expression analysis.
 
 ### Weekly differential expression analysis
 

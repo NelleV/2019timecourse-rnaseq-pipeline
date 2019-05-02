@@ -288,8 +288,16 @@ for(i in n_clusters){
 }
 ```
 
+#### Looking at the CDF of the consensus matrix
+
 ```{r fig.width=8, fig.height=8}
-library(moanin)
+moanin::plot_cdf_consensus(all_labels)
+```
+
+
+#### The model explorer strategy
+
+```{r fig.width=8, fig.height=8}
 moanin::plot_model_explorer(all_labels)
 ```
 

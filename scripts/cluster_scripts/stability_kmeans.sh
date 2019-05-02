@@ -5,7 +5,7 @@
 source activate goldwrap
 
 SEED=${SLURM_ARRAY_TASK_ID}
-for N_CLUSTERS in {5..20};
+for N_CLUSTERS in {2..20};
 do
     Rscript run_clustering.R ${N_CLUSTERS} ${SEED}
 done;
