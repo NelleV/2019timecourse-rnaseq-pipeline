@@ -45,14 +45,13 @@ While there are many methods that have been proposed for discrete aspects of
 time course data, the entire workflow for analysis of such data remains
 difficult, particularly for long, developmental time series. Most methods
 proposed for time course data are concerned with detecting genes that are
-changing over time (differential expression analysis), examples being
-`edge` [@storey:significance], functional component analysis based models
-[@wu:more], time-course permutation tests [@park:statistical], XXX
-[@sun:multiple]
-**TODO: Other methods to mention: impulse models, what else?
-Citations!**. However, with long time course datasets, particularly in
-developmental systems, a massive number of genes will show *some* change.
-For example, in the \xxx system, over \xxx\% of genes are shown to be changing
+changing over time (differential expression analysis), examples being `edge`
+[@storey:significance], functional component analysis based models [@wu:more],
+time-course permutation tests [@park:statistical], and multiple testing
+strategies to combine singe time point differential expression analysis
+[@sun:multiple]. However, with long time course datasets, particularly in
+developmental systems, a massive number of genes will show *some* change. For
+example, in the \xxx system, over \xxx\% of genes are shown to be changing
 over time. The task in these settings is often not to detect changes in genes,
 but to categorize into biologically interpretable patterns the vast number of
 changes discovered. 
@@ -67,32 +66,17 @@ parts (Figure \ref{fig:workflow}):
 
 This workflow represents an integration of both novel implementations of
 previously established methods and new methodologies for the settings of
-developmental time series. We provide the various steps of the workflow as
+developmental time series. It relies on several standard packages for
+analysing gene expression data, some specific for time-course data, others
+broadly used by the community. We provide the various steps of the workflow as
 functions in a R package **FIXME**. 
 
+```{r schema, echo=FALSE, fig.width=8, fig.cap="Workflow for analyzing time-course datasets."}
+library(knitr)
+knitr::include_graphics("images/fig1_schemas.png")
+```
 
----
-# Old intro
 
-Time-course gene expression analysis workflows include steps used more broadly
-for gene expression data analysis such as quality control (QC), exploratory
-data analysis (EDA), pre-processing, normalization, and visualization. Yet, a
-typical gene expression data analysis workflow is not entirely adequate for
-analysing time-course data. In particular, differential expression analysis
-needs to be adapted to time-course data, and often needs to be followed by a
-clustering step to group genes sharing similar patterns of expression.
-
-Here, we propose an integrated workflow for downstream analysis of time-course
-data, with the following main steps: (1) quality control and normalization;
-(2) differential expression analysis of time-course data; (3) clustering; (4)
-downstream analysis of clusters with GO term, pathway, and motif enrichment.
-
-This workflow relies on several standard packages for analysing gene
-expression data, some specific for time-course data, others broadly used by
-the community. We also provide alongside this workflow a package that nicely
-wraps all calls to dependencies with a common API by defining a model object
-holding all necessary metadata to perform all steps of the pipeline.
----
 
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
