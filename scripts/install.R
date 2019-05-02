@@ -87,3 +87,6 @@ if(!require("NMI")){
     install.packages("NMI")
 }
 
+if(!require(zoo)){
+    install.packages("zoo")
+}
