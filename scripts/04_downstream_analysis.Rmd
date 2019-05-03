@@ -77,8 +77,8 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 
 ```{r results="hide"}
 library(biomaRt)
-ensembl = useMart("ensembl")
-ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
+ensembl = biomaRt::useMart("ensembl")
+ensembl = biomaRt::useDataset("mmusculus_gene_ensembl", mart=ensembl)
 ```
 
 ```{r enrichment_analysis, results="hide", message=FALSE}
@@ -86,7 +86,7 @@ cluster = 13
 genes = gene_names[labels == cluster]
 
 # convert gene names
-genes = getBM(attributes=c("ensembl_gene_id", "entrezgene"),
+genes = biomaRt::getBM(attributes=c("ensembl_gene_id", "entrezgene"),
 		filters="refseq_mrna", values=genes,
 		mart=ensembl)["entrezgene"]
 genes = as.vector(unlist(genes))
@@ -139,8 +139,7 @@ term ID. **FIXME** matrix or data.frame??
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
 # FIXME move this to the package
-source("GO_terms_analysis.R")
-genes = getBM(attributes=c("go_id", "refseq_mrna"),
+genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
 	      mart=ensembl)
@@ -154,10 +153,9 @@ interface to `topGO` to fetch enriched GO terms. Here, we show an example of
 running a GO term enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
-scores = as.numeric(labels == cluster)
-names(scores) = gene_names
 go_terms_enriched = find_enriched_go_terms(
     scores,
+    13,
     gene_id_go_mapping, ontology="BP")
 ```
 

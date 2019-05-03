@@ -63,6 +63,30 @@ folder `data/shoemaker2015/rawdata`, containing the microarray data.
 data_dir = "data/shoemaker2015/rawdata"
 ```
 
+Given the source and a `Targets.txt` structured as follows, microarray can be loaded thanks to the limma library.
+
+```
+FileName
+GSM1557140_AR0313_043raw.txt.gz
+GSM1557141_AR0313_044raw.txt.gz
+GSM1557142_AR0313_045raw.txt.gz
+GSM1557143_AR0313_055raw.txt.gz
+GSM1557144_AR0313_056raw.txt.gz
+GSM1557145_AR0313_057raw.txt.gz
+GSM1557146_AR0313_058raw.txt.gz
+GSM1557147_AR0313_059raw.txt.gz
+```
+
+```{r}
+targets = limma::readTargets()
+RG = limma::read.maimages(
+  targets, source="agilent",
+  path=data_dir,
+  other.columns="gIsWellAboveBG",
+  green.only=TRUE)
+
+```
+
 The normalization strategy we apply here relies on `limma` and is as follows:
 
   - First, normalize probe intensity using background information using the
@@ -72,15 +96,7 @@ The normalization strategy we apply here relies on `limma` and is as follows:
 
 
 ```{r reading_targets, results="hide", fig.width=8, fig.height=4}
-# Read in the data using limma.
-targets = limma::readTargets()
-RG = limma::read.maimages(
-  targets, source="agilent",
-  path=data_dir,
-  other.columns="gIsWellAboveBG",
-  green.only=TRUE)
-
-# Preform background correction using norm-exponential strategy and normalize
+# Perform background correction using norm-exponential strategy and normalize
 # across samples using quantile normalization.
 RG = limma::backgroundCorrect(RG, method="normexp")
 RG.q = limma::normalizeBetweenArrays(RG, method="quantile")

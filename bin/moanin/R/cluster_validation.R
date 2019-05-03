@@ -59,7 +59,9 @@ plot_cdf_consensus = function(labels){
 
     }
 
-    graphics::legend(1, 0.8, legend=n_clusters,
+    graphics::legend("bottomright", legend=n_clusters,
+	lty=rep(1, length(n_clusters)),
+       pch=rep(16, length(n_clusters)),
        col=colors,
        title="Clusters", text.font=4)
 
@@ -176,6 +178,8 @@ plot_model_explorer = function(labels){
     }
 
     graphics::legend(min_score, length(scores)*0.9, legend=n_clusters,
+       lty=rep(1, length(scores)),
+       pch=rep(16, length(scores)),
        col=colors, 
        title="Clusters", text.font=4)
 }

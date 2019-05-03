@@ -266,6 +266,23 @@ A perfect consensus matrix ordered such as each elements that belong to the
 same cluster are adjacent to one another which show blocks along the diagonal
 close to 1.
 
+To perform such analysis, the first step is run the clustering several times
+on a resampled dataset--either using bootstrap or subsampling.
+
+Using the bootstrapping strategy:
+```{r}
+n_genes = dim(y)[1]
+indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
+
+bootstrapped_y = y[indices, ]
+```
+
+Using the subsampling strategy, keeping 80% of the genes:
+```{r}
+subsample_proportion = 0.8
+indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=TRUE)
+subsampled_y = y[indices, ]
+```
 
 Here we plot to stability matrix of the top 1000 genes for $k=5$ and $k=20$.
 
@@ -339,7 +356,7 @@ of elements of the consensus matrix.
 moanin::plot_cdf_consensus(all_labels)
 ```
 
-```{r echo="FALSE"}
+```{r echo=FALSE}
 library(knitr)
 knitr::include_graphics("images/clustering_CDF_consensus.png")
 ```
@@ -351,9 +368,12 @@ matrix. The consensus clustering strategy thus suggest at looking at either
 the AUC as a function of the number of the clusters or the "improvement" in
 the AUC as a function of the number of cluster.
 
-```{r echo="FALSE"}
+```{r echo=FALSE}
 library(knitr)
-knitr::include_graphics("images/clustering_CDF_consensus.png")
+knitr::include_graphics("images/clustering_AUC_consensus.png")
 ```
 
-
+```{r echo=FALSE}
+library(knitr)
+knitr::include_graphics("images/clustering_delta_AUC_consensus.png")
+```

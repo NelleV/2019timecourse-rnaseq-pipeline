@@ -3,8 +3,9 @@ library(topGO)
 
 #' Find enriched GO terms
 #'
-#' @param labels
-#' @param gene_id_to_go
+#' @param labels named vector containing labels
+#' @param cluster which cluster onto which to run the GO term analysis.
+#' @param gene_id_to_go Gene ID to GO object from topGO
 #' @param ontology string, optional, default: BP
 #'	specficies which ontology to use. Can be 'BP', 'CC', or 'NF'
 #' @param weighted, boolean, optional, default: FALSE
@@ -12,10 +13,15 @@ library(topGO)
 #' @param node_size integer, optional, default: 10
 #'	Consider only GO terms with node_size number of genes.
 #' @param ontology: BP, CC, NF
-find_enriched_go_terms = function(labels, gene_id_to_go,
+#' @export
+find_enriched_go_terms = function(labels, cluster, gene_id_to_go,
 				  ontology="BP", 
 				  weighted=FALSE,
 				  node_size=10){
+    gene_names = row.name(labels)
+    scores = as.numeric(labels == cluster)
+    names(scores) = gene_names
+
     if(!(ontology %in% c("BP", "CC", "NF"))){
 	error_message = paste(
 	    "moanin::find_enriched_go_terms: Ontology should be 'BP', 'CC',",
@@ -61,6 +67,11 @@ find_enriched_go_terms = function(labels, gene_id_to_go,
 
 #' Create the Gene to GO Term mapping
 #'
+#' @param genes dataframe, with `gene_col` and a column corresponding to the
+#'  `go_id`
+#' @param gene_col the column of the genes data frame that contains the
+#'  correct gene reference. By default, is refseq_mrna
+#' @export
 create_go_term_mapping = function(genes, gene_col="refseq_mrna"){
     gene_id_go_mapping = NULL
     gene_names = unique(genes[, "refseq_mrna"])
