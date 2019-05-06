@@ -3,8 +3,7 @@ library(topGO)
 
 #' Find enriched GO terms
 #'
-#' @param labels named vector containing labels
-#' @param cluster which cluster onto which to run the GO term analysis.
+#' @param assignments boolean named vector
 #' @param gene_id_to_go Gene ID to GO object from topGO
 #' @param ontology string, optional, default: BP
 #'	specficies which ontology to use. Can be 'BP', 'CC', or 'NF'
@@ -14,14 +13,13 @@ library(topGO)
 #'	Consider only GO terms with node_size number of genes.
 #' @param ontology: BP, CC, NF
 #' @export
-find_enriched_go_terms = function(labels, cluster, gene_id_to_go,
+find_enriched_go_terms = function(assignments, gene_id_to_go,
 				  ontology="BP", 
 				  weighted=FALSE,
 				  node_size=10){
-    gene_names = row.name(labels)
-    scores = as.numeric(labels == cluster)
-    names(scores) = gene_names
-
+    gene_names = names(assignments)
+    assignments = as.numeric(assignments)
+    names(assignments) = gene_names
     if(!(ontology %in% c("BP", "CC", "NF"))){
 	error_message = paste(
 	    "moanin::find_enriched_go_terms: Ontology should be 'BP', 'CC',",
@@ -35,18 +33,19 @@ find_enriched_go_terms = function(labels, cluster, gene_id_to_go,
       return(data < 0.5)
     }
 
-    GOdata = new("topGOdata", ontology=ontology, allGenes=labels, nodeSize=node_size,
+    GOdata = new("topGOdata", ontology=ontology, allGenes=assignments,
+		 nodeSize=node_size,
 		 geneSel=getTopDiffGenes,
 		 annot=annFUN.gene2GO, gene2GO=gene_id_to_go)
 
     if(weighted){
-        resultFisher = runTest(GOdata, algorithm="classic", statistic="fisher")
+        resultFisher = topGO::runTest(GOdata, algorithm="classic", statistic="fisher")
     }else{
-        resultFisher = runTest(GOdata, algorithm="weight", statistic="fisher")
+        resultFisher = topGO::runTest(GOdata, algorithm="weight", statistic="fisher")
     }
     n_nodes = length(resultFisher@score)
 
-    allRes = GenTable(
+    allRes = topGO::GenTable(
 	GOdata, 
 	resultFisher=resultFisher,
 	orderBy="resultFisher", ranksOf="resultFisher",

@@ -77,7 +77,7 @@ create_meta_prediction = function(splines_model, num_timepoints=100){
     # Create splines_model for prediction
     timepoints_pred = NULL
     groups_pred = NULL
-    meta = splines_model$meta
+    meta = droplevels(splines_model$meta)
     groups = levels(meta$Group) 
     for(group in groups){
 	mask = meta$Group == group

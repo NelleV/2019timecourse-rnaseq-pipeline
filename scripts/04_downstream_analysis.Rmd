@@ -61,7 +61,8 @@ subset of genes that fit well to a cluster (based on some criterion).
 ```{r}
 gene_names = row.names(labels)
 gene_names = gene_names[!is.na(labels)]
-labels = labels[!is.na(labels)]
+labels = as.vector(labels[!is.na(labels)])
+names(labels) = gene_names
 ```
 
 ### Finding enriched pathways using `biomaRt` and `KEGGprofile`
@@ -134,11 +135,12 @@ $NM_201361
 ```
 
 `biomaRt` queries results a matrix with two named columns of gene names and GO
-term ID. **FIXME** matrix or data.frame??
+term ID.
 
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
-# FIXME move this to the package
+library(topGO)
+#source("GO_terms_analysis.R")
 genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
@@ -153,19 +155,11 @@ interface to `topGO` to fetch enriched GO terms. Here, we show an example of
 running a GO term enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
+assignments = labels == cluster
+
 go_terms_enriched = find_enriched_go_terms(
-    scores,
-    13,
+    assignments,
     gene_id_go_mapping, ontology="BP")
 ```
 
-
-```{r echo=FALSE}
-
-go_terms_enriched = go_terms_enriched[
-    order(go_terms_enriched[, "resultFisher_padj"]), ]
-
-kable(go_terms_enriched, "html", escape=F, digits=4) %>%
-    kable_styling("striped", full_width=TRUE) 
-```
 
