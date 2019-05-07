@@ -79,7 +79,10 @@ pvalues = pvalues[genes_to_keep, ]
 # Filter out q-values for the pvalues table
 fishers_pval = moanin:::fisher_method(pvalues)
 fishers_qval = stats::p.adjust(fishers_pval)
-genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
+genes_to_keep = names(sort(fishers_pval))
+if(length(genes_to_keep) > n_genes_to_keep){
+    genes_to_keep = genes_to_keep[1:n_genes_to_keep]
+}
 
 y = as.matrix(data[genes_to_keep, ])
 ```
