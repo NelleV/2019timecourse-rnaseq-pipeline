@@ -11,6 +11,7 @@ library(limma)
 library(splines)
 library(stats)
 library(moanin)
+source("utils.R")
 ```
 
 ```{r echo=FALSE}
@@ -38,6 +39,7 @@ percentage_genes_to_label = 0.5
 data("shoemaker2015")
 data = shoemaker2015$data
 meta = shoemaker2015$meta
+meta = droplevels(meta)
 
 # Right now, the package doesn't contain the normalized data
 ```
@@ -229,6 +231,7 @@ And now a volcano plot for quick visualization
 
 pvalue = qvalues[, "M-K"]
 lfc_epicon = log_fold_change_epicon[, "M-K"]
+names(lfc_epicon) = row.names(log_fold_change_epicon)
 
 plot(lfc_epicon, -log10(pvalue), pch=20, main="Volcano plot",
      xlim=c(-2.5, 2))
@@ -240,6 +243,25 @@ points(lfc_epicon[abs(lfc_epicon) > 1],
        -log10(pvalue[abs(lfc_epicon) > 1]), pch=20, col="orange")
 points(lfc_epicon[(pvalue < 0.01) & (abs(lfc_epicon) > 1)],
        -log10(pvalue[(pvalue < 0.01) & (abs(lfc_epicon) > 1)]), pch=20, col="green")
+
+```
+
+Let's quickly visualize the top 10 DE genes ranked by p-value.
+
+```{r fig.height=8, fig.width=8}
+top_DE_genes_pval = names(sort(pvalue)[1:12])
+moanin::plot_genes(data[top_DE_genes_pval, ], splines_model,
+		   colors=ann_colors$Group, smooth=TRUE)
+```
+
+Now visualize the top 10 DE genes by log fold change
+
+```{r fig.height=8, fig.width=8}
+top_DE_genes_lfc = names(
+    sort(abs(lfc_epicon),
+	 decreasing=TRUE)[1:12])
+moanin::plot_genes(data[top_DE_genes_lfc, ], splines_model,
+		   colors=ann_colors$Group, smooth=TRUE)
 
 ```
 

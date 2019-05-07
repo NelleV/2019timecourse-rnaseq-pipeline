@@ -1,6 +1,7 @@
 library(viridis)
 library(graphics)
 
+
 #' Plotting centroids
 #'
 #' @param centroids matrix (k, t) containing the centroids
@@ -43,13 +44,30 @@ plot_centroids = function(centroids, splines_model, colors=NULL, smooth=FALSE){
 }
 
 
+#' Plotting data
+#'
+#' @param data matrix (k, t) containing the centroids
+#' @param splines_model splines_model
+#' @param meta	data.frame (t, n) containing the metadata.
+#' @param colors vector, optional, default NULL
+#'		vector of colors
+#' @param smooth boolean, optional, default: FALSE
+#'  Whether to smooth the centroids or not.
+#' @export
+plot_genes = function(data, splines_model, colors=NULL, smooth=FALSE){
+    plot_centroids(data, splines_model, colors=colors, smooth=smooth)
+}
+
+
 plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth=FALSE){
     meta = splines_model$meta
     groups = levels(meta$Group)
 
     xrange = range(meta$Timepoint)
     yrange = range(centroid)
-    centroid = t(as.matrix(centroid))
+    if(is.null(dim(centroid))){
+        centroid = t(as.matrix(centroid))
+    }
 
     graphics::plot(xrange, yrange, type="n")
     if(is.null(colors)){
