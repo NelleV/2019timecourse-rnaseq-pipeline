@@ -1,7 +1,7 @@
 group_colors = c(
     "M"="dodgerblue4",
-    "C"="gold",
-    "K"="orange",
+    "K"="gold",
+    "C"="orange",
     "VH"="red4",
     "VL"="red2")
 time_colors = grDevices::rainbow(14)

@@ -377,3 +377,8 @@ knitr::include_graphics("images/clustering_AUC_consensus.png")
 library(knitr)
 knitr::include_graphics("images/clustering_delta_AUC_consensus.png")
 ```
+
+The consensus clustering method suggest that the most stable is $k=2$, which
+separates over-expressed genes from under-expressed genes. While it is indeed
+a very stable clustering, it does not capture the range of gene expression
+patterns present in the data.

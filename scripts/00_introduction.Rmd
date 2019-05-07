@@ -51,7 +51,7 @@ time-course permutation tests [@park:statistical], and multiple testing
 strategies to combine singe time point differential expression analysis
 [@sun:multiple]. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show *some* change. For
-example, in the \xxx system, over \xxx\% of genes are shown to be changing
+example, in the **xxx** system, over **xxx%** of genes are shown to be changing
 over time. The task in these settings is often not to detect changes in genes,
 but to categorize into biologically interpretable patterns the vast number of
 changes discovered. 
