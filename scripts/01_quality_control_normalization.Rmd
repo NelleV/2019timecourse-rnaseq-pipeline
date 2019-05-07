@@ -283,3 +283,5 @@ the influenza-infected mice midly react until time point 36. Third, the less
 pathogenic the strain is, the closer the samples are to the control condition.
 Fourth, the Vietnam samples at time point 120 and 168 are the one that are the
 most different from control samples.
+
+# References
