@@ -47,3 +47,22 @@ test_that("Estimating log fold change with unknown error", {
     expect_error(estimate_log_fold_change(data, splines_model,
 					  contrast, method="hahaha"))
 })
+
+
+test_that("Estimating log fold change", {
+    data(shoemaker2015)
+    data = shoemaker2015$data
+    meta = shoemaker2015$meta
+
+    splines_model = moanin::create_splines_model(meta)
+
+    # Reduce the data set
+    data = data[1:10, ]
+    contrasts = limma::makeContrasts(contrasts=c("C-K"), levels=meta$Group)
+    data[, meta$Group == "C"] = 0
+    data[, meta$Group == "K"] = 1
+    lfc_max = estimate_log_fold_change(data, splines_model, contrasts=contrasts, method="max")
+    expect_equal(1, max(lfc_max))
+    expect_equal(1, min(lfc_max))
+
+})
