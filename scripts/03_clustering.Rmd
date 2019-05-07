@@ -43,6 +43,7 @@ data("shoemaker2015")
 
 data = shoemaker2015$data
 meta = shoemaker2015$meta
+meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
 
 data = read.table(".results/quantile_normalized.txt") 
 
@@ -138,12 +139,11 @@ moanin:::plot_centroids(kmeans_clusters$centroids, splines_model,
 Now, let's look at genes in cluster 15
 
 ```{r fig.width=8, fig.height=8}
-cluster_to_plot = 13
+cluster_to_plot = 20
 gene_names = row.names(data)
 genes_to_plot =  names(kmeans_clusters$clusters[kmeans_clusters$clusters == cluster_to_plot])
 data_to_plot = data[genes_to_plot, ]
 submeta = meta
-submeta$Group = factor(submeta$Group, levels(submeta$Group)[c(3, 1, 2, 5, 4)])
 ord = order(
   submeta$Group,
   submeta$Timepoint,
@@ -188,12 +188,28 @@ that this number is 20 clusters.
 Once the maximum number of clusters is set, several strategies allow to
 identify the number of clusters:
 
-    - Elbow method
-    - *Silhouette method* 
-    - *Model explorer*
+- **Elbow method**. First introduced in 1953 by Thorndike [@thorndike:who],
+  the elbow methods looks at the total with cluster sum of squares 
+  as a function of the number of clusters (WCSS). When adding clusters
+  doesn't decrease the WCSS by a sufficient
+  amount, one can consider stopping. This method thus provides visual aid to
+  the user to choose the number of clusters, but often the "elbow" is hard to
+  see on real data, where the number of clusters is not clearly defined.
+- **Silhouette method**. Similarly to the Elbow method, the Silhouette method
+  refers to a method of validation of consistency within clusters, and
+  provides visual aid to choose the number of clusters.
+- **Stability methods** Stability methods are more computationally intensive
+  than any other method, as they rely on assessing the stability of the
+  clustering for every $k$ to a small randomization of the data. The user is
+  then invited to choose the number of cluster based on a number of similarity
+  measures.
+
+First, let us run the clustering for all possible clusters of interest. We
+will, for each clustering experiment, conserve (1) with within cluster sum of
+squares; (2) the labels assigned to all genes.
 
 ```{r running_clustering_on_all_k}
-all_possible_n_clusters = c(5, 7, 9, 11)
+all_possible_n_clusters = c(5, 7, 9, 11, 13, 15)
 all_clustering = list()
 wss_values = list()
 
@@ -210,6 +226,7 @@ for(n_cluster in all_possible_n_clusters){
 ```
 
 ### Elbow method
+
 
 ```{r elbow_method, fig.width=6, fig.height=4}
 
@@ -282,8 +299,8 @@ bootstrapped_y = y[indices, ]
 
 Using the subsampling strategy, keeping 80% of the genes:
 ```{r}
-subsample_proportion = 0.8
-indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=TRUE)
+subsample_proportion = 1
+indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=FALSE)
 subsampled_y = y[indices, ]
 ```
 
@@ -384,4 +401,5 @@ knitr::include_graphics("images/clustering_delta_AUC_consensus.png")
 The consensus clustering method suggest that the most stable is $k=2$, which
 separates over-expressed genes from under-expressed genes. While it is indeed
 a very stable clustering, it does not capture the range of gene expression
-patterns present in the data.
+patterns present in the data. This shows the limitation of such method on real
+data, where the number of clusters is not clearly defined.

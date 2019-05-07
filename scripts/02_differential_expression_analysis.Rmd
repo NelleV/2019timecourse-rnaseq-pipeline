@@ -1,6 +1,7 @@
 ---
 title: "Differential expression analysis: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 ---
 
 
@@ -11,6 +12,8 @@ library(limma)
 library(splines)
 library(stats)
 library(moanin)
+library(knitr)
+library(kableExtra)
 source("utils.R")
 ```
 
@@ -187,7 +190,7 @@ unordered treatments, but fail to use the temporal structure of the data.
 
 ### Time-course differential expression analysis between two groups
 
-To leverage this temporal structure, Storey et al [CITE FIXME] proposes to
+To leverage this temporal structure, Storey et al [@storey:significance] proposes to
 model time-course micro-array with splines functions, and to use a log-ratio
 likelihood test to detect differentially expressed genes. `moanin` extends
 this idea by providing functions to perform time-course differential
@@ -208,45 +211,106 @@ pvalues = moanin::timecourse_differential_expression_analysis(
     data, splines_model, contrasts)
 qvalues = apply(pvalues, 2, stats::p.adjust)
 
+```
+
+The number of genes found differentially expressed ranges from around 12000 to
+29000 depending on the strain and dosage of influenza virus given to the mice.
+This corresponds to between 30% to 70% of the genes found differentially
+expressed in this time-course experiment.
+
+```{r echo=FALSE, fig.width=6, fig.height=6}
+num_de = colSums(qvalues < 0.05)
+names(num_de) = c(
+    "Kawasaki", "California", "Vietnam LD", "Vietname HD")
+barplot(num_de, col="black", ylab="Number of DE genes")
+```
+
+The next step in a classical differential expression analysis is typically to
+assess the effect of the treatment by looking at the log fold change.
+Computing the log fold change on a time-course experiment is not trivial: one
+can be interested in the average log-fold change across time, or the
+cumulative log-fold change. Sometimes a gene can be over-expressed at the
+beginning of the time-course data, and then over-expressed at the end of the
+experiment. As a result, `moanin` provides a number of possible ways to
+compute the log fold change across the whole time-course.
+
+First, `moanin` provides as simple interface to compute the log-fold change
+for each individual timepoints.
+
+```{r}
+log_fold_change_timepoints = moanin::estimate_log_fold_change(
+    data, splines_model, contrasts,  method="timely")
+```
+
+```{r echo=FALSE}
+kable(head(log_fold_change_timepoints[,
+colnames(log_fold_change_timepoints)[1:5]]))
+```
+
+This matrix can then be used to visualize the log-fold change for each
+contrast per timepoint.
+
+Sometimes, a single value per gene and per contrast is more useful. Here is a
+table of the possible ways to compute log-fold change values.
+
+| Name   | Formula   |     |
+|------- | --------- |--- |
+| timely | $\text{lfc}(t)$  | Function of time |
+| sum  | $\sum_t lfc(t)$  | Sum of log fold change. |
+| abs_sum  | $\sum_t \|lfc(t)\|$  | Always positive |
+| max  | $\max_t \|lfc(t)\|$  | Always positive  |
+| min  | $\min_t \|lfc(t)\|$  | Always positive |
+| epicon  | $$  | Captures overall strength of response and overall direction |
+
+
+```{r}
 log_fold_change_epicon = moanin::estimate_log_fold_change(
     data, splines_model, contrasts,  method="epicon")
 
+log_fold_change_sum = moanin::estimate_log_fold_change(
+    data, splines_model, contrasts,  method="sum")
+
 log_fold_change_max = moanin::estimate_log_fold_change(
     data, splines_model, contrasts, method="max")
+
+log_fold_change_min = moanin::estimate_log_fold_change(
+    data, splines_model, contrasts, method="min")
 ```
 
-Let's explore a bit the number of genes found differentially expressed.
 
-```{r echo=FALSE, fig.width=6}
-num_de = colSums(qvalues < 0.05)
-names(num_de) = c(
-    "Kawasaki", "California", "Vietnam low-dose", "Vietname high-dose")
-barplot(num_de, col="black", ylab="Number of DE genes")
-
+```{r echo=FALSE, fig.height=8, fig.width=8, message=FALSE}
+par(mfrow=c(2, 2))
+plot(log_fold_change_epicon[, "M-C"],
+     log_fold_change_sum[, "M-C"], pch=20, main="EPICON vs sum",
+     xlab="EPICON", ylab="sum")
+plot(log_fold_change_epicon[, "M-C"],
+     log_fold_change_max[, "M-C"], pch=20, main="EPICON vs max",
+     xlab="EPICON", ylab="max")
+plot(log_fold_change_max[, "M-C"],
+     log_fold_change_min[, "M-C"], pch=20, main="max vs min",
+     xlab="max", ylab="min")
+plot(log_fold_change_max[, "M-C"],
+     log_fold_change_sum[, "M-C"], pch=20, main="max vs sum",
+     xlab="max", ylab="sum")
 ```
 
-And now a volcano plot for quick visualization
+From the single measures of log-fold change and the p-value, we can now look
+at the volcano plot. Here is an example of a volcano plot for the comparaison
+of the control to the Kawasaki strain, using the EPICON log fold change
+computation.
 
 ```{r fig.height=8, fig.width=8}
-
 pvalue = qvalues[, "M-K"]
 lfc_epicon = log_fold_change_epicon[, "M-K"]
 names(lfc_epicon) = row.names(log_fold_change_epicon)
 
 plot(lfc_epicon, -log10(pvalue), pch=20, main="Volcano plot",
      xlim=c(-2.5, 2))
-
-# Add colored points: red if padj<0.05, orange of log2FC>1, green if both)
-points(lfc_epicon[pvalue < 0.01], -log10(pvalue[pvalue < 0.01]), pch=20,
-       col="red")
-points(lfc_epicon[abs(lfc_epicon) > 1],
-       -log10(pvalue[abs(lfc_epicon) > 1]), pch=20, col="orange")
-points(lfc_epicon[(pvalue < 0.01) & (abs(lfc_epicon) > 1)],
-       -log10(pvalue[(pvalue < 0.01) & (abs(lfc_epicon) > 1)]), pch=20, col="green")
-
 ```
 
-Let's quickly visualize the top 10 DE genes ranked by p-value.
+As another sanity check, `moanin` provides a simple utility function to
+visualize gene time-course data. Here, we plot the 12 genes with the smallest
+p-values.
 
 ```{r fig.height=8, fig.width=8}
 top_DE_genes_pval = names(sort(pvalue)[1:12])
@@ -254,7 +318,8 @@ moanin::plot_genes(data[top_DE_genes_pval, ], splines_model,
 		   colors=ann_colors$Group, smooth=TRUE)
 ```
 
-Now visualize the top 10 DE genes by log fold change
+And here we visualize the genes with the largest absolute EPICON log-fold
+change.
 
 ```{r fig.height=8, fig.width=8}
 top_DE_genes_lfc = names(
@@ -264,6 +329,11 @@ moanin::plot_genes(data[top_DE_genes_lfc, ], splines_model,
 		   colors=ann_colors$Group, smooth=TRUE)
 
 ```
+
+Thanks to those visualization, we can see that genes often follow similar
+patterns of expression, although on a different scale for each gene. We can
+leverage this observation to cluster the genes into groups of similar patterns
+of transcriptomic response.
 
 ```{r echo=FALSE, results="hide"}
 # Rename stuff for saving
@@ -297,3 +367,6 @@ de_analysis = subset(de_analysis, select=-c(Row.names))
 
 write.table(de_analysis, outname, sep="\t")
 ```
+
+
+# References

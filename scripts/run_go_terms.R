@@ -8,6 +8,8 @@ library(viridis)
 
 library(moanin)
 library(biomaRt)
+library(topGO)
+
 df = 6
 
 # Preprocessing & filtering
@@ -37,7 +39,6 @@ labels = labels[!is.na(labels)]
 
 
 # FIXME move this to the package
-source("GO_terms_analysis.R")
 ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
 

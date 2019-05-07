@@ -17,23 +17,23 @@ plot_centroids = function(centroids, splines_model, colors=NULL, smooth=FALSE){
     if(n_centroids <= 3){
         graphics::par(
 	    mfrow=c(n_centroids, 1),
-            mar=c(0.1, 0.1, 0.1, 0.1))
+            mar=c(0.2, 0.2, 0.2, 0.2))
     }else if(n_centroids <= 6){
         n_col = ceiling(n_centroids / 2)
         graphics::par(
 	    mfrow=c(n_col, 2),
-            mar=c(0.1, 0.1, 0.1, 0.1))
+            mar=c(0.2, 0.2, 0.2, 0.2))
     }else if(n_centroids <= 12){
         ncol = ceiling(n_centroids / 3)
         graphics::par(
 	    mfrow=c(ncol, 3),
-            mar=c(0.1, 0.1, 0.1, 0.1))
+            mar=c(0.2, 0.2, 0.2, 0.2))
     }else{
         nrow = round(n_centroids ** 0.5)
         ncol = ceiling(n_centroids / nrow)
         graphics::par(
 	    mfrow=c(ncol, nrow),
-            mar=c(0.1, 0.1, 0.1, 0.1))
+            mar=c(0.2, 0.2, 0.2, 0.2))
     }
 
     for(i in 1:n_centroids){

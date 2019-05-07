@@ -77,7 +77,7 @@ GSM1557146_AR0313_058raw.txt.gz
 GSM1557147_AR0313_059raw.txt.gz
 ```
 
-```{r}
+```{r message=FALSE}
 targets = limma::readTargets()
 RG = limma::read.maimages(
   targets, source="agilent",
@@ -95,7 +95,7 @@ The normalization strategy we apply here relies on `limma` and is as follows:
 
 
 
-```{r reading_targets, results="hide", fig.width=8, fig.height=4}
+```{r reading_targets, results="hide", fig.width=8, fig.height=4, message=FALSE}
 # Perform background correction using norm-exponential strategy and normalize
 # across samples using quantile normalization.
 RG = limma::backgroundCorrect(RG, method="normexp")
@@ -215,7 +215,6 @@ condition; (2) its sampling time. We use different markers for each replicate.
 We also plot the second and third components in the second row.
 
 ```{r pca_plots, fig.width=8, fig.height=8}
-# FIXME Add legend
 graphics::par(mfrow=c(2, 2))
 graphics::plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC1"],
@@ -238,6 +237,7 @@ graphics::plot(
     col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     xlab="PC2", ylab="PC3")
+
 ```
 
 Then, we plot the pearson correlation across each samples. We order the
@@ -279,7 +279,7 @@ NMF::aheatmap(
 We can already see interesting patterns emerging from the correlation plot.
 First, the cross-correlation amongst samples taking from the control mice is
 higher than the cross correlation amongst the rest of the treatments. Second,
-the influenza-infected mice midly react until time point 36. Third, the
-California strain samples seem closer to control samples than the
-lowly-pathogenic Kawasaki samples. Fourth, the Vietnam samples at time point
-120 and 168 are the one that are the most different from control samples.
+the influenza-infected mice midly react until time point 36. Third, the less
+pathogenic the strain is, the closer the samples are to the control condition.
+Fourth, the Vietnam samples at time point 120 and 168 are the one that are the
+most different from control samples.
