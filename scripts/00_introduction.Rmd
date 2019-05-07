@@ -10,7 +10,6 @@ bibliography: bibliography.bib
 - Add legends to the plots that don't have.
 - Currently have two functions "plot_genes", "plot_centroids", that do exactly
   the same thing. Find a better name for both of them
-- On the schema plot, replace clustering schemas with something else.
 
 # Abstract
 
