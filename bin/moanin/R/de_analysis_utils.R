@@ -28,10 +28,10 @@ estimate_log_fold_change = function(data, splines_model,
 	log_fold_changes = lfc_per_time(data, meta, contrasts)
     }else if(method %in% c("sum", "max", "min", "abs_sum", "abs_squared_sum", "epicon")){
 	timely_lfc = lfc_per_time(data, meta, contrasts)
-	timely_lfc_meta = reconstruct_meta_from_lfc(timely_lfc)
+	timely_lfc_meta = reconstruct_meta_from_lfc(timely_lfc, split_char=":")
     	log_fold_changes = data.frame(row.names=row.names(data))
 	for(contrast in colnames(contrasts)){
-	    mask = timely_lfc_meta$Group == contrast
+	    mask = (timely_lfc_meta$Group == contrast) & !is.na(colSums(timely_lfc))
 	    if(method == "max"){
 		log_fold_changes[, contrast] = rowMax(abs(timely_lfc[, mask]))
 	    } else if(method == "min") {
@@ -102,20 +102,31 @@ lfc_per_time = function(data, meta, contrasts){
     averaged_meta = reconstruct_meta_from_lfc(averaged_data, split_char=":")
 
     averaged_meta$Timepoint = as.factor(averaged_meta$Timepoint)
-    sample_coefficients = lapply(averaged_meta$Group, function(x) return(contrasts[x, ]))
-    sample_coefficients = as.matrix(unlist(sample_coefficients))
-    dim(sample_coefficients) = c(dim(averaged_meta)[1], dim(contrasts)[2])
+    sample_coefficients = sapply(averaged_meta$Group, function(x) return(contrasts[x, ]))
+    if(is.null(dim(sample_coefficients))){
+	sample_coefficients = as.matrix(sample_coefficients)
+    }else{
+	sample_coefficients = t(sample_coefficients)
+    }
     colnames(sample_coefficients) = colnames(contrasts)
 
-    log_fold_changes = data.frame(row.names=row.names(data))
+    log_fold_changes = matrix(NA, dim(data)[1],
+			      dim(contrasts)[2]*length(unique(meta$Timepoint)))
+    row.names(log_fold_changes) = row.names(data)
+    colnames(log_fold_changes) = sapply(
+	colnames(sample_coefficients),
+	function(x){sapply(unique(averaged_meta$Timepoint), function(t){paste0(x, ":", t)})})
 
     for(column in colnames(sample_coefficients)){
 	
 	sample_coefficient = as.vector(unlist(sample_coefficients[, column]))
 	coef_data = t(t(averaged_data) * sample_coefficient)
-	for(timepoint in averaged_meta$Timepoint){
+	for(timepoint in unique(averaged_meta$Timepoint)){
 	    mask = averaged_meta$Timepoint == timepoint
-	    colname = paste0(column, ".", as.character(timepoint))
+	    if(sum(mask) != dim(contrasts)[1]){
+		next
+	    }
+	    colname = paste0(column, ":", as.character(timepoint))
 	    log_fold_changes[, colname] = rowSums(coef_data[, mask])
 	}
     }
