@@ -209,7 +209,7 @@ will, for each clustering experiment, conserve (1) with within cluster sum of
 squares; (2) the labels assigned to all genes.
 
 ```{r running_clustering_on_all_k}
-all_possible_n_clusters = c(5, 7, 9, 11, 13, 15)
+all_possible_n_clusters = c(5, 9, 11, 15)
 all_clustering = list()
 wss_values = list()
 
