@@ -140,7 +140,6 @@ term ID.
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
 library(topGO)
-#source("GO_terms_analysis.R")
 genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
@@ -162,4 +161,11 @@ go_terms_enriched = find_enriched_go_terms(
     gene_id_go_mapping, ontology="BP")
 ```
 
+```{r echo=FALSE}
 
+go_terms_enriched = go_terms_enriched[
+    order(go_terms_enriched[, "resultFisher_padj"]), ]
+
+kable(go_terms_enriched, "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
+```
