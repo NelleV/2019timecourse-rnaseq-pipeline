@@ -1,11 +1,9 @@
 RMD_FILES = $(wildcard *.Rmd)
-HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(RMD_FILES))
-R_FILES = $(patsubst %.Rmd, tmp/%.R, $(RMD_FILES))
+SUPP_RMD_FILES = $(wildcard miscellaneous/*.Rmd)
 
-PIPELINE_STEPS = step0_preprocessing \
-		 step2_normalization \
-		 step3_DE_analysis \
-		 step4_clustering
+HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(RMD_FILES))
+SUPP_HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(SUPP_RMD_FILES))
+
 
 all: html
 
@@ -16,9 +14,7 @@ complete: html
 	rm -f reports/04_downstream_analysis.html
 	make html
 
-pipeline:
-	for i in $(PIPELINE_STEPS); do $(MAKE) -C $$i all; done
-
+supp: $(SUPP_HTML_FILES)
 
 reports/02_differential_expression_analysis.html: 02_differential_expression_analysis.Rmd reports/01_quality_control_normalization.html
 	mkdir -p reports
@@ -34,9 +30,8 @@ reports/04_downstream_analysis.html: 04_downstream_analysis.Rmd reports/03_clust
 
 reports/%.html: %.Rmd
 	mkdir -p .results
-	mkdir -p reports
+	mkdir -p $(@D)
 	Rscript .scripts/compile_rmarkdown.R $< $@
-
 
 results/all_go_terms.tsv: .results/clustering_labels.txt
 	Rscript run_pathways.R
