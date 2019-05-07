@@ -322,18 +322,19 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>First, let us clean up the gene obtained and only select the genes we are going to use in the enrichment analysis. One can either use the whole set of genes, only the set of differentially expressed genes in each cluster, or a subset of genes that fit well to a cluster (based on some criterion).</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">gene_names =<span class="st"> </span><span class="kw">row.names</span>(labels)</a>
 <a class="sourceLine" id="cb2-2" data-line-number="2">gene_names =<span class="st"> </span>gene_names[<span class="op">!</span><span class="kw">is.na</span>(labels)]</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">labels =<span class="st"> </span>labels[<span class="op">!</span><span class="kw">is.na</span>(labels)]</a></code></pre></div>
+<a class="sourceLine" id="cb2-3" data-line-number="3">labels =<span class="st"> </span><span class="kw">as.vector</span>(labels[<span class="op">!</span><span class="kw">is.na</span>(labels)])</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw">names</span>(labels) =<span class="st"> </span>gene_names</a></code></pre></div>
 <div id="finding-enriched-pathways-using-biomart-and-keggprofile" class="section level3">
 <h3>Finding enriched pathways using <code>biomaRt</code> and <code>KEGGprofile</code></h3>
 <p>Let us first tackle the case of pathway enrichment analysis. We will leverage the packages <code>biomaRt</code> and <code>KEGGprofile</code> for this step. <code>KEGGprofile</code> is a package that easily allows to perform pathway enrichment analysis on a set of genes labeled with the ensembl annotation. We thus need to convert the gene names into the appropriate format. This is where <code>biomaRt</code> comes in handy: it enables easy conversion from one gene annotation to another. Here, we will use it to convert the gene names from the Refseq annotation to the ensembl one.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">library</span>(biomaRt)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">ensembl =<span class="st"> </span><span class="kw">useMart</span>(<span class="st">&quot;ensembl&quot;</span>)</a>
-<a class="sourceLine" id="cb3-3" data-line-number="3">ensembl =<span class="st"> </span><span class="kw">useDataset</span>(<span class="st">&quot;mmusculus_gene_ensembl&quot;</span>, <span class="dt">mart=</span>ensembl)</a></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">cluster =<span class="st"> </span><span class="dv">13</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">ensembl =<span class="st"> </span>biomaRt<span class="op">::</span><span class="kw">useMart</span>(<span class="st">&quot;ensembl&quot;</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">ensembl =<span class="st"> </span>biomaRt<span class="op">::</span><span class="kw">useDataset</span>(<span class="st">&quot;mmusculus_gene_ensembl&quot;</span>, <span class="dt">mart=</span>ensembl)</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">cluster =<span class="st"> </span><span class="dv">20</span></a>
 <a class="sourceLine" id="cb4-2" data-line-number="2">genes =<span class="st"> </span>gene_names[labels <span class="op">==</span><span class="st"> </span>cluster]</a>
 <a class="sourceLine" id="cb4-3" data-line-number="3"></a>
 <a class="sourceLine" id="cb4-4" data-line-number="4"><span class="co"># convert gene names</span></a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">genes =<span class="st"> </span><span class="kw">getBM</span>(<span class="dt">attributes=</span><span class="kw">c</span>(<span class="st">&quot;ensembl_gene_id&quot;</span>, <span class="st">&quot;entrezgene&quot;</span>),</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">genes =<span class="st"> </span>biomaRt<span class="op">::</span><span class="kw">getBM</span>(<span class="dt">attributes=</span><span class="kw">c</span>(<span class="st">&quot;ensembl_gene_id&quot;</span>, <span class="st">&quot;entrezgene&quot;</span>),</a>
 <a class="sourceLine" id="cb4-6" data-line-number="6">        <span class="dt">filters=</span><span class="st">&quot;refseq_mrna&quot;</span>, <span class="dt">values=</span>genes,</a>
 <a class="sourceLine" id="cb4-7" data-line-number="7">        <span class="dt">mart=</span>ensembl)[<span class="st">&quot;entrezgene&quot;</span>]</a>
 <a class="sourceLine" id="cb4-8" data-line-number="8">genes =<span class="st"> </span><span class="kw">as.vector</span>(<span class="kw">unlist</span>(genes))</a>
@@ -359,27 +360,13 @@ Adj. p-value
 <tbody>
 <tr>
 <td style="text-align:left;">
-04668
-</td>
-<td style="text-align:left;">
-TNF signaling pathway
-</td>
-<td style="text-align:right;">
-39
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
 05169
 </td>
 <td style="text-align:left;">
 Epstein-Barr virus infection
 </td>
 <td style="text-align:right;">
-27
+28
 </td>
 <td style="text-align:right;">
 0.0000
@@ -393,7 +380,21 @@ Epstein-Barr virus infection
 NOD-like receptor signaling pathway
 </td>
 <td style="text-align:right;">
-28
+29
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04668
+</td>
+<td style="text-align:left;">
+TNF signaling pathway
+</td>
+<td style="text-align:right;">
+38
 </td>
 <td style="text-align:right;">
 0.0000
@@ -407,7 +408,7 @@ NOD-like receptor signaling pathway
 Cytokine-cytokine receptor interaction
 </td>
 <td style="text-align:right;">
-23
+21
 </td>
 <td style="text-align:right;">
 0.0000
@@ -421,7 +422,7 @@ Cytokine-cytokine receptor interaction
 Influenza A
 </td>
 <td style="text-align:right;">
-30
+28
 </td>
 <td style="text-align:right;">
 0.0000
@@ -436,6 +437,20 @@ Toll-like receptor signaling pathway
 </td>
 <td style="text-align:right;">
 33
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05168
+</td>
+<td style="text-align:left;">
+Herpes simplex virus 1 infection
+</td>
+<td style="text-align:right;">
+16
 </td>
 <td style="text-align:right;">
 0.0000
@@ -471,27 +486,13 @@ Measles
 </tr>
 <tr>
 <td style="text-align:left;">
-05168
+04064
 </td>
 <td style="text-align:left;">
-Herpes simplex virus 1 infection
+NF-kappa B signaling pathway
 </td>
 <td style="text-align:right;">
-16
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05160
-</td>
-<td style="text-align:left;">
-Hepatitis C
-</td>
-<td style="text-align:right;">
-24
+29
 </td>
 <td style="text-align:right;">
 0.0000
@@ -513,27 +514,13 @@ Kaposi sarcoma-associated herpesvirus infection
 </tr>
 <tr>
 <td style="text-align:left;">
-04210
+05160
 </td>
 <td style="text-align:left;">
-Apoptosis
+Hepatitis C
 </td>
 <td style="text-align:right;">
-26
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04064
-</td>
-<td style="text-align:left;">
-NF-kappa B signaling pathway
-</td>
-<td style="text-align:right;">
-28
+24
 </td>
 <td style="text-align:right;">
 0.0000
@@ -547,7 +534,7 @@ NF-kappa B signaling pathway
 Human immunodeficiency virus 1 infection
 </td>
 <td style="text-align:right;">
-20
+19
 </td>
 <td style="text-align:right;">
 0.0000
@@ -569,20 +556,6 @@ Cytosolic DNA-sensing pathway
 </tr>
 <tr>
 <td style="text-align:left;">
-04657
-</td>
-<td style="text-align:left;">
-IL-17 signaling pathway
-</td>
-<td style="text-align:right;">
-30
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
 04380
 </td>
 <td style="text-align:left;">
@@ -590,6 +563,48 @@ Osteoclast differentiation
 </td>
 <td style="text-align:right;">
 25
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04630
+</td>
+<td style="text-align:left;">
+JAK-STAT signaling pathway
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04657
+</td>
+<td style="text-align:left;">
+IL-17 signaling pathway
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04622
+</td>
+<td style="text-align:left;">
+RIG-I-like receptor signaling pathway
+</td>
+<td style="text-align:right;">
+32
 </td>
 <td style="text-align:right;">
 0.0000
@@ -611,6 +626,20 @@ Type I diabetes mellitus
 </tr>
 <tr>
 <td style="text-align:left;">
+04612
+</td>
+<td style="text-align:left;">
+Antigen processing and presentation
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 05332
 </td>
 <td style="text-align:left;">
@@ -625,97 +654,13 @@ Graft-versus-host disease
 </tr>
 <tr>
 <td style="text-align:left;">
-04062
+04210
 </td>
 <td style="text-align:left;">
-Chemokine signaling pathway
+Apoptosis
 </td>
 <td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04630
-</td>
-<td style="text-align:left;">
-JAK-STAT signaling pathway
-</td>
-<td style="text-align:right;">
-21
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04622
-</td>
-<td style="text-align:left;">
-RIG-I-like receptor signaling pathway
-</td>
-<td style="text-align:right;">
-31
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05134
-</td>
-<td style="text-align:left;">
-Legionellosis
-</td>
-<td style="text-align:right;">
-33
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04612
-</td>
-<td style="text-align:left;">
-Antigen processing and presentation
-</td>
-<td style="text-align:right;">
-25
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05330
-</td>
-<td style="text-align:left;">
-Allograft rejection
-</td>
-<td style="text-align:right;">
-30
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05320
-</td>
-<td style="text-align:left;">
-Autoimmune thyroid disease
-</td>
-<td style="text-align:right;">
-27
+22
 </td>
 <td style="text-align:right;">
 0.0000
@@ -737,13 +682,13 @@ Necroptosis
 </tr>
 <tr>
 <td style="text-align:left;">
-05161
+05330
 </td>
 <td style="text-align:left;">
-Hepatitis B
+Allograft rejection
 </td>
 <td style="text-align:right;">
-19
+30
 </td>
 <td style="text-align:right;">
 0.0000
@@ -751,13 +696,55 @@ Hepatitis B
 </tr>
 <tr>
 <td style="text-align:left;">
-05152
+04062
 </td>
 <td style="text-align:left;">
-Tuberculosis
+Chemokine signaling pathway
 </td>
 <td style="text-align:right;">
 18
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05134
+</td>
+<td style="text-align:left;">
+Legionellosis
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05320
+</td>
+<td style="text-align:left;">
+Autoimmune thyroid disease
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05165
+</td>
+<td style="text-align:left;">
+Human papillomavirus infection
+</td>
+<td style="text-align:right;">
+13
 </td>
 <td style="text-align:right;">
 0.0000
@@ -779,6 +766,34 @@ C-type lectin receptor signaling pathway
 </tr>
 <tr>
 <td style="text-align:left;">
+05152
+</td>
+<td style="text-align:left;">
+Tuberculosis
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05133
+</td>
+<td style="text-align:left;">
+Pertussis
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 05144
 </td>
 <td style="text-align:left;">
@@ -793,69 +808,13 @@ Malaria
 </tr>
 <tr>
 <td style="text-align:left;">
-05323
-</td>
-<td style="text-align:left;">
-Rheumatoid arthritis
-</td>
-<td style="text-align:right;">
-24
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05140
-</td>
-<td style="text-align:left;">
-Leishmaniasis
-</td>
-<td style="text-align:right;">
-25
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05133
-</td>
-<td style="text-align:left;">
-Pertussis
-</td>
-<td style="text-align:right;">
-24
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04650
-</td>
-<td style="text-align:left;">
-Natural killer cell mediated cytotoxicity
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
 04145
 </td>
 <td style="text-align:left;">
 Phagosome
 </td>
 <td style="text-align:right;">
-16
+17
 </td>
 <td style="text-align:right;">
 0.0000
@@ -863,41 +822,13 @@ Phagosome
 </tr>
 <tr>
 <td style="text-align:left;">
-05165
+05161
 </td>
 <td style="text-align:left;">
-Human papillomavirus infection
+Hepatitis B
 </td>
 <td style="text-align:right;">
-12
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05142
-</td>
-<td style="text-align:left;">
-Chagas disease (American trypanosomiasis)
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-0.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05416
-</td>
-<td style="text-align:left;">
-Viral myocarditis
-</td>
-<td style="text-align:right;">
-20
+17
 </td>
 <td style="text-align:right;">
 0.0000
@@ -919,13 +850,97 @@ Human T-cell leukemia virus 1 infection
 </tr>
 <tr>
 <td style="text-align:left;">
-05202
+05321
 </td>
 <td style="text-align:left;">
-Transcriptional misregulation in cancer
+Inflammatory bowel disease (IBD)
 </td>
 <td style="text-align:right;">
-15
+25
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04650
+</td>
+<td style="text-align:left;">
+Natural killer cell mediated cytotoxicity
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05140
+</td>
+<td style="text-align:left;">
+Leishmaniasis
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05323
+</td>
+<td style="text-align:left;">
+Rheumatoid arthritis
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04514
+</td>
+<td style="text-align:left;">
+Cell adhesion molecules (CAMs)
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05416
+</td>
+<td style="text-align:left;">
+Viral myocarditis
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05203
+</td>
+<td style="text-align:left;">
+Viral carcinogenesis
+</td>
+<td style="text-align:right;">
+14
 </td>
 <td style="text-align:right;">
 0.0000
@@ -939,7 +954,7 @@ Transcriptional misregulation in cancer
 Toxoplasmosis
 </td>
 <td style="text-align:right;">
-18
+19
 </td>
 <td style="text-align:right;">
 0.0000
@@ -947,100 +962,16 @@ Toxoplasmosis
 </tr>
 <tr>
 <td style="text-align:left;">
-05321
+05142
 </td>
 <td style="text-align:left;">
-Inflammatory bowel disease (IBD)
-</td>
-<td style="text-align:right;">
-22
-</td>
-<td style="text-align:right;">
-0.0001
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04514
-</td>
-<td style="text-align:left;">
-Cell adhesion molecules (CAMs)
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-0.0001
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05203
-</td>
-<td style="text-align:left;">
-Viral carcinogenesis
-</td>
-<td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-0.0001
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05200
-</td>
-<td style="text-align:left;">
-Pathways in cancer
-</td>
-<td style="text-align:right;">
-10
-</td>
-<td style="text-align:right;">
-0.0002
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04115
-</td>
-<td style="text-align:left;">
-p53 signaling pathway
+Chagas disease (American trypanosomiasis)
 </td>
 <td style="text-align:right;">
 18
 </td>
 <td style="text-align:right;">
-0.0005
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05143
-</td>
-<td style="text-align:left;">
-African trypanosomiasis
-</td>
-<td style="text-align:right;">
-23
-</td>
-<td style="text-align:right;">
-0.0005
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04215
-</td>
-<td style="text-align:left;">
-Apoptosis - multiple species
-</td>
-<td style="text-align:right;">
-25
-</td>
-<td style="text-align:right;">
-0.0005
+0.0000
 </td>
 </tr>
 <tr>
@@ -1054,49 +985,7 @@ AGE-RAGE signaling pathway in diabetic complications
 16
 </td>
 <td style="text-align:right;">
-0.0006
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05020
-</td>
-<td style="text-align:left;">
-Prion diseases
-</td>
-<td style="text-align:right;">
-24
-</td>
-<td style="text-align:right;">
-0.0008
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04610
-</td>
-<td style="text-align:left;">
-Complement and coagulation cascades
-</td>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:right;">
-0.0013
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05014
-</td>
-<td style="text-align:left;">
-Amyotrophic lateral sclerosis (ALS)
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-0.0013
+0.0002
 </td>
 </tr>
 <tr>
@@ -1110,35 +999,91 @@ Cellular senescence
 12
 </td>
 <td style="text-align:right;">
-0.0015
+0.0004
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-04151
+05200
 </td>
 <td style="text-align:left;">
-PI3K-Akt signaling pathway
+Pathways in cancer
 </td>
 <td style="text-align:right;">
-10
+9
 </td>
 <td style="text-align:right;">
-0.0026
+0.0004
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-04010
+05020
 </td>
 <td style="text-align:left;">
-MAPK signaling pathway
+Prion diseases
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+0.0004
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04144
+</td>
+<td style="text-align:left;">
+Endocytosis
 </td>
 <td style="text-align:right;">
 11
 </td>
 <td style="text-align:right;">
-0.0028
+0.0006
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05143
+</td>
+<td style="text-align:left;">
+African trypanosomiasis
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0.0012
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04666
+</td>
+<td style="text-align:left;">
+Fc gamma R-mediated phagocytosis
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.0014
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04215
+</td>
+<td style="text-align:left;">
+Apoptosis - multiple species
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+0.0015
 </td>
 </tr>
 <tr>
@@ -1152,21 +1097,35 @@ Salmonella infection
 15
 </td>
 <td style="text-align:right;">
-0.0038
+0.0015
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-04672
+05202
 </td>
 <td style="text-align:left;">
-Intestinal immune network for IgA production
+Transcriptional misregulation in cancer
 </td>
 <td style="text-align:right;">
-19
+11
 </td>
 <td style="text-align:right;">
-0.0048
+0.0018
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05014
+</td>
+<td style="text-align:left;">
+Amyotrophic lateral sclerosis (ALS)
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.0024
 </td>
 </tr>
 <tr>
@@ -1180,35 +1139,21 @@ B cell receptor signaling pathway
 15
 </td>
 <td style="text-align:right;">
-0.0058
+0.0025
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-05222
+04151
 </td>
 <td style="text-align:left;">
-Small cell lung cancer
+PI3K-Akt signaling pathway
 </td>
 <td style="text-align:right;">
-14
+9
 </td>
 <td style="text-align:right;">
-0.0058
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-05216
-</td>
-<td style="text-align:left;">
-Thyroid cancer
-</td>
-<td style="text-align:right;">
-19
-</td>
-<td style="text-align:right;">
-0.0071
+0.0032
 </td>
 </tr>
 <tr>
@@ -1222,35 +1167,35 @@ Proteasome
 17
 </td>
 <td style="text-align:right;">
-0.0074
+0.0039
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-01524
+04010
 </td>
 <td style="text-align:left;">
-Platinum drug resistance
+MAPK signaling pathway
 </td>
 <td style="text-align:right;">
-14
+10
 </td>
 <td style="text-align:right;">
-0.0100
+0.0047
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-05322
+04660
 </td>
 <td style="text-align:left;">
-Systemic lupus erythematosus
+T cell receptor signaling pathway
 </td>
 <td style="text-align:right;">
-12
+13
 </td>
 <td style="text-align:right;">
-0.0100
+0.0054
 </td>
 </tr>
 <tr>
@@ -1264,7 +1209,7 @@ Acute myeloid leukemia
 14
 </td>
 <td style="text-align:right;">
-0.0122
+0.0058
 </td>
 </tr>
 <tr>
@@ -1278,21 +1223,35 @@ HIF-1 signaling pathway
 12
 </td>
 <td style="text-align:right;">
-0.0180
+0.0076
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-04640
+04917
 </td>
 <td style="text-align:left;">
-Hematopoietic cell lineage
+Prolactin signaling pathway
 </td>
 <td style="text-align:right;">
-13
+14
 </td>
 <td style="text-align:right;">
-0.0193
+0.0080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05322
+</td>
+<td style="text-align:left;">
+Systemic lupus erythematosus
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+0.0083
 </td>
 </tr>
 <tr>
@@ -1306,63 +1265,91 @@ Staphylococcus aureus infection
 12
 </td>
 <td style="text-align:right;">
-0.0208
+0.0092
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-05418
+04672
 </td>
 <td style="text-align:left;">
-Fluid shear stress and atherosclerosis
+Intestinal immune network for IgA production
 </td>
 <td style="text-align:right;">
-11
+16
 </td>
 <td style="text-align:right;">
-0.0217
+0.0093
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-05340
+05212
 </td>
 <td style="text-align:left;">
-Primary immunodeficiency
-</td>
-<td style="text-align:right;">
-17
-</td>
-<td style="text-align:right;">
-0.0224
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-04666
-</td>
-<td style="text-align:left;">
-Fc gamma R-mediated phagocytosis
+Pancreatic cancer
 </td>
 <td style="text-align:right;">
 13
 </td>
 <td style="text-align:right;">
-0.0240
+0.0105
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-04660
+04658
 </td>
 <td style="text-align:left;">
-T cell receptor signaling pathway
+Th1 and Th2 cell differentiation
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0.0112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05223
+</td>
+<td style="text-align:left;">
+Non-small cell lung cancer
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.0126
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04659
+</td>
+<td style="text-align:left;">
+Th17 cell differentiation
 </td>
 <td style="text-align:right;">
 12
 </td>
 <td style="text-align:right;">
-0.0302
+0.0144
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05222
+</td>
+<td style="text-align:left;">
+Small cell lung cancer
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0.0168
 </td>
 </tr>
 <tr>
@@ -1376,21 +1363,77 @@ Type II diabetes mellitus
 15
 </td>
 <td style="text-align:right;">
-0.0312
+0.0173
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-04144
+05418
 </td>
 <td style="text-align:left;">
-Endocytosis
+Fluid shear stress and atherosclerosis
 </td>
 <td style="text-align:right;">
-9
+10
 </td>
 <td style="text-align:right;">
-0.0365
+0.0180
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04115
+</td>
+<td style="text-align:left;">
+p53 signaling pathway
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0.0196
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04920
+</td>
+<td style="text-align:left;">
+Adipocytokine signaling pathway
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0.0196
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+04640
+</td>
+<td style="text-align:left;">
+Hematopoietic cell lineage
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0.0205
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+05218
+</td>
+<td style="text-align:left;">
+Melanoma
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0.0211
 </td>
 </tr>
 </tbody>
@@ -1407,10 +1450,10 @@ $NM_201361
  [1] &quot;GO:0016020&quot; &quot;GO:0016021&quot; &quot;GO:0003674&quot; &quot;GO:0008150&quot; &quot;GO:0005794&quot;
  [6] &quot;GO:0005829&quot; &quot;GO:0005737&quot; &quot;GO:0005856&quot; &quot;GO:0005874&quot; &quot;GO:0005739&quot;
 [11] &quot;GO:0005819&quot; &quot;GO:0000922&quot; &quot;GO:0072686&quot;</code></pre>
-<p><code>biomaRt</code> queries results a matrix with two named columns of gene names and GO term ID. <strong>FIXME</strong> matrix or data.frame??</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># </span><span class="al">FIXME</span><span class="co"> move this to the package</span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">source</span>(<span class="st">&quot;GO_terms_analysis.R&quot;</span>)</a>
-<a class="sourceLine" id="cb6-3" data-line-number="3">genes =<span class="st"> </span><span class="kw">getBM</span>(<span class="dt">attributes=</span><span class="kw">c</span>(<span class="st">&quot;go_id&quot;</span>, <span class="st">&quot;refseq_mrna&quot;</span>),</a>
+<p><code>biomaRt</code> queries results a matrix with two named columns of gene names and GO term ID.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">library</span>(topGO)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="co">#source(&quot;GO_terms_analysis.R&quot;)</span></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3">genes =<span class="st"> </span>biomaRt<span class="op">::</span><span class="kw">getBM</span>(<span class="dt">attributes=</span><span class="kw">c</span>(<span class="st">&quot;go_id&quot;</span>, <span class="st">&quot;refseq_mrna&quot;</span>),</a>
 <a class="sourceLine" id="cb6-4" data-line-number="4">          <span class="dt">values=</span>gene_names,</a>
 <a class="sourceLine" id="cb6-5" data-line-number="5">          <span class="dt">filters=</span><span class="st">&quot;refseq_mrna&quot;</span>,</a>
 <a class="sourceLine" id="cb6-6" data-line-number="6">          <span class="dt">mart=</span>ensembl)</a>
@@ -1418,1472 +1461,11 @@ $NM_201361
 <a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co"># Create gene to GO id mapping</span></a>
 <a class="sourceLine" id="cb6-9" data-line-number="9">gene_id_go_mapping =<span class="st"> </span><span class="kw">create_go_term_mapping</span>(genes)</a></code></pre></div>
 <p>Once the gene ID to GO mapping list is created, <code>moanin</code> provides a simple interface to <code>topGO</code> to fetch enriched GO terms. Here, we show an example of running a GO term enrichment on the “Biological process” ontology (BP).</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">scores =<span class="st"> </span><span class="kw">as.numeric</span>(labels <span class="op">==</span><span class="st"> </span>cluster)</a>
-<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">names</span>(scores) =<span class="st"> </span>gene_names</a>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">assignments =<span class="st"> </span>labels <span class="op">==</span><span class="st"> </span>cluster</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
 <a class="sourceLine" id="cb7-3" data-line-number="3">go_terms_enriched =<span class="st"> </span><span class="kw">find_enriched_go_terms</span>(</a>
-<a class="sourceLine" id="cb7-4" data-line-number="4">    scores,</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">    assignments,</a>
 <a class="sourceLine" id="cb7-5" data-line-number="5">    gene_id_go_mapping, <span class="dt">ontology=</span><span class="st">&quot;BP&quot;</span>)</a></code></pre></div>
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;">
-</th>
-<th style="text-align:left;">
-GO.ID
-</th>
-<th style="text-align:left;">
-Term
-</th>
-<th style="text-align:right;">
-Annotated
-</th>
-<th style="text-align:right;">
-Significant
-</th>
-<th style="text-align:right;">
-Expected
-</th>
-<th style="text-align:left;">
-resultFisher
-</th>
-<th style="text-align:right;">
-resultFisher_padj
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-4
-</td>
-<td style="text-align:left;">
-<a href="GO:0042254" class="uri">GO:0042254</a>
-</td>
-<td style="text-align:left;">
-ribosome biogenesis
-</td>
-<td style="text-align:right;">
-149
-</td>
-<td style="text-align:right;">
-145
-</td>
-<td style="text-align:right;">
-133.15
-</td>
-<td style="text-align:left;">
-0.00025
-</td>
-<td style="text-align:right;">
-0.3134
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-5
-</td>
-<td style="text-align:left;">
-<a href="GO:0071805" class="uri">GO:0071805</a>
-</td>
-<td style="text-align:left;">
-potassium ion transmembrane transport
-</td>
-<td style="text-align:right;">
-88
-</td>
-<td style="text-align:right;">
-87
-</td>
-<td style="text-align:right;">
-78.64
-</td>
-<td style="text-align:left;">
-0.00055
-</td>
-<td style="text-align:right;">
-0.5515
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-6
-</td>
-<td style="text-align:left;">
-<a href="GO:0030048" class="uri">GO:0030048</a>
-</td>
-<td style="text-align:left;">
-actin filament-based movement
-</td>
-<td style="text-align:right;">
-60
-</td>
-<td style="text-align:right;">
-60
-</td>
-<td style="text-align:right;">
-53.62
-</td>
-<td style="text-align:left;">
-0.00115
-</td>
-<td style="text-align:right;">
-0.9610
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-7
-</td>
-<td style="text-align:left;">
-<a href="GO:0050684" class="uri">GO:0050684</a>
-</td>
-<td style="text-align:left;">
-regulation of mRNA processing
-</td>
-<td style="text-align:right;">
-56
-</td>
-<td style="text-align:right;">
-56
-</td>
-<td style="text-align:right;">
-50.04
-</td>
-<td style="text-align:left;">
-0.00180
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-8
-</td>
-<td style="text-align:left;">
-<a href="GO:0050911" class="uri">GO:0050911</a>
-</td>
-<td style="text-align:left;">
-detection of chemical stimulus involved …
-</td>
-<td style="text-align:right;">
-140
-</td>
-<td style="text-align:right;">
-135
-</td>
-<td style="text-align:right;">
-125.11
-</td>
-<td style="text-align:left;">
-0.00191
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-9
-</td>
-<td style="text-align:left;">
-<a href="GO:0060173" class="uri">GO:0060173</a>
-</td>
-<td style="text-align:left;">
-limb development
-</td>
-<td style="text-align:right;">
-91
-</td>
-<td style="text-align:right;">
-89
-</td>
-<td style="text-align:right;">
-81.32
-</td>
-<td style="text-align:left;">
-0.00243
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-10
-</td>
-<td style="text-align:left;">
-<a href="GO:0016570" class="uri">GO:0016570</a>
-</td>
-<td style="text-align:left;">
-histone modification
-</td>
-<td style="text-align:right;">
-228
-</td>
-<td style="text-align:right;">
-217
-</td>
-<td style="text-align:right;">
-203.75
-</td>
-<td style="text-align:left;">
-0.00273
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-11
-</td>
-<td style="text-align:left;">
-<a href="GO:0009755" class="uri">GO:0009755</a>
-</td>
-<td style="text-align:left;">
-hormone-mediated signaling pathway
-</td>
-<td style="text-align:right;">
-88
-</td>
-<td style="text-align:right;">
-86
-</td>
-<td style="text-align:right;">
-78.64
-</td>
-<td style="text-align:left;">
-0.00321
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-12
-</td>
-<td style="text-align:left;">
-<a href="GO:0060070" class="uri">GO:0060070</a>
-</td>
-<td style="text-align:left;">
-canonical Wnt signaling pathway
-</td>
-<td style="text-align:right;">
-152
-</td>
-<td style="text-align:right;">
-145
-</td>
-<td style="text-align:right;">
-135.83
-</td>
-<td style="text-align:left;">
-0.00623
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-13
-</td>
-<td style="text-align:left;">
-<a href="GO:0048704" class="uri">GO:0048704</a>
-</td>
-<td style="text-align:left;">
-embryonic skeletal system morphogenesis
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-40.21
-</td>
-<td style="text-align:left;">
-0.00626
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-14
-</td>
-<td style="text-align:left;">
-<a href="GO:0060048" class="uri">GO:0060048</a>
-</td>
-<td style="text-align:left;">
-cardiac muscle contraction
-</td>
-<td style="text-align:right;">
-64
-</td>
-<td style="text-align:right;">
-63
-</td>
-<td style="text-align:right;">
-57.19
-</td>
-<td style="text-align:left;">
-0.00633
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-15
-</td>
-<td style="text-align:left;">
-<a href="GO:0018394" class="uri">GO:0018394</a>
-</td>
-<td style="text-align:left;">
-peptidyl-lysine acetylation
-</td>
-<td style="text-align:right;">
-79
-</td>
-<td style="text-align:right;">
-77
-</td>
-<td style="text-align:right;">
-70.60
-</td>
-<td style="text-align:left;">
-0.00731
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-16
-</td>
-<td style="text-align:left;">
-<a href="GO:0001764" class="uri">GO:0001764</a>
-</td>
-<td style="text-align:left;">
-neuron migration
-</td>
-<td style="text-align:right;">
-79
-</td>
-<td style="text-align:right;">
-77
-</td>
-<td style="text-align:right;">
-70.60
-</td>
-<td style="text-align:left;">
-0.00731
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-17
-</td>
-<td style="text-align:left;">
-<a href="GO:0006805" class="uri">GO:0006805</a>
-</td>
-<td style="text-align:left;">
-xenobiotic metabolic process
-</td>
-<td style="text-align:right;">
-42
-</td>
-<td style="text-align:right;">
-42
-</td>
-<td style="text-align:right;">
-37.53
-</td>
-<td style="text-align:left;">
-0.00879
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-18
-</td>
-<td style="text-align:left;">
-<a href="GO:0007156" class="uri">GO:0007156</a>
-</td>
-<td style="text-align:left;">
-homophilic cell adhesion via plasma memb…
-</td>
-<td style="text-align:right;">
-60
-</td>
-<td style="text-align:right;">
-59
-</td>
-<td style="text-align:right;">
-53.62
-</td>
-<td style="text-align:left;">
-0.00940
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-19
-</td>
-<td style="text-align:left;">
-<a href="GO:0032543" class="uri">GO:0032543</a>
-</td>
-<td style="text-align:left;">
-mitochondrial translation
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-35.75
-</td>
-<td style="text-align:left;">
-0.01102
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-20
-</td>
-<td style="text-align:left;">
-<a href="GO:0006475" class="uri">GO:0006475</a>
-</td>
-<td style="text-align:left;">
-internal protein amino acid acetylation
-</td>
-<td style="text-align:right;">
-74
-</td>
-<td style="text-align:right;">
-72
-</td>
-<td style="text-align:right;">
-66.13
-</td>
-<td style="text-align:left;">
-0.01146
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-21
-</td>
-<td style="text-align:left;">
-<a href="GO:0006631" class="uri">GO:0006631</a>
-</td>
-<td style="text-align:left;">
-fatty acid metabolic process
-</td>
-<td style="text-align:right;">
-189
-</td>
-<td style="text-align:right;">
-180
-</td>
-<td style="text-align:right;">
-168.90
-</td>
-<td style="text-align:left;">
-0.01202
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-22
-</td>
-<td style="text-align:left;">
-<a href="GO:0072659" class="uri">GO:0072659</a>
-</td>
-<td style="text-align:left;">
-protein localization to plasma membrane
-</td>
-<td style="text-align:right;">
-142
-</td>
-<td style="text-align:right;">
-135
-</td>
-<td style="text-align:right;">
-126.90
-</td>
-<td style="text-align:left;">
-0.01240
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-23
-</td>
-<td style="text-align:left;">
-<a href="GO:0010970" class="uri">GO:0010970</a>
-</td>
-<td style="text-align:left;">
-transport along microtubule
-</td>
-<td style="text-align:right;">
-87
-</td>
-<td style="text-align:right;">
-84
-</td>
-<td style="text-align:right;">
-77.75
-</td>
-<td style="text-align:left;">
-0.01338
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-24
-</td>
-<td style="text-align:left;">
-<a href="GO:0044272" class="uri">GO:0044272</a>
-</td>
-<td style="text-align:left;">
-sulfur compound biosynthetic process
-</td>
-<td style="text-align:right;">
-49
-</td>
-<td style="text-align:right;">
-48
-</td>
-<td style="text-align:right;">
-43.79
-</td>
-<td style="text-align:left;">
-0.01380
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-25
-</td>
-<td style="text-align:left;">
-<a href="GO:0035305" class="uri">GO:0035305</a>
-</td>
-<td style="text-align:left;">
-negative regulation of dephosphorylation
-</td>
-<td style="text-align:right;">
-55
-</td>
-<td style="text-align:right;">
-54
-</td>
-<td style="text-align:right;">
-49.15
-</td>
-<td style="text-align:left;">
-0.01534
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-26
-</td>
-<td style="text-align:left;">
-<a href="GO:0000086" class="uri">GO:0000086</a>
-</td>
-<td style="text-align:left;">
-G2/M transition of mitotic cell cycle
-</td>
-<td style="text-align:right;">
-54
-</td>
-<td style="text-align:right;">
-53
-</td>
-<td style="text-align:right;">
-48.26
-</td>
-<td style="text-align:left;">
-0.01690
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-27
-</td>
-<td style="text-align:left;">
-<a href="GO:0019748" class="uri">GO:0019748</a>
-</td>
-<td style="text-align:left;">
-secondary metabolic process
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-32.17
-</td>
-<td style="text-align:left;">
-0.01731
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-28
-</td>
-<td style="text-align:left;">
-<a href="GO:0009150" class="uri">GO:0009150</a>
-</td>
-<td style="text-align:left;">
-purine ribonucleotide metabolic process
-</td>
-<td style="text-align:right;">
-212
-</td>
-<td style="text-align:right;">
-200
-</td>
-<td style="text-align:right;">
-189.45
-</td>
-<td style="text-align:left;">
-0.02405
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-29
-</td>
-<td style="text-align:left;">
-<a href="GO:0016197" class="uri">GO:0016197</a>
-</td>
-<td style="text-align:left;">
-endosomal transport
-</td>
-<td style="text-align:right;">
-106
-</td>
-<td style="text-align:right;">
-101
-</td>
-<td style="text-align:right;">
-94.73
-</td>
-<td style="text-align:left;">
-0.02491
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-30
-</td>
-<td style="text-align:left;">
-<a href="GO:0014031" class="uri">GO:0014031</a>
-</td>
-<td style="text-align:left;">
-mesenchymal cell development
-</td>
-<td style="text-align:right;">
-49
-</td>
-<td style="text-align:right;">
-48
-</td>
-<td style="text-align:right;">
-43.79
-</td>
-<td style="text-align:left;">
-0.02735
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-31
-</td>
-<td style="text-align:left;">
-<a href="GO:0021915" class="uri">GO:0021915</a>
-</td>
-<td style="text-align:left;">
-neural tube development
-</td>
-<td style="text-align:right;">
-104
-</td>
-<td style="text-align:right;">
-99
-</td>
-<td style="text-align:right;">
-92.94
-</td>
-<td style="text-align:left;">
-0.02864
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-32
-</td>
-<td style="text-align:left;">
-<a href="GO:0072175" class="uri">GO:0072175</a>
-</td>
-<td style="text-align:left;">
-epithelial tube formation
-</td>
-<td style="text-align:right;">
-89
-</td>
-<td style="text-align:right;">
-85
-</td>
-<td style="text-align:right;">
-79.53
-</td>
-<td style="text-align:left;">
-0.03308
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-33
-</td>
-<td style="text-align:left;">
-<a href="GO:0021510" class="uri">GO:0021510</a>
-</td>
-<td style="text-align:left;">
-spinal cord development
-</td>
-<td style="text-align:right;">
-47
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:left;">
-0.03309
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-34
-</td>
-<td style="text-align:left;">
-<a href="GO:0006497" class="uri">GO:0006497</a>
-</td>
-<td style="text-align:left;">
-protein lipidation
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-41.11
-</td>
-<td style="text-align:left;">
-0.03638
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-35
-</td>
-<td style="text-align:left;">
-<a href="GO:0021795" class="uri">GO:0021795</a>
-</td>
-<td style="text-align:left;">
-cerebral cortex cell migration
-</td>
-<td style="text-align:right;">
-29
-</td>
-<td style="text-align:right;">
-29
-</td>
-<td style="text-align:right;">
-25.92
-</td>
-<td style="text-align:left;">
-0.03815
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-36
-</td>
-<td style="text-align:left;">
-<a href="GO:0060119" class="uri">GO:0060119</a>
-</td>
-<td style="text-align:left;">
-inner ear receptor cell development
-</td>
-<td style="text-align:right;">
-29
-</td>
-<td style="text-align:right;">
-29
-</td>
-<td style="text-align:right;">
-25.92
-</td>
-<td style="text-align:left;">
-0.03815
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-37
-</td>
-<td style="text-align:left;">
-<a href="GO:0050795" class="uri">GO:0050795</a>
-</td>
-<td style="text-align:left;">
-regulation of behavior
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-34
-</td>
-<td style="text-align:right;">
-32.17
-</td>
-<td style="text-align:left;">
-0.03832
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-38
-</td>
-<td style="text-align:left;">
-<a href="GO:0006261" class="uri">GO:0006261</a>
-</td>
-<td style="text-align:left;">
-DNA-dependent DNA replication
-</td>
-<td style="text-align:right;">
-67
-</td>
-<td style="text-align:right;">
-64
-</td>
-<td style="text-align:right;">
-59.87
-</td>
-<td style="text-align:left;">
-0.03861
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-39
-</td>
-<td style="text-align:left;">
-<a href="GO:0060341" class="uri">GO:0060341</a>
-</td>
-<td style="text-align:left;">
-regulation of cellular localization
-</td>
-<td style="text-align:right;">
-494
-</td>
-<td style="text-align:right;">
-460
-</td>
-<td style="text-align:right;">
-441.46
-</td>
-<td style="text-align:left;">
-0.03954
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-40
-</td>
-<td style="text-align:left;">
-<a href="GO:0001738" class="uri">GO:0001738</a>
-</td>
-<td style="text-align:left;">
-morphogenesis of a polarized epithelium
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-44
-</td>
-<td style="text-align:right;">
-40.21
-</td>
-<td style="text-align:left;">
-0.03998
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-41
-</td>
-<td style="text-align:left;">
-<a href="GO:0006626" class="uri">GO:0006626</a>
-</td>
-<td style="text-align:left;">
-protein targeting to mitochondrion
-</td>
-<td style="text-align:right;">
-45
-</td>
-<td style="text-align:right;">
-44
-</td>
-<td style="text-align:right;">
-40.21
-</td>
-<td style="text-align:left;">
-0.03998
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-42
-</td>
-<td style="text-align:left;">
-<a href="GO:0070849" class="uri">GO:0070849</a>
-</td>
-<td style="text-align:left;">
-response to epidermal growth factor
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-43
-</td>
-<td style="text-align:left;">
-<a href="GO:0061337" class="uri">GO:0061337</a>
-</td>
-<td style="text-align:left;">
-cardiac conduction
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-44
-</td>
-<td style="text-align:left;">
-<a href="GO:0032330" class="uri">GO:0032330</a>
-</td>
-<td style="text-align:left;">
-regulation of chondrocyte differentiatio…
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-45
-</td>
-<td style="text-align:left;">
-<a href="GO:0055078" class="uri">GO:0055078</a>
-</td>
-<td style="text-align:left;">
-sodium ion homeostasis
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-46
-</td>
-<td style="text-align:left;">
-<a href="GO:0050919" class="uri">GO:0050919</a>
-</td>
-<td style="text-align:left;">
-negative chemotaxis
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-47
-</td>
-<td style="text-align:left;">
-<a href="GO:0007405" class="uri">GO:0007405</a>
-</td>
-<td style="text-align:left;">
-neuroblast proliferation
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-48
-</td>
-<td style="text-align:left;">
-<a href="GO:0018208" class="uri">GO:0018208</a>
-</td>
-<td style="text-align:left;">
-peptidyl-proline modification
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-49
-</td>
-<td style="text-align:left;">
-<a href="GO:0030166" class="uri">GO:0030166</a>
-</td>
-<td style="text-align:left;">
-proteoglycan biosynthetic process
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-28
-</td>
-<td style="text-align:right;">
-25.02
-</td>
-<td style="text-align:left;">
-0.04270
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-50
-</td>
-<td style="text-align:left;">
-<a href="GO:0006112" class="uri">GO:0006112</a>
-</td>
-<td style="text-align:left;">
-energy reserve metabolic process
-</td>
-<td style="text-align:right;">
-44
-</td>
-<td style="text-align:right;">
-43
-</td>
-<td style="text-align:right;">
-39.32
-</td>
-<td style="text-align:left;">
-0.04392
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-51
-</td>
-<td style="text-align:left;">
-<a href="GO:0035023" class="uri">GO:0035023</a>
-</td>
-<td style="text-align:left;">
-regulation of Rho protein signal transdu…
-</td>
-<td style="text-align:right;">
-72
-</td>
-<td style="text-align:right;">
-69
-</td>
-<td style="text-align:right;">
-64.34
-</td>
-<td style="text-align:left;">
-0.04398
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-52
-</td>
-<td style="text-align:left;">
-<a href="GO:0030307" class="uri">GO:0030307</a>
-</td>
-<td style="text-align:left;">
-positive regulation of cell growth
-</td>
-<td style="text-align:right;">
-97
-</td>
-<td style="text-align:right;">
-92
-</td>
-<td style="text-align:right;">
-86.68
-</td>
-<td style="text-align:left;">
-0.04608
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-53
-</td>
-<td style="text-align:left;">
-<a href="GO:0071826" class="uri">GO:0071826</a>
-</td>
-<td style="text-align:left;">
-ribonucleoprotein complex subunit organi…
-</td>
-<td style="text-align:right;">
-121
-</td>
-<td style="text-align:right;">
-114
-</td>
-<td style="text-align:right;">
-108.13
-</td>
-<td style="text-align:left;">
-0.04741
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-54
-</td>
-<td style="text-align:left;">
-<a href="GO:0086001" class="uri">GO:0086001</a>
-</td>
-<td style="text-align:left;">
-cardiac muscle cell action potential
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-24.13
-</td>
-<td style="text-align:left;">
-0.04780
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-55
-</td>
-<td style="text-align:left;">
-<a href="GO:0016073" class="uri">GO:0016073</a>
-</td>
-<td style="text-align:left;">
-snRNA metabolic process
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-24.13
-</td>
-<td style="text-align:left;">
-0.04780
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-56
-</td>
-<td style="text-align:left;">
-<a href="GO:0008333" class="uri">GO:0008333</a>
-</td>
-<td style="text-align:left;">
-endosome to lysosome transport
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-24.13
-</td>
-<td style="text-align:left;">
-0.04780
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-57
-</td>
-<td style="text-align:left;">
-<a href="GO:0032527" class="uri">GO:0032527</a>
-</td>
-<td style="text-align:left;">
-protein exit from endoplasmic reticulum
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-24.13
-</td>
-<td style="text-align:left;">
-0.04780
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-58
-</td>
-<td style="text-align:left;">
-<a href="GO:0007219" class="uri">GO:0007219</a>
-</td>
-<td style="text-align:left;">
-Notch signaling pathway
-</td>
-<td style="text-align:right;">
-96
-</td>
-<td style="text-align:right;">
-91
-</td>
-<td style="text-align:right;">
-85.79
-</td>
-<td style="text-align:left;">
-0.04924
-</td>
-<td style="text-align:right;">
-1.0000
-</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 
