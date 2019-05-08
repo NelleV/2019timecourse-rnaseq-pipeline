@@ -8,7 +8,7 @@ SUPP_HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(SUPP_RMD_FILES))
 
 all: html pdf
 
-pdf: manuscript.pdf
+pdf: reports/manuscript.pdf
 
 html: $(HTML_FILES)
 
@@ -22,6 +22,12 @@ reports/%.html: %.Rmd
 	mkdir -p .results
 	mkdir -p $(@D)
 	Rscript .scripts/compile_rmarkdown.R $< $@
+
+reports/%.pdf: %.Rmd
+	mkdir -p .results
+	mkdir -p $(@D)
+	Rscript .scripts/compile_rmarkdown.R $< $@
+
 
 results/all_go_terms.tsv: .results/clustering_labels.txt
 	Rscript run_pathways.R

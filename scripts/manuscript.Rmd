@@ -378,7 +378,7 @@ ord = order(
   meta$Group,
   meta$Timepoint,
   meta$Replicate)
-data = data[, ord]
+variance_filtered_data = variance_filtered_data[, ord]
 meta = meta[ord, ]
 
 data_corr = stats::cor(variance_filtered_data, method="pearson")
@@ -596,8 +596,9 @@ log_fold_change_timepoints = moanin::estimate_log_fold_change(
 ```
 
 ```{r echo=FALSE}
-kable(head(log_fold_change_timepoints[,
-colnames(log_fold_change_timepoints)[1:5]]))
+kable(
+    head(log_fold_change_timepoints[, colnames(log_fold_change_timepoints)[1:5]]),
+    format = "latex")
 ```
 
 This matrix can then be used to visualize the log-fold change for each
@@ -1186,7 +1187,7 @@ pathways = subset(
 
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways[1:10, ], "html", escape=F, digits=4) %>%
+kable(pathways[1:10, ], "latex", escape=F, digits=4) %>%
     kable_styling("striped", full_width=TRUE) 
 ```
 
@@ -1239,8 +1240,10 @@ go_terms_enriched = find_enriched_go_terms(
 
 go_terms_enriched = go_terms_enriched[
     order(go_terms_enriched[, "resultFisher_padj"]), ]
+colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
+"Significant", "Expected", "P-value", "adj. p-value")
 
-kable(go_terms_enriched[1:15, ], "html", escape=F, digits=4) %>%
+kable(go_terms_enriched[1:15, ], "latex", escape=F, digits=4)  %>%
     kable_styling("striped", full_width=TRUE) 
 ```
 
