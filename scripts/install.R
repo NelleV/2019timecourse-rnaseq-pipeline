@@ -90,3 +90,8 @@ if(!require("NMI")){
 if(!require(zoo)){
     install.packages("zoo")
 }
+
+if(!require(BiocWorkflowTools)){
+    biocLite("BiocWorkflowTools")
+}
+

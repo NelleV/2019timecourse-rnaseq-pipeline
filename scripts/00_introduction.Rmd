@@ -1,6 +1,18 @@
 ---
 title: "Introduction: a pipeline to analyse time-course gene expression data"
+author:
+    - name: Nelle Varoquaux
+      affiliation: Department of Statistics and Berkeley Institute for Data Science, University of California, Berkeley, Berkeley, CA
+    - name: Elizabeth Purdom
+      affiliation: Department of Statistics, University of California, Berkeley, Berkeley, CA
+keywords: >
+    time-course gene expression data, clustering, time-course
+    differential expression analysis, workflow
+vignette: >
+    %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
+    %\VignetteEngine{knitr::rmarkdown}
 output: rmarkdown::html_vignette
+
 bibliography: bibliography.bib
 ---
 
@@ -12,7 +24,6 @@ bibliography: bibliography.bib
   the same thing. Find a better name for both of them
 
 # Abstract
-
 
 The phenotypic diversity of cells is governed by a complex equilibrium between
 their genetic identity and their environmental interactions: Understanding the
@@ -79,6 +90,7 @@ broadly used by the community. We provide the various steps of the workflow as
 functions in a R package **FIXME**. 
 
 ```{r schema, echo=FALSE, fig.width=8, fig.cap="Workflow for analyzing time-course datasets."}
+library(BiocStyle)
 library(knitr)
 knitr::include_graphics("images/fig1_schemas.png")
 ```
