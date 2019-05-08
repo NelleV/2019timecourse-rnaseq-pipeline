@@ -39,33 +39,13 @@ pval_col_to_keep = colnames(de_analysis)[
 pvalues = de_analysis[, pval_col_to_keep]
 
 splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
+fishers_pval = moanin:::fisher_method(pvalues)
+fishers_qval = stats::p.adjust(fishers_pval)
 
-# FIXME refactor this into a function
-if(filter_genes){
-    # First, filter out any genes that doesn't have a log fold change of at
-    # least 2 at at least one of the time points.
-    
-    genes_to_keep = row.names(lfc_max[rowSums(lfc_max > 2) > 0, ])
-    pvalues = pvalues[genes_to_keep, ]
+genes_to_keep = row.names(
+    lfc_max[(rowSums(lfc_max > 2) > 0) & (fishers_qval < 0.05), ])
+y = as.matrix(data[genes_to_keep, ])
 
-    if(length(genes_to_keep) > n_genes_to_keep){
-
-	# Then rank by fisher's p-value and take max the number of genes of
-	# interest
-	# Filter out q-values for the pvalues table
-	fishers_pval = moanin:::fisher_method(pvalues)
-	fishers_qval = stats::p.adjust(fishers_pval)
-        if(keep_all_significant){
-	   genes_to_keep = names(fishers_qval[fishers_qval < 0.05])
-	}else{
-	    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
-	}
-    }
-
-    y = as.matrix(data[genes_to_keep, ])
-}else{
-    y = as.matrix(data)
-}
 
 ###############################################################################
 # Now, randomly subsample.

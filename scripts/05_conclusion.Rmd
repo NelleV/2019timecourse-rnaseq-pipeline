@@ -3,6 +3,15 @@ title: "Conclusion: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
 ---
 
+# Conclusion
+
+This workflow provides a tutoral for the analysis of time-course gene
+expression data in R, illustrated through the analysis of mice lung tissue
+exposed to different influenza strain. It covers four main steps; (1) quality
+control and normalization; (2) differential expression analysis; (3)
+clustering of time-course gene expression data; (4) downstream analysis of
+clusters.
+
 # Software and data availability
 
 The source code for this workflow can be found at **FIXME** 

@@ -64,61 +64,119 @@ splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
 
 # Clustering of time-course data
 
-The next step is to perform clustering. First, we reduce the set of genes of
-interest to genes that are (1) significant; (2) "highly" differentially
-expressed. First, we select the genes that have a log-fold change of at least
-2 across at least one experiment for one time point. 
+
+The very large number of genes found differentially expressed impair any
+interpretation one would attempt: with 70\% of the genome found differentially
+expressed, all pathways are affected by the treatment. Hence the next step of
+the workflow to cluster gene expression according to their dynamical response
+to the treatment. Before clustering the genes, we first reduce the set of
+genes of interest to genes that are (1) significantly found differentially
+expressed; (2) "highly" differentially expressed. To do this, we first
+aggregate all p-values obtained during the time-course differential expresison
+step in a single p-value using Fisher's method [@fisher:statistical]. Then we
+select all the genes which have a Fisher adjusted p-value below 0.05 and a log
+fold change of at least two between at least one condition and one time-point.
+
 
 ```{r filter_genes}
-# First, filter out any genes that doesn't have a log fold change of at
-# least 2 at at least one of the time points.
-
-genes_to_keep = row.names(lfc_max[rowSums(lfc_max > 2) > 0, ])
-pvalues = pvalues[genes_to_keep, ]
-
 # Then rank by fisher's p-value and take max the number of genes of interest
 # Filter out q-values for the pvalues table
 fishers_pval = moanin:::fisher_method(pvalues)
 fishers_qval = stats::p.adjust(fishers_pval)
-genes_to_keep = names(sort(fishers_pval))
-if(length(genes_to_keep) > n_genes_to_keep){
-    genes_to_keep = genes_to_keep[1:n_genes_to_keep]
-}
 
+genes_to_keep = row.names(
+    lfc_max[(rowSums(lfc_max > 2) > 0) & (fishers_qval < 0.05), ])
 y = as.matrix(data[genes_to_keep, ])
 ```
 
-After filtering, we consider `r dim(y)[1]` genes for the clustering.
+After filtering, we are left with `r dim(y)[1]` genes. We can then apply a
+clustering. As observed by looking at genes found differentially expressed, 
+many genes share a similar gene expression pattern, but on different scale.
+We thus propose the following adaptation of k-means:
+
+- **Splines estimation**: for each gene, fit the splines function with the basis
+  of your choice.
+- **Rescaling splines**: for each gene, rescale the estimated splines function
+  such that the values are bounded between 0 and 1.
+- **K-means**: apply k-means on the rescaled fitted splines to estimate the
+  centroids.
+- **Assign scores and labels to all genes**: then assign a score and a label
+  to all gene based on a goodness-of-fit measure on the raw data. By default,
+  the `splines_kmeans_score_and_label` function only labels the best 50% of
+  genes.
+
+
+The first three steps
 
 ```{r clustering}
 # First fit the kmeans clusters
 kmeans_clusters = moanin:::splines_kmeans(
-    y, splines_model, n_clusters=20,
+    y, splines_model, n_clusters=8,
     random_seed=42,
     n_init=20)
+```
 
+We then use the `plot_centroids` function to visualize the centroids obtained
+with the splines k-means model. 
+
+```{r fig.height=6, fig.width=6}
+moanin:::plot_centroids(kmeans_clusters$centroids, splines_model,
+			colors=ann_colors$Group,
+			smooth=TRUE)
+```
+
+The scoring and labeling can be done via the `splines_kmeans_score_and_label`
+function.
+
+```{r}
 # Then assign scores and labels to all the data, using a goodness-of-fit
 # scoring function.
 scores_and_labels = moanin::splines_kmeans_score_and_label(
     data, kmeans_clusters)
 labels = scores_and_labels$labels
+labels = unlist(labels[!is.na(labels)])
 ```
 
-Summary of number of genes assigned with original scoring, and "better"
-scoring.
+Before performing the next steps, let us investigate in more detail the
+differences between the labels provided by the splines k-means model and the
+scoring and labelinig step.
 
-```{r}
-barplot(table(kmeans_clusters$clusters), col="black")
+```{r echo=FALSE, fig.height=6, fig.width=6}
+par(mfrow=c(2, 1))
+barplot(table(kmeans_clusters$clusters), col="black", main="splines k-means
+labeling")
+barplot(table(labels), col="black", main="score and label")
 ```
 
-```{r}
-barplot(table(labels), col="black")
+The scoring and label step allows to label genes that were removed during the
+filtering step, yet are good matches to the centroids found during the
+clustering.
+
+```{r echo=FALSE, fig.height=6, fig.width=6, fig.caption="Confusion matrix between the two sets of labels"}
+labels = unlist(labels[!is.na(labels)])
+genes_scored = names(labels)
+
+kmeans_labels = kmeans_clusters$clusters
+kmeans_labels = kmeans_labels[genes_scored]
+
+labels = labels[names(kmeans_labels)]
+
+both_labels = data.frame("kmeans"=kmeans_labels, "scored"=labels)
+# Create another cluster.
+#both_labels[is.na(both_labels)] = 21
+confusion_matrix = table(both_labels)
+text = as.matrix(as.character(confusion_matrix))
+dim(text) = dim(confusion_matrix)
+NMF::aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
+	      border=list(cell=TRUE), txt=text, legend=FALSE, Rowv=FALSE,
+	      Colv=FALSE)
+labels = scores_and_labels$labels
+labels = unlist(labels[!is.na(labels)])
+
 ```
 
-Just a hack, cause I didn't update the code
-```{r}
-kmeans_clusters$clusters = labels[!is.na(labels)]
-```
+
+
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the next step
@@ -128,20 +186,29 @@ write.table(kmeans_labels,
 	    sep="\t")
 ```
 
-Now let's visualize the centroids.
 
-```{r fig.height=8, fig.width=8}
-moanin:::plot_centroids(kmeans_clusters$centroids, splines_model,
-			colors=ann_colors$Group,
-			smooth=TRUE)
+## Looking at specific clusters in details.
+
+Now, let us look more in detail some specific clusters. Cluster 4 seems
+particularly interesting: it captures genes with strong differences between
+the differant influenza treatments and the control, while the control remains
+relatively flat.
+
+Heatmaps are useful to investigate the range of expression patterns for
+specific genes. Here, we are going to plot heatmaps of the normalized gene
+expression patterns and the rescaled gene expression patterns side by side.
+
+First, select the genes of interest.
+
+```{r}
+cluster_to_plot = 4
+genes_to_plot =  names(labels[labels == cluster_to_plot])
 ```
 
-Now, let's look at genes in cluster 15
 
-```{r fig.width=8, fig.height=8}
-cluster_to_plot = 20
-gene_names = row.names(data)
-genes_to_plot =  names(kmeans_clusters$clusters[kmeans_clusters$clusters == cluster_to_plot])
+```{r fig.width=6, fig.height=8}
+layout(matrix(c(1,2),nrow=1), widths=c(1, 2))
+
 data_to_plot = data[genes_to_plot, ]
 submeta = meta
 ord = order(
@@ -153,27 +220,34 @@ submeta$Timepoint = as.factor(submeta$Timepoint)
 data_to_plot = data_to_plot[, ord]
 submeta = submeta[ord, ]
 
-NMF::aheatmap(
+res = NMF::aheatmap(
     data_to_plot,
     Colv=NA,
+    color="YlGnBu",
     annCol=submeta[,
                 c("Group", "Timepoint")],
     annLegend=FALSE,
     annColors=ann_colors,
-    main="Cluster 15",
-    treeheight=0)
+    main=paste("Cluster", cluster_to_plot, "(raw)"),
+    treeheight=0, legend=FALSE)
 
+# Now use the results of the previous call to aheatmap to reorder the genes.
 NMF::aheatmap(
-    moanin:::rescale_values(data_to_plot),
+    moanin:::rescale_values(data_to_plot)[res$rowInd,],
     Colv=NA,
+    Rowv=NA,
     annCol=submeta[,
                 c("Group", "Timepoint")],
-    annLegend=FALSE,
+    annLegend=TRUE,
     annColors=ann_colors,
-    main=paste("Cluster", cluster_to_plot),
+    main=paste("Cluster", cluster_to_plot, "(rescaled)"),
     treeheight=0)
 
 ```
+
+Those two heatmaps demonstrate that the clustering method successfully cluster
+genes that are on different scales, and yet share the same dynamical response
+to the treatments.
 
 ## How to choose the number of clusters.
 
@@ -298,6 +372,7 @@ bootstrapped_y = y[indices, ]
 ```
 
 Using the subsampling strategy, keeping 80% of the genes:
+
 ```{r}
 subsample_proportion = 1
 indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=FALSE)
@@ -354,15 +429,25 @@ a label to all data points. Finally, compute the pairwise similarity measure
 between all bootstrapped partition, and plot the cumulative density of the
 obtained scores.
 
-```{r fig.width=8, fig.height=8}
+```{r fig.width=6, fig.height=6}
 moanin::plot_model_explorer(all_labels)
 ```
 
 From this plot, we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
-but not as stable as $k=2$. Similarly, $k=14$ is more stable than $k=11$,
-$k=12$, $k=13$. The model explorer strategy, in addition to visualizing the
-diversity of the centroids, can thus help assessing an adequate number of
-clusters.
+but not as stable as $k=2$. The model explorer strategy, in addition to
+visualizing the diversity of the centroids, can thus help assessing an
+adequate number of clusters.
+
+Now, replot the same model explorer, but only for the clustering experiments
+$k=6$, $k=7$, $k=8$, $k=9$ and $k=10$ so that we can see more clearly the stability
+measures in that range.
+
+
+```{r fig.width=6, fig.height=6}
+clusters = c("C6", "C7", "C8", "C9", "C10")
+selected_labels = all_labels[clusters]
+moanin::plot_model_explorer(selected_labels)
+```
 
 #### Consensus clustering as a way to find $k$
 

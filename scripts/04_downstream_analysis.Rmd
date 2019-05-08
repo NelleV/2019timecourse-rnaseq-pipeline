@@ -83,7 +83,7 @@ ensembl = biomaRt::useDataset("mmusculus_gene_ensembl", mart=ensembl)
 ```
 
 ```{r enrichment_analysis, results="hide", message=FALSE}
-cluster = 20
+cluster = 4
 genes = gene_names[labels == cluster]
 
 # convert gene names

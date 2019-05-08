@@ -39,7 +39,7 @@ plot_centroids = function(centroids, splines_model, colors=NULL, smooth=FALSE){
     for(i in 1:n_centroids){
         plot_centroid_individual(as.vector(centroids[i, ]),
 				 splines_model, colors=colors,
-				 smooth=smooth)
+				 smooth=smooth, title=NULL)
     }
 }
 
@@ -59,7 +59,8 @@ plot_genes = function(data, splines_model, colors=NULL, smooth=FALSE){
 }
 
 
-plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth=FALSE){
+plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth=FALSE,
+				    title=NULL){
     meta = splines_model$meta
     groups = levels(meta$Group)
 
@@ -69,7 +70,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
         centroid = t(as.matrix(centroid))
     }
 
-    graphics::plot(xrange, yrange, type="n")
+    graphics::plot(xrange, yrange, type="n", main=title)
     if(is.null(colors)){
         colors = viridis::viridis(length(groups))
 	names(colors) = groups
