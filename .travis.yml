@@ -6,6 +6,10 @@ r:
 sudo: false
 cache: packages
 
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install texlive-latex-extra
+
 install: source .build_tools/travis/install.sh
 script: source .build_tools/travis/test_script.sh
 
