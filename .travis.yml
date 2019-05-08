@@ -11,7 +11,6 @@ before_install:
     - sudo apt-get install -y pandoc
     - sudo apt-get install -y texlive-full
     - sudo apt-get install -y texlive-xetex
-    - sudo apt-get install texlive-latex-extra
 
 install: source .build_tools/travis/install.sh
 script: source .build_tools/travis/test_script.sh
