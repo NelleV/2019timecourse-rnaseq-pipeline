@@ -11,10 +11,13 @@ library(devtools)
 library(limma)
 library(splines)
 library(stats)
-library(moanin)
 library(NMF)
+library(KEGGprofile)
+library(kableExtra)
+library(viridis)
+
+library(moanin)
 source("utils.R")
-# library(moanin)
 ```
 
 ```{r echo=FALSE, results="hide"}
@@ -179,18 +182,6 @@ labels = scores_and_labels$labels
 labels = unlist(labels[!is.na(labels)])
 
 ```
-
-
-
-
-```{r results="hide", echo=FALSE}
-# Save the clustering for the next step
-kmeans_labels = as.data.frame(labels[!is.na(labels)])
-write.table(kmeans_labels,
-	    ".results/clustering_labels.txt",
-	    sep="\t")
-```
-
 
 ## Looking at specific clusters in details.
 
@@ -410,8 +401,6 @@ NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
 
 ```
 
-
-
 ```{r echo=FALSE, results="hide"}
 n_clusters = 2:20
 all_labels = list()
@@ -499,5 +488,162 @@ separates over-expressed genes from under-expressed genes. While it is indeed
 a very stable clustering, it does not capture the range of gene expression
 patterns present in the data. This shows the limitation of such method on real
 data, where the number of clusters is not clearly defined.
+
+
+# Downstream analysis of clusters.
+
+Once good clusters are obtained, the next step is to leverage the clustering
+to ease interpretation. Classic enrichment analysis step can then be performed
+in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
+term enrichment analysis, motif enrichment analysis, etc.
+
+First, let us clean up the gene obtained and only select the genes we are
+going to use in the enrichment analysis. One can either use the whole set of
+genes, only the set of differentially expressed genes in each cluster, or a
+subset of genes that fit well to a cluster (based on some criterion).
+
+**FIXME**
+
+### Finding enriched pathways using `biomaRt` and `KEGGprofile`
+
+Let us first tackle the case of pathway enrichment analysis. We will leverage
+the packages `biomaRt` [@durinck:biomart] and `KEGGprofile` [@zhao:keggprofile]
+for this step. `KEGGprofile` is a
+package that easily allows to perform pathway enrichment analysis on a set of
+genes labeled with the ensembl annotation. We thus need to convert the gene
+names into the appropriate format. This is where `biomaRt` comes in handy: it
+enables easy conversion from one gene annotation to another. Here, we will use
+it to convert the gene names from the Refseq annotation to the ensembl one.
+
+
+```{r results="hide"}
+library(biomaRt)
+ensembl = biomaRt::useMart("ensembl")
+ensembl = biomaRt::useDataset("mmusculus_gene_ensembl", mart=ensembl)
+```
+
+```{r enrichment_analysis, results="hide", message=FALSE}
+cluster = 8
+genes = gene_names[labels == cluster]
+
+# convert gene names
+genes = biomaRt::getBM(attributes=c("ensembl_gene_id", "entrezgene"),
+		filters="refseq_mrna", values=genes,
+		mart=ensembl)["entrezgene"]
+genes = as.vector(unlist(genes))
+pathways = KEGGprofile::find_enriched_pathway(
+    genes, species="mmu",
+    download_latest=TRUE)$stastic
+
+```
+
+```{r echo=FALSE}
+
+pathways = pathways[
+    order(pathways["pvalueAdj"]),]
+
+# Select the columns to print
+pathways = subset(
+    pathways,
+    select=c(
+	"Pathway_Name", "Percentage",
+	"pvalueAdj"))
+
+colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
+pathways["Percentage"] = pathways["Percentage"] * 100
+kable(pathways[1:10, ], "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
+```
+
+
+### Finding enriched GO terms
+
+To find GO terms, we use `biomaRt` to find the mapping between GO terms and
+gene mapping. The GO enrichment library `topGO` [@alexa:topgo] expects the GO term to gene
+mapping to be a list where each item is a mapping between a gene name and a GO
+term ID vector. 
+
+```text
+$NM_199153
+[1] "GO:0016020" "GO:0016021" "GO:0007186" "GO:0004930" "GO:0007165"
+[6] "GO:0050896" "GO:0050909"
+
+$NM_201361
+ [1] "GO:0016020" "GO:0016021" "GO:0003674" "GO:0008150" "GO:0005794"
+ [6] "GO:0005829" "GO:0005737" "GO:0005856" "GO:0005874" "GO:0005739"
+[11] "GO:0005819" "GO:0000922" "GO:0072686"
+```
+
+`biomaRt` queries results a matrix with two named columns of gene names and GO
+term ID.
+
+
+```{r go_to_gene_mapping, results="hide", message=FALSE}
+library(topGO)
+genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
+	      values=gene_names,
+	      filters="refseq_mrna",
+	      mart=ensembl)
+
+# Create gene to GO id mapping
+gene_id_go_mapping = moanin::create_go_term_mapping(genes)
+```
+
+Once the gene ID to GO mapping list is created, `moanin` provides a simple
+interface to `topGO` to fetch enriched GO terms. Here, we show an example of
+running a GO term enrichment on the "Biological process" ontology (BP).
+
+```{r go_term_enrichment, results="hide", message=FALSE}
+assignments = labels == cluster
+
+go_terms_enriched = find_enriched_go_terms(
+    assignments,
+    gene_id_go_mapping, ontology="BP")
+```
+
+```{r echo=FALSE}
+
+go_terms_enriched = go_terms_enriched[
+    order(go_terms_enriched[, "resultFisher_padj"]), ]
+
+kable(go_terms_enriched[1:15, ], "html", escape=F, digits=4) %>%
+    kable_styling("striped", full_width=TRUE) 
+```
+
+# Conclusion
+
+This workflow provides a tutoral for the analysis of time-course gene
+expression data in R, illustrated through the analysis of mice lung tissue
+exposed to different influenza strain. It covers four main steps; (1) quality
+control and normalization; (2) differential expression analysis; (3)
+clustering of time-course gene expression data; (4) downstream analysis of
+clusters.
+
+# Software and data availability
+
+The source code for this workflow can be found at **FIXME** 
+Data used in this workflow are available from NCBI GEO, accession GSE95601.
+
+# Author contributions
+
+NV and EP wrote the workflow.
+
+# Competing interests
+The authors declare that they have no competing interests.
+
+# Grant information
+
+This research was funded in part by a Department of Energy (DOE) grant
+(DE-SC0014081); by the Gordon and Betty Moore Foundation (Grant GBMF3834) and
+the Alfred P. Sloan Foundation (Grant 2013-10-27) to the University of
+California, Berkeley [N.V.]; by a ENS-CFM Data Science Chair [E.P.].
+
+*I confirm that the funders had no role in study design, data collection and
+analysis, decision to publish, or preparation of the manuscript.*
+
+# Acknowledgments
+
+The authors thank Karthik Ram and the Ropensci community for valuable
+feedback.
 
 # References

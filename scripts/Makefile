@@ -24,10 +24,6 @@ reports/03_clustering.html: 03_clustering.Rmd reports/02_differential_expression
 	mkdir -p reports
 	Rscript .scripts/compile_rmarkdown.R $< $@
 
-reports/04_downstream_analysis.html: 04_downstream_analysis.Rmd reports/03_clustering.html
-	mkdir -p reports
-	Rscript .scripts/compile_rmarkdown.R $< $@
-
 reports/%.html: %.Rmd
 	mkdir -p .results
 	mkdir -p $(@D)
