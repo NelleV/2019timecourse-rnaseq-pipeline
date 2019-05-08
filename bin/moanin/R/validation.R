@@ -14,21 +14,38 @@ check_meta = function(meta, check_replicates=FALSE){
     metadata_column_names = colnames(meta)
     if(!("Group" %in% metadata_column_names)){
 	stop(
+	    "moanin::create_splines_model: " +
 	    "Metadata doesn't contain expected information." +
 	    " Group column is missing.")
     }
 
     if(!("Timepoint" %in% metadata_column_names)){
 	stop(
+	    "moanin::create_splines_model: " +
 	    "Metadata doesn't contain expected information." +
 	    " Timepoint column is missing.")
     }
 
     if(check_replicates & !("Replicate" %in% metadata_column_names)){
 	stop(
+	    "moanin::create_splines_model: " +
 	    "Metadata doesn't contain expected information." +
 	    "Replicate column is missing")
     }
+
+    # Check that Timepoint is numeric.
+    if(!is.numeric(meta$Timepoint)){
+	stop(
+	    "moanin::create_splines_model: " +
+	    "Timepoint column is expected to be numeric")
+    }
+
+    if(!is.factor(meta$Group)){
+	stop(
+	    "moanin::create_splines_model: " +
+	    "Group column is expected to be factors")
+    }
+
 
     # Just create this one.
     if(!("WeeklyGroup" %in% metadata_column_names)){

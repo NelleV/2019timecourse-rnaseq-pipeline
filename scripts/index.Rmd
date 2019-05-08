@@ -3,9 +3,5 @@ title: "A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
 ---
 
-- [Introduction](00_introduction.html)
-- [Quality control and normalization](01_quality_control_normalization.html)
-- [Differential expression analysis](02_differential_expression_analysis.html)
-- [Clustering, downstream analysis, and conclusion.](03_clustering.html)
-
-
+The manuscript has been automatically compiled thanks to travis and can be
+found [here](manuscript.pdf).

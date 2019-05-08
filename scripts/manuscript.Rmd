@@ -1,77 +1,422 @@
 ---
-title: "Differential expression analysis: A pipeline to analyse time-course gene expression data"
-output: rmarkdown::html_vignette
+title: "A pipeline to analyse time-course gene expression data"
+author:
+    - name: Nelle Varoquaux
+      affiliation: Department of Statistics and Berkeley Institute for Data Science, University of California, Berkeley, Berkeley, CA 
+    - name: Elizabeth Purdom
+      affiliation: Department of Statistics, University of California, Berkeley, Berkeley, CA
+
+abstract: >
+    The phenotypic diversity of cells is governed by a complex equilibrium
+    between their genetic identity and their environmental interactions:
+    Understanding the dynamics of gene expression is a fundamental question of
+    biology. However, analysing time-course transcriptomic data raises unique
+    challenging statistical and computational questions, requiring the
+    development of novel methods and software.  Using as case study
+    time-course transcriptomics data from mice exposed to different strains of
+    influenza, ihis workflows provides a step-by-step tutorial of the
+    methodology used to analyse time-course data: (1) normalization of the
+    micro-array dataset; (2) differential expression analysis using functional
+    data analysis; (3) clustering fo time-course data; (4) interpreting
+    clusters with GO term and KEGG pathway enrichment analysis.
+
+keywords: >
+    time-course gene expression data, clustering, differential expression,
+    workflow
+vignette: >
+    %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
+    %\VignetteEngine{knitr::rmarkdown}
+output: BiocWorkflowTools::f1000_article
+
 bibliography: bibliography.bib
 ---
 
-
-```{r echo=FALSE, results="hide", message=FALSE, warning=FALSE}
-# Reloading necessary data and preliminary results
+```{r echo=FALSE, results="hide", message=FALSE}
+# Loading dependencies
 library(devtools)
 library(limma)
 library(splines)
 library(stats)
 library(knitr)
 library(kableExtra)
+library(BiocStyle)
+library(biomaRt)
 
+library(ggplot2)
 library(NMF)
 library(KEGGprofile)
 library(viridis)
+
+library(topGO)
 
 library(moanin)
 
 source("utils.R")
 ```
 
-```{r echo=FALSE}
-# Set options
-df = 6
+```{r echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(
+  cache=TRUE, autodep=TRUE, warning=FALSE, error=FALSE, message=FALSE,
+  echo=TRUE,
+  duplicate.label="allow"
+)
+```
 
-# Preprocessing & filtering
-is_count = FALSE
-take_log = FALSE    
-filter_expression = FALSE
 
-# Differential expression analysis
-timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
+# TODO list
 
-# Clustering
-filter_genes = TRUE
-n_genes_to_keep = 5000
-n_clusters = 20
-percentage_genes_to_label = 0.5
+
+- Add legends to the plots that don't have.
+- Currently have two functions "plot_genes", "plot_centroids", that do exactly
+  the same thing. Find a better name for both of them
+
+# Abstract
+
+The phenotypic diversity of cells is governed by a complex equilibrium between
+their genetic identity and their environmental interactions: Understanding the
+dynamics of gene expression is a fundamental question of biology. However,
+analysing time-course transcriptomic data raises unique challenging
+statistical and computational questions, requiring the development of novel
+methods and software.  Using as case study time-course transcriptomics data
+from mice exposed to different strains of influenza, ihis workflows provides a
+step-by-step tutorial of the methodology used to analyse time-course data:
+(1) normalization of the micro-array dataset; (2) differential expression
+analysis using functional data analysis; (3) clustering fo time-course data;
+(4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
+
+
+# Introduction
+
+Gene expression studies provide simultaneous quantification of the level of
+mRNA from all genes in a sample. High-throughput studies of gene expression
+have a long history, starting with microarray technologies in the 1990s
+through to single-cell technologies. While many expression studies are
+designed to compare the gene expression in distinct groups, there is also a
+long history of time-course expression studies, where the the gene expression
+is compared across time by measuring mRNA levels from different samples across
+time [^1]. Such time course studies can vary from measuring a few distinct time
+points, to sampling ten to twenty time points. Many longer time series are
+particularly interested in investigating development over time. More recently,
+single-cell studies track single cells through their development, and a single
+cell is measured at a particular moment in its developmental progression -- a
+value that is not know but estimated from the data as its "pseudo-time."
+
+[^1]: Because the collection of the mRNA is often destructive, samples at
+different time points are generally from different biological samples;
+longitudinal studies, for example tracking the same subject over time, are
+certainly possible in certain settings, but not directly considered here. 
+
+While there are many methods that have been proposed for discrete aspects of
+time course data, the entire workflow for analysis of such data remains
+difficult, particularly for long, developmental time series. Most methods
+proposed for time course data are concerned with detecting genes that are
+changing over time (differential expression analysis), examples being `edge`
+[@storey:significance], functional component analysis based models [@wu:more],
+time-course permutation tests [@park:statistical], and multiple testing
+strategies to combine singe time point differential expression analysis
+[@sun:multiple]. However, with long time course datasets, particularly in
+developmental systems, a massive number of genes will show *some* change. For
+example, in the mice lung tissues infected with influenza, over 50% of genes
+are shown to be changing over time. The task in these settings is often not to
+detect changes in genes, but to categorize into biologically interpretable
+patterns the vast number of changes discovered. 
+
+We present here a workflow for such an analysis that consists of 4 main
+parts (Figure \ref{fig:workflow}):
+
+- Quality control and normalization;
+- Identification of genes that are differentially expressed;
+- Clustering of genes into distinct temporal patterns;
+- Biological interpretation of the clusters.
+
+This workflow represents an integration of both novel implementations of
+previously established methods and new methodologies for the settings of
+developmental time series. It relies on several standard packages for
+analysing gene expression data, some specific for time-course data, others
+broadly used by the community. We provide the various steps of the workflow as
+functions in a R package called `moanin`.
+
+```{r schema, echo=FALSE, fig.width=8, fig.cap="Workflow for analyzing time-course datasets."}
+knitr::include_graphics("images/fig1_schemas.png")
+```
+
+
+
+# Analysis of the dynamical response of mouse lung tissue to influenza
+
+## Overview
+
+This workflow is illustrated using data from a micro-array time-course
+experiment, exposing mice to three different strains of influenza, and
+collecting lung tissue during 14 time-points after infection (0, 3, 6, 9, 12,
+18, 24, 30, 36, 48, 60 hours, then 3, 5, and 7 days later)
+[@shoemaker:ultrasensitive]. The three strains of influenza used in the
+study are (1) a low pathogenicity seasonal H1N1 influenza virus
+(A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009
+pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1
+avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
+$10^5$ PFU of each virus. An adidtional 42 mice were injected with a lower dose
+of the Vietnam avian influenza virus ($10^3$ PFU).
+
+By combining gene expression time-course data with virus growth data, the
+authors show that the inflammatory response of lung tissue is gated until a
+threshold of the virus concentration is  exceeded in the lung. Once this
+threshold is exceeded, a strong inflammatory and cytokin production occurs.
+This results provides evidence that the pathology response is non-linearly
+regulated by virus concentration.
+
+## References
+
+
+
+## Pre-processing and normalization
+
+The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
+with accession number GSE63786. The dataset has a total of 209 samples, with
+45018 probes (1 sample was removed by the authors prior to uploading the
+dataset on GEO).
+
+Note that in the following, we assume that the user has access to a data
+folder `data/shoemaker2015/rawdata`, containing the microarray data. 
+
+```{r}
+data_dir = "data/shoemaker2015/rawdata"
+```
+
+Given the source and a `Targets.txt` structured as follows, microarray can be loaded thanks to the limma library.
+
+```
+FileName
+GSM1557140_AR0313_043raw.txt.gz
+GSM1557141_AR0313_044raw.txt.gz
+GSM1557142_AR0313_045raw.txt.gz
+GSM1557143_AR0313_055raw.txt.gz
+GSM1557144_AR0313_056raw.txt.gz
+GSM1557145_AR0313_057raw.txt.gz
+GSM1557146_AR0313_058raw.txt.gz
+GSM1557147_AR0313_059raw.txt.gz
+```
+
+```{r message=FALSE, results="hide", warning=FALSE}
+targets = limma::readTargets()
+RG = limma::read.maimages(
+  targets, source="agilent",
+  path=data_dir,
+  other.columns="gIsWellAboveBG",
+  green.only=TRUE)
+
+```
+
+The normalization strategy we apply here relies on `limma` and is as follows:
+
+  - First, normalize probe intensity using background information using the
+    "norm-exponential" strategy.
+  - Then normalize across micro-arrrays using quantile normalization.
+
+
+
+```{r reading_targets, results="hide", fig.width=8, fig.height=4, message=FALSE, warning=FALSE}
+# Perform background correction using norm-exponential strategy and normalize
+# across samples using quantile normalization.
+RG = limma::backgroundCorrect(RG, method="normexp")
+RG.q = limma::normalizeBetweenArrays(RG, method="quantile")
+```
+
+Plotting the smoothed empirical densities of the probe values before
+normalization shows considerable variations betweens arrays. Once the data has
+been normalized across array using quantile normalization, the smoothed
+empirical densities of each sample perfectly overlap.
+
+```{r plotting_densities, results="hide", fig.width=8, fig.height=4}
+# Plot the densities of the probes before and after normalization.
+par(mfrow=c(1, 2))
+limma::plotDensities(RG, col="black", legend=FALSE,
+		     main="Before normalization")
+limma::plotDensities(RG.q, col="black", legend=FALSE,
+		     main="After normalization")
 ```
 
 
 ```{r echo=FALSE, results="hide"}
-# Set data files and options
-data("shoemaker2015")
-data = shoemaker2015$data
+# Get the number for the text. Do not display results or computation
+control_probes = RG.q$genes[, "ControlType"] == 1
+is_expressed = rowSums(RG.q$other$"gIsWellAboveBG" > 0) >= 4
+n_control_probes = sum(control_probes)
+n_lowly_expressed = sum(!is_expressed)
+```
+
+We then clean up the names of each gene and each sample to match the original
+data. Finally, we further filter out probes based on the following criteria:
+(1) removing the `r n_control_probes` control probes; (2) removing 
+`r n_lowly_expressed` low-expressed genes. 
+
+```{r clean_up_names}
+
+sample_names = sapply(strsplit(colnames(RG.q), "_"), .subset2,  1)
+colnames(RG.q) = sample_names
+row.names(RG.q) = make.names(RG$genes$SystematicName, unique=TRUE)
+idx_to_keep = which(
+  !(RG$genes$Systematic %in% c("DarkCorner", "GE_BrightCorner",
+			       "NegativeControl")))
+
+data = RG.q[idx_to_keep,]
+
+# Filter out control probes.
+control_probes = data$genes[, "ControlType"] == 1
+is_expressed = rowSums(data$other$"gIsWellAboveBG" > 0) >= 4
+
+data = data[!control_probes & is_expressed, ]$E
+```
+
+
+
+```{r echo=FALSE, results="hide"}
+# Do not display. setting variables for text
+n_samples = dim(data)[2]
+n_probes = dim(data)[1]
+```
+
+After filtering, we are left with `r n_probes` probes of interest in 
+`r n_samples` samples.
+
+
+Now that we have normalized and filtered the gene expressions, let's load the
+metadata. The package `moanin` contains the normalized data and meta of
+[@shoemaker:ultrasensitive].
+
+```{r}
+# Now load in the metadata
+data(shoemaker2015)
 meta = shoemaker2015$meta
-meta = droplevels(meta)
-
-# Right now, the package doesn't contain the normalized data
+data = shoemaker2015$data
 ```
 
-```{r, echo=FALSE, results="hide"}
-# XXX FIXME
-data = read.table(".results/quantile_normalized.txt") 
-source("utils.R")
+## Exploratory analysis and quality control
+
+
+Plotting the smoothed empirical densities of probe values for each sample and
+estimating the variations across samples before and after normalization is a
+first quality control step. Typically, two other quality control and
+exploratory analysis steps are also performed before and after normalization:
+(1) low dimensionality embedding of the samples; (2) correlation plots between
+each samples. In both cases, we expect a strong biological signal, while
+replicate samples should be strongly clustered or correlated with one another.
+
+
+Before performing any additional exploratory analysis, let us only keep highly
+variable genes: we keep for this step only the top 50% most variable genes.
+
+```{r}
+variance_cutoff = 0.5
+variance_per_genes = apply(data, 1, mad)
+min_variance = stats::quantile(variance_per_genes, c(variance_cutoff))
+variance_filtered_data = data[variance_per_genes > min_variance,]
 ```
 
+```{r echo=FALSE, fig.width=8, fig.height=4}
+graphics::hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
+	       ylab="# probes")
+graphics::abline(v=min_variance, col="#AB0000", lw=2)
+```
 
-## Differential expression analysis of time-course data
+Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
+centered and scaled gene expression data. 
+
+```{r pca, fig.width=8, fig.height=8}
+# Reorder genes on condition, time, and replicate
+
+pca_data = stats::prcomp(t(variance_filtered_data), rank=3, center=TRUE, scale=TRUE) 
+percent_var = round(100 * attr(pca_data, "percentVar"))
+```
+
+We then plot the two first components, and color each sample by (1) its
+condition; (2) its sampling time. We use different markers for each replicate.
+We also plot the second and third components in the second row.
+
+```{r pca_plots, fig.width=8, fig.height=8}
+graphics::par(mfrow=c(2, 2))
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+    col=ann_colors$Group[meta$Group],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC1")
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+    col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC1")
+
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC3"],
+    col=ann_colors$Group[meta$Group],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC3")
+graphics::plot(
+    pca_data$x[, "PC2"], pca_data$x[, "PC3"],
+    col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
+    xlab="PC2", ylab="PC3")
+
+```
+
+Then, we plot the pearson correlation across each samples. We order the
+samples by their Group (treatment) and Timepoint (the time of sampling).
+Additionally, in this example, we order each treatment by strength of the
+pathogenicity of the treatment: Control, Kawasaki, California, low dose of
+Vietnam, then high dose of Vietnam.
+
+
+```{r  correlation_plot, fig.width=6, fig.height=6}
+
+# Reorder the conditions such that:
+#	- Control is before any influenza treatment
+#	- Each treatment is ordered from low to high pathogeny
+meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
+
+# Reorder genes on condition, time, and replicate
+ord = order(
+  meta$Group,
+  meta$Timepoint,
+  meta$Replicate)
+data = data[, ord]
+meta = meta[ord, ]
+
+data_corr = stats::cor(variance_filtered_data, method="pearson")
+
+# Copy the metadata before changing the timepoints into factors
+data_corr_meta = meta
+data_corr_meta$Timepoint = as.factor(meta$Timepoint)
+NMF::aheatmap(
+    data_corr,
+    Colv=NA, Rowv=NA,
+    annCol=data_corr_meta[, c("Group", "Timepoint")],
+    annRow=data_corr_meta[, c("Group", "Timepoint")],
+    annLegend=TRUE, 
+    annColors=ann_colors,
+    main="Correlation plot")
+```
+
+We can already see interesting patterns emerging from the correlation plot.
+First, the cross-correlation amongst samples taking from the control mice is
+higher than the cross correlation amongst the rest of the treatments. Second,
+the influenza-infected mice midly react until time point 36. Third, the less
+pathogenic the strain is, the closer the samples are to the control condition.
+Fourth, the Vietnam samples at time point 120 and 168 are the one that are the
+most different from control samples.
+
+# Differential expression analysis of time-course data
 
 The next step is typically to run a differential expression analysis. Most of
 `moanin`'s function rely on an object containing a number of information such
-as the metadata and the splines model used.
+as the metadata and the splines model used. We start by creating the
+`splines_model` object using the `create_splines_model` function.
 
 ```{r}
 splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
 ```
 
 
-### Weekly differential expression analysis
+## Weekly differential expression analysis
 
 `moanin` provides a simple interface to perform a time by time differential
 expression analysis. Under the hood, it simply calls `limma` on the set of
@@ -194,7 +539,7 @@ timepoints.
 As a summary, classic differential expression methods are appropriate for
 unordered treatments, but fail to use the temporal structure of the data.
 
-### Time-course differential expression analysis between two groups
+## Time-course differential expression analysis between two groups
 
 To leverage this temporal structure, Storey et al [@storey:significance] proposes to
 model time-course micro-array with splines functions, and to use a log-ratio
@@ -204,7 +549,9 @@ expression analysis using `limma` contrasts.
 
 
 ```{r de_analysis}
-# Define contrast
+# Differential expression analysis
+timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
+
 contrasts = limma::makeContrasts(
 	contrasts=timecourse_contrasts,
 	levels=levels(meta$Group))
@@ -619,8 +966,8 @@ average_silhouette = function(labels, y) {
 average_silhouette_values = list()
 i = 1
 for(i in 1:length(all_clustering)){
-    labels = all_clustering[i]
-    average_silhouette_values[i] = average_silhouette(labels, y)
+    clustering_results = all_clustering[i]
+    average_silhouette_values[i] = average_silhouette(clustering_results, y)
     i = i + 1
 }
 
@@ -675,7 +1022,6 @@ subsampled_y = y[indices, ]
 Here we plot to stability matrix of the top 1000 genes for $k=5$ and $k=20$.
 
 ```{r fig.width=6, fig.height=4}
-library(NMF)
 stability_5 = read.table("results/stability_5.tsv", sep="\t")
 consensus_matrix_stability_5 = moanin::consensus_matrix(stability_5,
 							scale=FALSE)
@@ -755,7 +1101,6 @@ moanin::plot_cdf_consensus(all_labels)
 ```
 
 ```{r echo=FALSE}
-library(knitr)
 knitr::include_graphics("images/clustering_CDF_consensus.png")
 ```
 
@@ -767,12 +1112,10 @@ the AUC as a function of the number of the clusters or the "improvement" in
 the AUC as a function of the number of cluster.
 
 ```{r echo=FALSE}
-library(knitr)
 knitr::include_graphics("images/clustering_AUC_consensus.png")
 ```
 
 ```{r echo=FALSE}
-library(knitr)
 knitr::include_graphics("images/clustering_delta_AUC_consensus.png")
 ```
 
@@ -790,27 +1133,10 @@ to ease interpretation. Classic enrichment analysis step can then be performed
 in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
 term enrichment analysis, motif enrichment analysis, etc.
 
-```{r echo=FALSE, results="hide"}
-# Set data files and options
-data("shoemaker2015")
-data = shoemaker2015$data
-meta = shoemaker2015$meta
-
-labels = read.table(".results/clustering_labels.txt", sep="\t",
-		    check.names=FALSE)
-```
-
 First, let us clean up the gene obtained and only select the genes we are
 going to use in the enrichment analysis. One can either use the whole set of
 genes, only the set of differentially expressed genes in each cluster, or a
 subset of genes that fit well to a cluster (based on some criterion).
-
-```{r}
-gene_names = row.names(labels)
-gene_names = gene_names[!is.na(labels)]
-labels = as.vector(labels[!is.na(labels)])
-names(labels) = gene_names
-```
 
 ### Finding enriched pathways using `biomaRt` and `KEGGprofile`
 
@@ -825,13 +1151,14 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 
 
 ```{r results="hide"}
-library(biomaRt)
 ensembl = biomaRt::useMart("ensembl")
 ensembl = biomaRt::useDataset("mmusculus_gene_ensembl", mart=ensembl)
 ```
 
 ```{r enrichment_analysis, results="hide", message=FALSE}
 cluster = 8
+labels = unlist(labels)
+gene_names = names(labels)
 genes = gene_names[labels == cluster]
 
 # convert gene names
@@ -887,7 +1214,6 @@ term ID.
 
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
-library(topGO)
 genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
@@ -929,7 +1255,7 @@ clusters.
 
 # Software and data availability
 
-The source code for this workflow can be found at **FIXME** 
+The source code for this workflow can be found at [https://github.com/NelleV/2019timecourse-rnaseq-pipeline](https://github.com/NelleV/2019timecourse-rnaseq-pipeline).
 Data used in this workflow are available from NCBI GEO, accession GSE95601.
 
 # Author contributions
@@ -955,3 +1281,4 @@ The authors thank Karthik Ram and the Ropensci community for valuable
 feedback.
 
 # References
+
