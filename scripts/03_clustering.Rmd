@@ -141,7 +141,7 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labelinig step.
 
-```{r echo=FALSE, fig.height=6, fig.width=6}
+```{r echo=FALSE, fig.height=6, fig.width=6, warning=FALSE}
 par(mfrow=c(2, 1))
 barplot(table(kmeans_clusters$clusters), col="black", main="splines k-means
 labeling")
@@ -301,11 +301,14 @@ for(n_cluster in all_possible_n_clusters){
 
 ### Elbow method
 
+The Elbow method to choose the number of clusters relies on visualization aid
+to choose the number of cluster. The method relies on plotting the within
+cluster sum of squares as a function of the number of clusters. At some point,
+the WCSS will stop dropping, giving an angle in the graph.  The number of
+cluster is chosen at this "Elbow point."
+
 
 ```{r elbow_method, fig.width=6, fig.height=4}
-
-# function to compute total within-cluster sum of square 
-
 plot(all_possible_n_clusters, wss_values,
      type="b", pch=19, frame=FALSE, 
      xlab="Number of clusters K",
@@ -314,6 +317,9 @@ plot(all_possible_n_clusters, wss_values,
 ```
 
 ### Average silhouette method
+
+The silhouette value is a measure of how similar a data point is to its own
+cluster (cohesion) compared to other clusters (separation). 
 
 ```{r average_silhouette_method, fig.width=6, fig.height=4}
 # function to compute average silhouette for k clusters

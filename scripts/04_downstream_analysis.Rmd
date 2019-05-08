@@ -1,6 +1,7 @@
 ---
 title: "Downstream analysis: A pipeline to analyse time-course gene expression data"
 output: rmarkdown::html_vignette
+bibliography: bibliography.bib
 ---
 
 
@@ -68,7 +69,8 @@ names(labels) = gene_names
 ### Finding enriched pathways using `biomaRt` and `KEGGprofile`
 
 Let us first tackle the case of pathway enrichment analysis. We will leverage
-the packages `biomaRt` and `KEGGprofile` for this step. `KEGGprofile` is a
+the packages `biomaRt` [@durink:biomart] and `KEGGprofile` [@zhao:keggprofile]
+for this step. `KEGGprofile` is a
 package that easily allows to perform pathway enrichment analysis on a set of
 genes labeled with the ensembl annotation. We thus need to convert the gene
 names into the appropriate format. This is where `biomaRt` comes in handy: it
@@ -111,7 +113,7 @@ pathways = subset(
 
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways, "html", escape=F, digits=4) %>%
+kable(pathways[1:10, ], "html", escape=F, digits=4) %>%
     kable_styling("striped", full_width=TRUE) 
 ```
 
@@ -146,7 +148,7 @@ genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
 	      mart=ensembl)
 
 # Create gene to GO id mapping
-gene_id_go_mapping = create_go_term_mapping(genes)
+gene_id_go_mapping = moanin::create_go_term_mapping(genes)
 ```
 
 Once the gene ID to GO mapping list is created, `moanin` provides a simple
@@ -166,6 +168,8 @@ go_terms_enriched = find_enriched_go_terms(
 go_terms_enriched = go_terms_enriched[
     order(go_terms_enriched[, "resultFisher_padj"]), ]
 
-kable(go_terms_enriched, "html", escape=F, digits=4) %>%
+kable(go_terms_enriched[1:15, ], "html", escape=F, digits=4) %>%
     kable_styling("striped", full_width=TRUE) 
 ```
+
+# References

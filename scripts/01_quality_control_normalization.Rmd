@@ -77,7 +77,7 @@ GSM1557146_AR0313_058raw.txt.gz
 GSM1557147_AR0313_059raw.txt.gz
 ```
 
-```{r message=FALSE}
+```{r message=FALSE, results="hide", warning=FALSE}
 targets = limma::readTargets()
 RG = limma::read.maimages(
   targets, source="agilent",
@@ -95,7 +95,7 @@ The normalization strategy we apply here relies on `limma` and is as follows:
 
 
 
-```{r reading_targets, results="hide", fig.width=8, fig.height=4, message=FALSE}
+```{r reading_targets, results="hide", fig.width=8, fig.height=4, message=FALSE, warning=FALSE}
 # Perform background correction using norm-exponential strategy and normalize
 # across samples using quantile normalization.
 RG = limma::backgroundCorrect(RG, method="normexp")
@@ -110,8 +110,10 @@ empirical densities of each sample perfectly overlap.
 ```{r plotting_densities, results="hide", fig.width=8, fig.height=4}
 # Plot the densities of the probes before and after normalization.
 par(mfrow=c(1, 2))
-limma::plotDensities(RG, col="black", legend=FALSE)
-limma::plotDensities(RG.q, col="black", legend=FALSE)
+limma::plotDensities(RG, col="black", legend=FALSE,
+		     main="Before normalization")
+limma::plotDensities(RG.q, col="black", legend=FALSE,
+		     main="After normalization")
 ```
 
 
@@ -166,6 +168,7 @@ metadata. The package `moanin` contains the normalized data and meta of
 # Now load in the metadata
 data(shoemaker2015)
 meta = shoemaker2015$meta
+data = shoemaker2015$data
 ```
 
 ```{r echo=FALSE, results="hide"}
