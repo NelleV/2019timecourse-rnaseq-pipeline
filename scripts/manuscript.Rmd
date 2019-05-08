@@ -26,7 +26,8 @@ keywords: >
 vignette: >
     %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
     %\VignetteEngine{knitr::rmarkdown}
-output: BiocWorkflowTools::f1000_article
+#output: BiocWorkflowTools::f1000_article
+output: pdf_document
 
 bibliography: bibliography.bib
 ---
@@ -39,7 +40,7 @@ library(splines)
 library(stats)
 library(knitr)
 library(kableExtra)
-library(BiocStyle)
+#library(BiocStyle)
 library(biomaRt)
 
 library(ggplot2)
