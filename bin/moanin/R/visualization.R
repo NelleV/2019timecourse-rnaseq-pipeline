@@ -103,7 +103,7 @@ plot_centroid_individual = function(centroid, splines_model, colors=NULL, smooth
         mask = meta$Group == group
         time = meta$Timepoint[mask]
         indx = order(time)
-        graphics::lines(time[indx], centroid[mask][indx], type="b",
+        graphics::lines(time[indx], centroid[mask][indx], type="p",
 		        col=color, pch=16,
 			lwd=0)
 	if(smooth){
