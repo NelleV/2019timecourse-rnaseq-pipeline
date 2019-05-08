@@ -36,10 +36,16 @@ plot_centroids = function(centroids, splines_model, colors=NULL, smooth=FALSE){
             mar=c(0.2, 0.2, 0.2, 0.2))
     }
 
+    name_centroids = names(centroids)
+    name_centroid = NULL
     for(i in 1:n_centroids){
+	if(!is.null(name_centroids)){
+	    name_centroid = name_centroids[i]
+	}
         plot_centroid_individual(as.vector(centroids[i, ]),
 				 splines_model, colors=colors,
-				 smooth=smooth, title=NULL)
+				 smooth=smooth,
+				 title=name_centroid)
     }
 }
 

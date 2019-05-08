@@ -51,6 +51,11 @@ splines_kmeans = function(data, splines_model, n_clusters=10,
 	kmeans_clusters$centroids, splines_model)
     names(kmeans_clusters$clusters) = row.names(data)
 
+    # Give names to clusters
+    cluster_names = sapply(1:n_clusters, function(x){paste0("C", x)})
+    row.names(kmeans_clusters$centroids) = cluster_names
+    colnames(kmeans_clusters$centroids) = colnames(data)
+
     kmeans_clusters$splines_model = splines_model
     kmeans_clusters$fit_splines = fit_splines
     kmeans_clusters$rescale = rescale

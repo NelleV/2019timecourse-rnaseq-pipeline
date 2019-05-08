@@ -168,8 +168,8 @@ confusion_matrix = table(both_labels)
 text = as.matrix(as.character(confusion_matrix))
 dim(text) = dim(confusion_matrix)
 NMF::aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
-	      border=list(cell=TRUE), txt=text, legend=FALSE, Rowv=FALSE,
-	      Colv=FALSE)
+	      border=list(cell=TRUE), txt=text, legend=FALSE, Rowv=NA,
+	      Colv=NA)
 labels = scores_and_labels$labels
 labels = unlist(labels[!is.na(labels)])
 
@@ -189,7 +189,7 @@ write.table(kmeans_labels,
 
 ## Looking at specific clusters in details.
 
-Now, let us look more in detail some specific clusters. Cluster 4 seems
+Now, let us look more in detail some specific clusters. Cluster 8 seems
 particularly interesting: it captures genes with strong differences between
 the differant influenza treatments and the control, while the control remains
 relatively flat.
@@ -201,13 +201,13 @@ expression patterns and the rescaled gene expression patterns side by side.
 First, select the genes of interest.
 
 ```{r}
-cluster_to_plot = 4
+cluster_to_plot = 8
 genes_to_plot =  names(labels[labels == cluster_to_plot])
 ```
 
 
 ```{r fig.width=6, fig.height=8}
-layout(matrix(c(1,2),nrow=1), widths=c(1, 2))
+layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 
 data_to_plot = data[genes_to_plot, ]
 submeta = meta
@@ -488,3 +488,5 @@ separates over-expressed genes from under-expressed genes. While it is indeed
 a very stable clustering, it does not capture the range of gene expression
 patterns present in the data. This shows the limitation of such method on real
 data, where the number of clusters is not clearly defined.
+
+# References
