@@ -200,8 +200,8 @@ score_genes_centroid = function(data, centroid, positive_scaling=TRUE, scale=TRU
 #' 
 #' @param pvalues pvalues
 #'
-#' @keywords internal
-fisher_method = function(pvalues){
+#' @export
+pvalues_fisher_method = function(pvalues){
     # TODO Add a check that all pvalues are "valid"
     keep = (pvalues >= 0) & (pvalues <= 1)
     pvalues[pvalues == 0] = 1e-285

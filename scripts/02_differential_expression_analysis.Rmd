@@ -5,7 +5,7 @@ bibliography: bibliography.bib
 ---
 
 
-```{r echo=FALSE, results="hide"}
+```{r echo=FALSE, results="hide", message=FALSE, warning=FALSE}
 # Reloading necessary data and preliminary results
 library(devtools)
 library(limma)

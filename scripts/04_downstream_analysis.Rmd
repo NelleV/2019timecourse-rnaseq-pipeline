@@ -69,7 +69,7 @@ names(labels) = gene_names
 ### Finding enriched pathways using `biomaRt` and `KEGGprofile`
 
 Let us first tackle the case of pathway enrichment analysis. We will leverage
-the packages `biomaRt` [@durink:biomart] and `KEGGprofile` [@zhao:keggprofile]
+the packages `biomaRt` [@durinck:biomart] and `KEGGprofile` [@zhao:keggprofile]
 for this step. `KEGGprofile` is a
 package that easily allows to perform pathway enrichment analysis on a set of
 genes labeled with the ensembl annotation. We thus need to convert the gene
@@ -121,7 +121,7 @@ kable(pathways[1:10, ], "html", escape=F, digits=4) %>%
 ### Finding enriched GO terms
 
 To find GO terms, we use `biomaRt` to find the mapping between GO terms and
-gene mapping. The GO enrichment library `topGO` expects the GO term to gene
+gene mapping. The GO enrichment library `topGO` [@alexa:topgo] expects the GO term to gene
 mapping to be a list where each item is a mapping between a gene name and a GO
 term ID vector. 
 
