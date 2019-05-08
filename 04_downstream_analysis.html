@@ -326,7 +326,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <a class="sourceLine" id="cb2-4" data-line-number="4"><span class="kw">names</span>(labels) =<span class="st"> </span>gene_names</a></code></pre></div>
 <div id="finding-enriched-pathways-using-biomart-and-keggprofile" class="section level3">
 <h3>Finding enriched pathways using <code>biomaRt</code> and <code>KEGGprofile</code></h3>
-<p>Let us first tackle the case of pathway enrichment analysis. We will leverage the packages <code>biomaRt</code> <span class="citation">(<span class="citeproc-not-found" data-reference-id="durink:biomart"><strong>???</strong></span>)</span> and <code>KEGGprofile</code> <span class="citation">(Zhao, Guo, and Shyr 2017)</span> for this step. <code>KEGGprofile</code> is a package that easily allows to perform pathway enrichment analysis on a set of genes labeled with the ensembl annotation. We thus need to convert the gene names into the appropriate format. This is where <code>biomaRt</code> comes in handy: it enables easy conversion from one gene annotation to another. Here, we will use it to convert the gene names from the Refseq annotation to the ensembl one.</p>
+<p>Let us first tackle the case of pathway enrichment analysis. We will leverage the packages <code>biomaRt</code> <span class="citation">(Durinck et al. 2005)</span> and <code>KEGGprofile</code> <span class="citation">(Zhao, Guo, and Shyr 2017)</span> for this step. <code>KEGGprofile</code> is a package that easily allows to perform pathway enrichment analysis on a set of genes labeled with the ensembl annotation. We thus need to convert the gene names into the appropriate format. This is where <code>biomaRt</code> comes in handy: it enables easy conversion from one gene annotation to another. Here, we will use it to convert the gene names from the Refseq annotation to the ensembl one.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">library</span>(biomaRt)</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2">ensembl =<span class="st"> </span>biomaRt<span class="op">::</span><span class="kw">useMart</span>(<span class="st">&quot;ensembl&quot;</span>)</a>
 <a class="sourceLine" id="cb3-3" data-line-number="3">ensembl =<span class="st"> </span>biomaRt<span class="op">::</span><span class="kw">useDataset</span>(<span class="st">&quot;mmusculus_gene_ensembl&quot;</span>, <span class="dt">mart=</span>ensembl)</a></code></pre></div>
@@ -503,7 +503,7 @@ JAK-STAT signaling pathway
 </div>
 <div id="finding-enriched-go-terms" class="section level3">
 <h3>Finding enriched GO terms</h3>
-<p>To find GO terms, we use <code>biomaRt</code> to find the mapping between GO terms and gene mapping. The GO enrichment library <code>topGO</code> expects the GO term to gene mapping to be a list where each item is a mapping between a gene name and a GO term ID vector.</p>
+<p>To find GO terms, we use <code>biomaRt</code> to find the mapping between GO terms and gene mapping. The GO enrichment library <code>topGO</code> <span class="citation">(Alexa and Rahnenfuhrer 2016)</span> expects the GO term to gene mapping to be a list where each item is a mapping between a gene name and a GO term ID vector.</p>
 <pre class="text"><code>$NM_199153
 [1] &quot;GO:0016020&quot; &quot;GO:0016021&quot; &quot;GO:0007186&quot; &quot;GO:0004930&quot; &quot;GO:0007165&quot;
 [6] &quot;GO:0050896&quot; &quot;GO:0050909&quot;
@@ -953,6 +953,12 @@ regulation of small GTPase mediated sign…
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
 <div id="refs" class="references">
+<div id="ref-alexa:topgo">
+<p>Alexa, Adrian, and Jorg Rahnenfuhrer. 2016. <em>TopGO: Enrichment Analysis for Gene Ontology</em>.</p>
+</div>
+<div id="ref-durinck:biomart">
+<p>Durinck, S., Y. Moreau, A. Kasprzyk, S. Davis, B. De Moor, A. Brazma, and W. Huber. 2005. “BioMart and Bioconductor: a powerful link between biological databases and microarray data analysis.” <em>Bioinformatics</em> 21 (16): 3439–40.</p>
+</div>
 <div id="ref-zhao:keggprofile">
 <p>Zhao, Shilin, Yan Guo, and Yu Shyr. 2017. <em>KEGGprofile: An Annotation and Visualization Package for Multi-Types and Multi-Groups Expression Data in Kegg Pathway</em>.</p>
 </div>
