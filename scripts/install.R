@@ -72,26 +72,26 @@ if(!require(Biobase)){
 }
 
 if(!require(MASS)){
-    # biocLite("MASS")
+    biocLite("MASS")
 }
 
 if(!require("biomaRt")){
-    # biocLite("biomaRt")
+    biocLite("biomaRt")
 }
 
 if(!require(KEGGprofile)){
-    # biocLite("KEGGprofile")
+    biocLite("KEGGprofile")
 }
 
 if(!require("NMI")){
-    # install.packages("NMI")
+    install.packages("NMI")
 }
 
 if(!require(zoo)){
-    # install.packages("zoo")
+    install.packages("zoo")
 }
 
 if(!require(BiocWorkflowTools)){
-    # biocLite("BiocWorkflowTools")
+    biocLite("BiocWorkflowTools")
 }
 
