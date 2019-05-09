@@ -40,7 +40,7 @@ library(splines)
 library(stats)
 library(knitr)
 library(kableExtra)
-#library(BiocStyle)
+library(BiocStyle)
 library(biomaRt)
 
 library(ggplot2)
