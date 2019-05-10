@@ -4,4 +4,4 @@ output: rmarkdown::html_vignette
 ---
 
 The manuscript has been automatically compiled thanks to travis and can be
-found [here](manuscript.pdf).
+found [here](manuscript.html).
