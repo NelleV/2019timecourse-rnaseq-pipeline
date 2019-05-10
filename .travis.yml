@@ -1,13 +1,12 @@
-language: r
-dist: xenial
+sudo: required
+services:
+    - docker
 
-r:
-    - bioc-release
+before_install:
+  - docker pull nellev/rbio
+  - docker run -d -p 127.0.0.1:80:4567 nellev/rbio /bin/sh -c "cd ~; "
+  - docker ps -a
 
-sudo: false
-cache: packages
-
-install: source .build_tools/travis/install.sh
 script: source .build_tools/travis/test_script.sh
 
 deploy:

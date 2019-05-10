@@ -26,6 +26,12 @@ run_tests() {
     popd
 }
 
+# Start by installing
+pushd bin/moanin
+make install
+popd
+
+# Now get data and run the tests and build the manuscript
 get_data
 run_tests
 mkdir -p scripts/reports
