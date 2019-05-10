@@ -1,2 +1,2 @@
 library(devtools)
-devtools::install()
+devtools::install(upgrade=FALSE)

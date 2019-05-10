@@ -26,6 +26,6 @@ run_tests() {
     popd
 }
 
-#get_data
-#run_tests
+get_data
+run_tests
 mkdir -p scripts/reports
