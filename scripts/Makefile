@@ -1,12 +1,12 @@
-ALL_RMD_FILES = $(wildcard *.Rmd)
-RMD_FILES = $(filter-out manuscript.Rmd, $(ALL_RMD_FILES))
+RMD_FILES = $(wildcard *.Rmd)
+# RMD_FILES = $(filter-out manuscript.Rmd, $(ALL_RMD_FILES))
 SUPP_RMD_FILES = $(wildcard miscellaneous/*.Rmd)
 
 HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(RMD_FILES))
 SUPP_HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(SUPP_RMD_FILES))
 
 
-all: html pdf
+all: html 
 
 pdf: reports/manuscript.pdf
 
@@ -26,7 +26,7 @@ reports/%.html: %.Rmd
 reports/%.pdf: %.Rmd
 	mkdir -p .results
 	mkdir -p $(@D)
-	Rscript .scripts/compile_rmarkdown.R $< $@
+	Rscript .scripts/compile_rmarkdown_pdf.R $< $@
 
 
 results/all_go_terms.tsv: .results/clustering_labels.txt
