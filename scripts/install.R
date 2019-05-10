@@ -48,39 +48,39 @@ if(!require(NMF)){
 source("https://bioconductor.org/biocLite.R")
 
 if(!require(limma)){
-    # biocLite("limma")
+    biocLite("limma")
 }
 
 if(!require(edgeR)){
-    # biocLite("edgeR")
+    biocLite("edgeR")
 }
 
 if(!require(edge)){
-    # biocLite("edge")
+    biocLite("edge")
 }
 
 if(!require(EDASeq)){
-    # biocLite("EDASeq")
+    biocLite("EDASeq")
 }
 
 if(!require(topGO)){
-    # biocLite("topGO")
+    biocLite("topGO")
 }
 
 if(!require(Biobase)){
-    # biocLite("Biobase")
+    biocLite("Biobase")
 }
 
 if(!require(MASS)){
-    # biocLite("MASS")
+    biocLite("MASS")
 }
 
 if(!require("biomaRt")){
-    # biocLite("biomaRt")
+    biocLite("biomaRt")
 }
 
 if(!require(KEGGprofile)){
-    # biocLite("KEGGprofile")
+    biocLite("KEGGprofile")
 }
 
 if(!require("NMI")){
