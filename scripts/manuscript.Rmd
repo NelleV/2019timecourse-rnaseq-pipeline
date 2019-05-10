@@ -1229,8 +1229,8 @@ go_terms_enriched = go_terms_enriched[
 colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
 "Significant", "Expected", "P-value", "adj. p-value")
 
-kable(go_terms_enriched[1:15, ], "latex", escape=F, digits=4)  %>%
-    kable_styling("striped", full_width=TRUE) 
+# kable(go_terms_enriched[1:15, ], "latex", escape=F, digits=4)  %>%
+#     kable_styling("striped", full_width=TRUE) 
 ```
 
 # Conclusion
