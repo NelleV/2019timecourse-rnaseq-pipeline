@@ -11,5 +11,5 @@ set -e
 Rscript scripts/install.R
 
 pushd bin/moanin
-make install
+# make install
 popd
