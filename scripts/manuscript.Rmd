@@ -1233,6 +1233,13 @@ kable(go_terms_enriched[1:15, ], "latex", escape=F, digits=4)  %>%
     kable_styling("striped", full_width=TRUE) 
 ```
 
+
+# Session information
+
+```{r}
+sessionInfo()
+```
+
 # Conclusion
 
 This workflow provides a tutoral for the analysis of time-course gene
