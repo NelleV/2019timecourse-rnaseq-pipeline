@@ -1,0 +1,1323 @@
+\documentclass[9pt,a4paper,]{extarticle}
+
+\usepackage{f1000_styles}
+
+\usepackage[pdfborder={0 0 0}]{hyperref}
+
+\usepackage[numbers]{natbib}
+\bibliographystyle{unsrtnat}
+
+
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+
+% disable code chunks background
+%\renewenvironment{Shaded}{}{}
+
+% disable section numbers
+\setcounter{secnumdepth}{0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
+\begin{document}
+\pagestyle{front}
+
+\title{A pipeline to analyse time-course gene expression data}
+
+%% AUTH AFFIL %%
+
+\maketitle
+\thispagestyle{front}
+
+\begin{abstract}
+The phenotypic diversity of cells is governed by a complex equilibrium between their genetic identity and their environmental interactions: Understanding the dynamics of gene expression is a fundamental question of biology.However, analysing time-course transcriptomic data raises unique challenging statistical and computational questions, requiring the development of novel methods and software. Using as case study time-course transcriptomics data from mice exposed to different strains of influenza, this workflows provides a step-by-step tutorial of the methodology used to analyse time-course data: (1) normalization of the micro-array dataset; (2) differential expression analysis using functional data analysis; (3) clustering fo time-course data; (4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
+\end{abstract}
+
+\section*{Keywords}
+time-course gene expression data, clustering, differential expression, workflow
+
+
+\clearpage
+\pagestyle{main}
+
+\#TODO list
+
+\begin{itemize}
+\tightlist
+\item
+  Add legends to the plots that don't have.
+\item
+  Currently have two functions ``plot\_genes'', ``plot\_centroids'', that do exactly
+  the same thing. Find a better name for both of them
+\end{itemize}
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Gene expression studies provide simultaneous quantification of the level of
+mRNA from all genes in a sample. High-throughput studies of gene expression
+have a long history, starting with microarray technologies in the 1990s
+through to single-cell technologies. While many expression studies are
+designed to compare the gene expression in distinct groups, there is also a
+long history of time-course expression studies, where the the gene expression
+is compared across time by measuring mRNA levels from different samples across
+time \footnote{Because the collection of the mRNA is often destructive, samples at
+  different time points are generally from different biological samples;
+  longitudinal studies, for example tracking the same subject over time, are
+  certainly possible in certain settings, but not directly considered here.}. Such time course studies can vary from measuring a few distinct time
+points, to sampling ten to twenty time points. Many longer time series are
+particularly interested in investigating development over time. More recently,
+single-cell studies track single cells through their development, and a single
+cell is measured at a particular moment in its developmental progression -- a
+value that is not know but estimated from the data as its ``pseudo-time.''
+
+While there are many methods that have been proposed for discrete aspects of
+time course data, the entire workflow for analysis of such data remains
+difficult, particularly for long, developmental time series. Most methods
+proposed for time course data are concerned with detecting genes that are
+changing over time (differential expression analysis), examples being \texttt{edge}
+\citep{storey:significance}, functional component analysis based models \citep{wu:more},
+time-course permutation tests \citep{park:statistical}, and multiple testing
+strategies to combine singe time point differential expression analysis
+\citep{sun:multiple}. However, with long time course datasets, particularly in
+developmental systems, a massive number of genes will show \emph{some} change. For
+example, in the mice lung tissues infected with influenza, over 50\% of genes
+are shown to be changing over time. The task in these settings is often not to
+detect changes in genes, but to categorize into biologically interpretable
+patterns the vast number of changes discovered.
+
+We present here a workflow for such an analysis that consists of 4 main
+parts (Figure \ref{fig:workflow}):
+
+\begin{itemize}
+\tightlist
+\item
+  Quality control and normalization;
+\item
+  Identification of genes that are differentially expressed;
+\item
+  Clustering of genes into distinct temporal patterns;
+\item
+  Biological interpretation of the clusters.
+\end{itemize}
+
+This workflow represents an integration of both novel implementations of
+previously established methods and new methodologies for the settings of
+developmental time series. It relies on several standard packages for
+analysing gene expression data, some specific for time-course data, others
+broadly used by the community. We provide the various steps of the workflow as
+functions in a R package called \texttt{moanin}.
+
+\begin{figure}
+
+{\centering \includegraphics[width=4.81in]{images/fig1_schemas} 
+
+}
+
+\caption{Workflow for analyzing time-course datasets.}\label{fig:schema}
+\end{figure}
+
+\hypertarget{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}{%
+\section{Analysis of the dynamical response of mouse lung tissue to influenza}\label{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}}
+
+This workflow is illustrated using data from a micro-array time-course
+experiment, exposing mice to three different strains of influenza, and
+collecting lung tissue during 14 time-points after infection (0, 3, 6, 9, 12,
+18, 24, 30, 36, 48, 60 hours, then 3, 5, and 7 days later)
+\citep{shoemaker:ultrasensitive}. The three strains of influenza used in the
+study are (1) a low pathogenicity seasonal H1N1 influenza virus
+(A/Kawasaki/UTK4/2009 {[}H1N1{]}), a mildly pathogenic virus from the 2009
+pandemic season (A/California/04/2009 {[}H1N1{]}), and a highly pathogenic H5N1
+avian influenza virus (A/Vietnam/1203/2004 {[}H5N1{]}. Mice were injected with
+\(10^5\) PFU of each virus. An adidtional 42 mice were injected with a lower dose
+of the Vietnam avian influenza virus (\(10^3\) PFU).
+
+By combining gene expression time-course data with virus growth data, the
+authors show that the inflammatory response of lung tissue is gated until a
+threshold of the virus concentration is exceeded in the lung. Once this
+threshold is exceeded, a strong inflammatory and cytokin production occurs.
+This results provides evidence that the pathology response is non-linearly
+regulated by virus concentration.
+
+\hypertarget{quality-control-and-normalization}{%
+\subsection{Quality control and normalization}\label{quality-control-and-normalization}}
+
+\hypertarget{pre-processing-and-normalization}{%
+\subsubsection{Pre-processing and normalization}\label{pre-processing-and-normalization}}
+
+The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
+with accession number GSE63786. The dataset has a total of 209 samples, with
+45018 probes (1 sample was removed by the authors prior to uploading the
+dataset on GEO).
+
+Note that in the following, we assume that the user has access to a data
+folder \texttt{data/shoemaker2015/rawdata}, containing the microarray data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_dir =}\StringTok{ "data/shoemaker2015/rawdata"}
+\end{Highlighting}
+\end{Shaded}
+
+Given the source and a \texttt{Targets.txt} structured as follows, microarray can be loaded thanks to the limma library.
+
+\begin{verbatim}
+FileName
+GSM1557140_AR0313_043raw.txt.gz
+GSM1557141_AR0313_044raw.txt.gz
+GSM1557142_AR0313_045raw.txt.gz
+GSM1557143_AR0313_055raw.txt.gz
+GSM1557144_AR0313_056raw.txt.gz
+GSM1557145_AR0313_057raw.txt.gz
+GSM1557146_AR0313_058raw.txt.gz
+GSM1557147_AR0313_059raw.txt.gz
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{targets =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{readTargets}\NormalTok{()}
+\NormalTok{RG =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{read.maimages}\NormalTok{(}
+\NormalTok{  targets, }\DataTypeTok{source=}\StringTok{"agilent"}\NormalTok{,}
+  \DataTypeTok{path=}\NormalTok{data_dir,}
+  \DataTypeTok{other.columns=}\StringTok{"gIsWellAboveBG"}\NormalTok{,}
+  \DataTypeTok{green.only=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The normalization strategy we apply here relies on \texttt{limma} and is as follows:
+
+\begin{itemize}
+\tightlist
+\item
+  First, normalize probe intensity using background information using the
+  ``norm-exponential'' strategy.
+\item
+  Then normalize across micro-arrrays using quantile normalization.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Perform background correction using norm-exponential strategy and normalize}
+\CommentTok{# across samples using quantile normalization.}
+\NormalTok{RG =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{backgroundCorrect}\NormalTok{(RG, }\DataTypeTok{method=}\StringTok{"normexp"}\NormalTok{)}
+\NormalTok{RG.q =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{normalizeBetweenArrays}\NormalTok{(RG, }\DataTypeTok{method=}\StringTok{"quantile"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Plotting the smoothed empirical densities of the probe values before
+normalization shows considerable variations betweens arrays. Once the data has
+been normalized across array using quantile normalization, the smoothed
+empirical densities of each sample perfectly overlap.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Plot the densities of the probes before and after normalization.}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{2.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{))}
+\NormalTok{limma}\OperatorTok{::}\KeywordTok{plotDensities}\NormalTok{(RG, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{,}
+             \DataTypeTok{main=}\StringTok{"Before normalization"}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{0.8}\NormalTok{)}
+\NormalTok{limma}\OperatorTok{::}\KeywordTok{plotDensities}\NormalTok{(RG.q, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{,}
+             \DataTypeTok{main=}\StringTok{"After normalization"}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{0.8}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/plotting_densities-1} \end{center}
+
+We then clean up the names of each gene and each sample to match the original
+data. Finally, we further filter out probes based on the following criteria:
+(1) removing the 1486 control probes; (2) removing
+4823 low-expressed genes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sample_names =}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\KeywordTok{strsplit}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(RG.q), }\StringTok{"_"}\NormalTok{), .subset2,  }\DecValTok{1}\NormalTok{)}
+\KeywordTok{colnames}\NormalTok{(RG.q) =}\StringTok{ }\NormalTok{sample_names}
+\KeywordTok{row.names}\NormalTok{(RG.q) =}\StringTok{ }\KeywordTok{make.names}\NormalTok{(RG}\OperatorTok{$}\NormalTok{genes}\OperatorTok{$}\NormalTok{SystematicName, }\DataTypeTok{unique=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{idx_to_keep =}\StringTok{ }\KeywordTok{which}\NormalTok{(}
+  \OperatorTok{!}\NormalTok{(RG}\OperatorTok{$}\NormalTok{genes}\OperatorTok{$}\NormalTok{Systematic }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"DarkCorner"}\NormalTok{, }\StringTok{"GE_BrightCorner"}\NormalTok{,}
+                   \StringTok{"NegativeControl"}\NormalTok{)))}
+
+\NormalTok{data =}\StringTok{ }\NormalTok{RG.q[idx_to_keep,]}
+
+\CommentTok{# Filter out control probes.}
+\NormalTok{control_probes =}\StringTok{ }\NormalTok{data}\OperatorTok{$}\NormalTok{genes[, }\StringTok{"ControlType"}\NormalTok{] }\OperatorTok{==}\StringTok{ }\DecValTok{1}
+\NormalTok{is_expressed =}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(data}\OperatorTok{$}\NormalTok{other}\OperatorTok{$}\StringTok{"gIsWellAboveBG"} \OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{>=}\StringTok{ }\DecValTok{4}
+
+\NormalTok{data =}\StringTok{ }\NormalTok{data[}\OperatorTok{!}\NormalTok{control_probes }\OperatorTok{&}\StringTok{ }\NormalTok{is_expressed, ]}\OperatorTok{$}\NormalTok{E}
+\end{Highlighting}
+\end{Shaded}
+
+After filtering, we are left with 39544 probes of interest in
+209 samples.
+
+Now that we have normalized and filtered the gene expressions, let's load the
+metadata. The package \texttt{moanin} contains the normalized data and meta of
+\citep{shoemaker:ultrasensitive}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Now load in the metadata}
+\KeywordTok{data}\NormalTok{(shoemaker2015)}
+\NormalTok{meta =}\StringTok{ }\NormalTok{shoemaker2015}\OperatorTok{$}\NormalTok{meta}
+\NormalTok{data =}\StringTok{ }\NormalTok{shoemaker2015}\OperatorTok{$}\NormalTok{data}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{exploratory-analysis-and-quality-control}{%
+\subsubsection{Exploratory analysis and quality control}\label{exploratory-analysis-and-quality-control}}
+
+Plotting the smoothed empirical densities of probe values for each sample and
+estimating the variations across samples before and after normalization is a
+first quality control step. Typically, two other quality control and
+exploratory analysis steps are also performed before and after normalization:
+(1) low dimensionality embedding of the samples; (2) correlation plots between
+each samples. In both cases, we expect a strong biological signal, while
+replicate samples should be strongly clustered or correlated with one another.
+
+Before performing any additional exploratory analysis, let us only keep highly
+variable genes: we keep for this step only the top 50\% most variable genes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{variance_cutoff =}\StringTok{ }\FloatTok{0.5}
+\NormalTok{variance_per_genes =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data, }\DecValTok{1}\NormalTok{, mad)}
+\NormalTok{min_variance =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{quantile}\NormalTok{(variance_per_genes, }\KeywordTok{c}\NormalTok{(variance_cutoff))}
+\NormalTok{variance_filtered_data =}\StringTok{ }\NormalTok{data[variance_per_genes }\OperatorTok{>}\StringTok{ }\NormalTok{min_variance,]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
+
+Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
+centered and scaled gene expression data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Reorder genes on condition, time, and replicate}
+
+\NormalTok{pca_data =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{prcomp}\NormalTok{(}\KeywordTok{t}\NormalTok{(variance_filtered_data), }\DataTypeTok{rank=}\DecValTok{3}\NormalTok{, }\DataTypeTok{center=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{scale=}\OtherTok{TRUE}\NormalTok{) }
+\NormalTok{percent_var =}\StringTok{ }\KeywordTok{round}\NormalTok{(}\DecValTok{100} \OperatorTok{*}\StringTok{ }\KeywordTok{attr}\NormalTok{(pca_data, }\StringTok{"percentVar"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+We then plot the two first components, and color each sample by (1) its
+condition; (2) its sampling time. We use different markers for each replicate.
+We also plot the second and third components in the second row.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{graphics}\OperatorTok{::}\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{))}
+\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC1"}\NormalTok{],}
+    \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group[meta}\OperatorTok{$}\NormalTok{Group],}
+    \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
+    \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC1"}\NormalTok{)}
+\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC1"}\NormalTok{],}
+    \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)],}
+    \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
+    \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC1"}\NormalTok{)}
+
+\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC3"}\NormalTok{],}
+    \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group[meta}\OperatorTok{$}\NormalTok{Group],}
+    \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
+    \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC3"}\NormalTok{)}
+\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC3"}\NormalTok{],}
+    \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)],}
+    \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
+    \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC3"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/pca_plots-1} \end{center}
+
+Then, we plot the pearson correlation across each samples. We order the
+samples by their Group (treatment) and Timepoint (the time of sampling).
+Additionally, in this example, we order each treatment by strength of the
+pathogenicity of the treatment: Control, Kawasaki, California, low dose of
+Vietnam, then high dose of Vietnam.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Reorder the conditions such that:}
+\CommentTok{#   - Control is before any influenza treatment}
+\CommentTok{#   - Each treatment is ordered from low to high pathogeny}
+\NormalTok{meta}\OperatorTok{$}\NormalTok{Group =}\StringTok{ }\KeywordTok{factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group, }\KeywordTok{levels}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group)[}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{4}\NormalTok{)])}
+
+\CommentTok{# Reorder genes on condition, time, and replicate}
+\NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(}
+\NormalTok{  meta}\OperatorTok{$}\NormalTok{Group,}
+\NormalTok{  meta}\OperatorTok{$}\NormalTok{Timepoint,}
+\NormalTok{  meta}\OperatorTok{$}\NormalTok{Replicate)}
+
+\NormalTok{variance_filtered_data =}\StringTok{ }\NormalTok{variance_filtered_data[, ord]}
+\NormalTok{data_corr =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{cor}\NormalTok{(variance_filtered_data, }\DataTypeTok{method=}\StringTok{"pearson"}\NormalTok{)}
+
+\NormalTok{data_corr_meta =}\StringTok{ }\NormalTok{meta[ord, ]}
+
+\CommentTok{# Copy the metadata before changing the timepoints into factors}
+\NormalTok{data_corr_meta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)}
+\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
+\NormalTok{    data_corr,}
+    \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{, }\DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{annCol=}\NormalTok{data_corr_meta[, }\KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
+    \DataTypeTok{annRow=}\NormalTok{data_corr_meta[, }\KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
+    \DataTypeTok{annLegend=}\OtherTok{TRUE}\NormalTok{, }
+    \DataTypeTok{annColors=}\NormalTok{ann_colors,}
+    \DataTypeTok{main=}\StringTok{"Correlation plot"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/correlation_plot-1} \end{center}
+
+We can already see interesting patterns emerging from the correlation plot.
+First, the cross-correlation amongst samples taking from the control mice is
+higher than the cross correlation amongst the rest of the treatments. Second,
+the influenza-infected mice midly react until time point 36. Third, the less
+pathogenic the strain is, the closer the samples are to the control condition.
+Fourth, the Vietnam samples at time point 120 and 168 are the one that are the
+most different from control samples.
+
+\hypertarget{differential-expression-analysis-of-time-course-data}{%
+\subsection{Differential expression analysis of time-course data}\label{differential-expression-analysis-of-time-course-data}}
+
+The next step is typically to run a differential expression analysis. Most of
+\texttt{moanin}'s function rely on an object containing a number of information such
+as the metadata and the splines model used. We start by creating the
+\texttt{splines\_model} object using the \texttt{create\_splines\_model} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{splines_model =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{create_splines_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{weekly-differential-expression-analysis}{%
+\subsubsection{Weekly differential expression analysis}\label{weekly-differential-expression-analysis}}
+
+\texttt{moanin} provides a simple interface to perform a time by time differential
+expression analysis. Under the hood, it simply calls \texttt{limma} \citep{ritchie:limma} on the set of
+contrasts provided. Here, we show an example between the control mouse and the
+mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
+(H5N1), but the function works with any form contrasts.
+
+\textbf{FIXME rename the function to something better}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{meta}\OperatorTok{$}\NormalTok{WeeklyGroup =}\StringTok{ }\KeywordTok{make.names}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group}\OperatorTok{:}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint))}
+
+\CommentTok{# Define contrast   }
+\NormalTok{contrasts =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"M.0-VL.0"}\NormalTok{,}
+          \StringTok{"M.3-VL.3"}\NormalTok{,}
+          \StringTok{"M.6-VL.6"}\NormalTok{,}
+          \StringTok{"M.9-VL.9"}\NormalTok{,}
+          \StringTok{"M.12-VL.12"}\NormalTok{,}
+          \StringTok{"M.18-VL.18"}\NormalTok{,}
+          \StringTok{"M.24-VL.24"}\NormalTok{,}
+          \StringTok{"M.30-VL.30"}\NormalTok{,}
+          \StringTok{"M.36-VL.36"}\NormalTok{,}
+          \StringTok{"M.48-VL.48"}\NormalTok{,}
+          \StringTok{"M.60-VL.60"}\NormalTok{,}
+          \StringTok{"M.72-VL.72"}\NormalTok{,}
+          \StringTok{"M.120-VL.120"}\NormalTok{,}
+          \StringTok{"M.168-VL.168"}\NormalTok{)}
+\NormalTok{weekly_de_analysis =}\StringTok{  }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{weekly_differential_expression_analysis}\NormalTok{(}
+\NormalTok{     data, splines_model, contrasts,}
+     \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Let's look at the distribution of genes found differentially expressed per
+week between control and each of the influenza strains.
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-12-1} \end{center}
+
+The distribution of number of genes found differentially expressed by
+considering each time-point independantly highlights the challenges of such
+approach. Timepoint 6H and 18H of the Kawasaki strain have fewer numbers of
+genes found differentially expressed than timepoints 3H and 9H: this is likely
+due to biological or technical variances for specific genes at specific
+timepoints.
+
+As a summary, classic differential expression methods are appropriate for
+unordered treatments, but fail to use the temporal structure of the data.
+
+\hypertarget{time-course-differential-expression-analysis-between-two-groups}{%
+\subsubsection{Time-course differential expression analysis between two groups}\label{time-course-differential-expression-analysis-between-two-groups}}
+
+To leverage this temporal structure, Storey et al \citep{storey:significance} proposes to
+model time-course micro-array with splines functions, and to use a log-ratio
+likelihood test to detect differentially expressed genes. \texttt{moanin} extends
+this idea by providing functions to perform time-course differential
+expression analysis using \texttt{limma} contrasts.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Differential expression analysis}
+\NormalTok{timecourse_contrasts =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"M-K"}\NormalTok{, }\StringTok{"M-C"}\NormalTok{, }\StringTok{"M-VL"}\NormalTok{, }\StringTok{"M-VH"}\NormalTok{)}
+
+\NormalTok{contrasts =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{makeContrasts}\NormalTok{(}
+    \DataTypeTok{contrasts=}\NormalTok{timecourse_contrasts,}
+    \DataTypeTok{levels=}\KeywordTok{levels}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group))}
+
+\CommentTok{# The function takes the data (data.frame or named matrix), the meta data}
+\CommentTok{# (data.frame containing a timepoint and group column, the first corresponding}
+\CommentTok{#<c2><a0>to the time-course information, the latter corresponding to the}
+\CommentTok{# treatment).}
+\NormalTok{pvalues =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{timecourse_differential_expression_analysis}\NormalTok{(}
+\NormalTok{    data, splines_model, contrasts)}
+\NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, stats}\OperatorTok{::}\NormalTok{p.adjust)}
+\end{Highlighting}
+\end{Shaded}
+
+The number of genes found differentially expressed ranges from around 12000 to
+29000 depending on the strain and dosage of influenza virus given to the mice.
+This corresponds to between 30\% to 70\% of the genes found differentially
+expressed in this time-course experiment.
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
+
+The next step in a classical differential expression analysis is typically to
+assess the effect of the treatment by looking at the log fold change.
+Computing the log fold change on a time-course experiment is not trivial: one
+can be interested in the average log-fold change across time, or the
+cumulative log-fold change. Sometimes a gene can be over-expressed at the
+beginning of the time-course data, and then over-expressed at the end of the
+experiment. As a result, \texttt{moanin} provides a number of possible ways to
+compute the log fold change across the whole time-course.
+
+First, \texttt{moanin} provides as simple interface to compute the log-fold change
+for each individual timepoints.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{log_fold_change_timepoints =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{l|r|r|r|r|r}
+\hline
+  & M-K:1 & M-K:7 & M-K:11 & M-K:14 & M-K:2\\
+\hline
+NM\_009912 & -0.0061424 & 0.0224948 & -0.0515947 & -0.1143973 & 0.0614619\\
+\hline
+NM\_008725 & 2.6547855 & 0.2734387 & -0.6882925 & 0.4718807 & -1.7463319\\
+\hline
+NM\_007473 & -0.1603623 & 0.1017655 & 0.5079573 & 0.0595773 & 0.4250185\\
+\hline
+ENSMUST00000094955 & 0.3505920 & 0.6463011 & 0.2564796 & 0.3599102 & 0.4177116\\
+\hline
+NM\_001042489 & 0.0889750 & 0.2321381 & -0.1891501 & 0.1786113 & 0.3320644\\
+\hline
+NM\_008159 & -0.3863770 & 0.0298395 & -0.0862755 & -0.3266351 & -0.1893062\\
+\hline
+\end{tabular}
+
+This matrix can then be used to visualize the log-fold change for each
+contrast per timepoint.
+
+Sometimes, a single value per gene and per contrast is more useful. Here is a
+table of the possible ways to compute log-fold change values.
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule
+Name & Formula &\tabularnewline
+\midrule
+\endhead
+timely & \(\text{lfc}(t)\) & Function of time\tabularnewline
+sum & \(\sum_t lfc(t)\) & Sum of log fold change.\tabularnewline
+abs\_sum & \(\sum_t \|lfc(t)\|\) & Always positive\tabularnewline
+max & \(\max_t \|lfc(t)\|\) & Always positive\tabularnewline
+min & \(\min_t \|lfc(t)\|\) & Always positive\tabularnewline
+epicon & \$\$ & Captures overall strength of response and overall direction\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{log_fold_change_epicon =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"epicon"}\NormalTok{)}
+
+\NormalTok{log_fold_change_sum =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
+
+\NormalTok{log_fold_change_max =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{    data, splines_model, contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
+
+\NormalTok{log_fold_change_min =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{    data, splines_model, contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
+
+From the single measures of log-fold change and the p-value, we can now look
+at the volcano plot. Here is an example of a volcano plot for the comparaison
+of the control to the Kawasaki strain, using the EPICON log fold change
+computation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pvalue =}\StringTok{ }\NormalTok{qvalues[, }\StringTok{"M-K"}\NormalTok{]}
+\NormalTok{lfc_epicon =}\StringTok{ }\NormalTok{log_fold_change_epicon[, }\StringTok{"M-K"}\NormalTok{]}
+\KeywordTok{names}\NormalTok{(lfc_epicon) =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(log_fold_change_epicon)}
+
+\KeywordTok{plot}\NormalTok{(lfc_epicon, }\OperatorTok{-}\KeywordTok{log10}\NormalTok{(pvalue), }\DataTypeTok{pch=}\DecValTok{20}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Volcano plot"}\NormalTok{,}
+     \DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
+
+As another sanity check, \texttt{moanin} provides a simple utility function to
+visualize gene time-course data. Here, we plot the 12 genes with the smallest
+p-values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{top_DE_genes_pval =}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{sort}\NormalTok{(pvalue)[}\DecValTok{1}\OperatorTok{:}\DecValTok{12}\NormalTok{])}
+\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_pval, ], splines_model,}
+           \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+
+And here we visualize the genes with the largest absolute EPICON log-fold
+change.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{top_DE_genes_lfc =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
+    \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_epicon),}
+     \DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\DecValTok{12}\NormalTok{])}
+\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
+           \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+
+Thanks to those visualization, we can see that genes often follow similar
+patterns of expression, although on a different scale for each gene. We can
+leverage this observation to cluster the genes into groups of similar patterns
+of transcriptomic response.
+
+\hypertarget{clustering-of-time-course-data}{%
+\subsection{Clustering of time-course data}\label{clustering-of-time-course-data}}
+
+The very large number of genes found differentially expressed impair any
+interpretation one would attempt: with 70\% of the genome found differentially
+expressed, all pathways are affected by the treatment. Hence the next step of
+the workflow to cluster gene expression according to their dynamical response
+to the treatment. Before clustering the genes, we first reduce the set of
+genes of interest to genes that are (1) significantly found differentially
+expressed; (2) ``highly'' differentially expressed. To do this, we first
+aggregate all p-values obtained during the time-course differential expresison
+step in a single p-value using Fisher's method \citep{fisher:statistical}. Then we
+select all the genes which have a Fisher adjusted p-value below 0.05 and a log
+fold change of at least two between at least one condition and one time-point.
+Reducing the set of genes on which to perform the clustering allows to
+estimate the centroids with more stability.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Then rank by fisher's p-value and take max the number of genes of interest}
+\CommentTok{# Filter out q-values for the pvalues table}
+\NormalTok{fishers_pval =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{pvalues_fisher_method}\NormalTok{(pvalues)}
+\NormalTok{fishers_qval =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{p.adjust}\NormalTok{(fishers_pval)}
+
+\NormalTok{genes_to_keep =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(}
+\NormalTok{    log_fold_change_max[}
+\NormalTok{    (}\KeywordTok{rowSums}\NormalTok{(log_fold_change_max }\OperatorTok{>}\StringTok{ }\DecValTok{2}\NormalTok{) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{&}
+\StringTok{    }\NormalTok{(fishers_qval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05}\NormalTok{), ])}
+\CommentTok{# Keep the data corresponding to the genes of interest in another variable.}
+\NormalTok{y =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(data[genes_to_keep, ])}
+\end{Highlighting}
+\end{Shaded}
+
+After filtering, we are left with 3950 genes. We can then apply a
+clustering. As observed by looking at genes found differentially expressed,
+many genes share a similar gene expression pattern, but on different scale.
+We thus propose the following adaptation of k-means:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Splines estimation}: for each gene, fit the splines function with the basis
+  of your choice.
+\item
+  \textbf{Rescaling splines}: for each gene, rescale the estimated splines function
+  such that the values are bounded between 0 and 1.
+\item
+  \textbf{K-means}: apply k-means on the rescaled fitted splines to estimate the
+  centroids.
+\item
+  \textbf{Assign scores and labels to all genes}: then assign a score and a label
+  to all gene based on a goodness-of-fit measure on the raw data. By default,
+  the \texttt{splines\_kmeans\_score\_and\_label} function only labels the best 50\% of
+  genes.
+\end{itemize}
+
+The first three steps are performed jointly by the \texttt{splines\_kmeans} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# First fit the kmeans clusters}
+\NormalTok{kmeans_clusters =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans}\NormalTok{(}
+\NormalTok{    y, splines_model, }\DataTypeTok{n_clusters=}\DecValTok{8}\NormalTok{,}
+    \DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
+    \DataTypeTok{n_init=}\DecValTok{20}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+We then use the \texttt{plot\_centroids} function to visualize the centroids obtained
+with the splines k-means model.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_centroids}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, splines_model,}
+               \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group,}
+               \DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+
+The scoring and labeling can be done via the \texttt{splines\_kmeans\_score\_and\_label}
+function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#<c2><a0>Then assign scores and labels to all the data, using a goodness-of-fit}
+\CommentTok{# scoring function.}
+\NormalTok{scores_and_labels =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(}
+\NormalTok{    data, kmeans_clusters)}
+\NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
+
+\CommentTok{# Let's keep only the list of genes that have a label.}
+\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
+\end{Highlighting}
+\end{Shaded}
+
+Before performing the next steps, let us investigate in more detail the
+differences between the labels provided by the splines k-means model and the
+scoring and labelinig step.
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
+
+The scoring and label step allows to label genes that were removed during the
+filtering step, yet are good matches to the centroids found during the
+clustering.
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+
+\hypertarget{looking-at-specific-clusters-in-details.}{%
+\subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
+
+Now, let us look more in detail some specific clusters. Cluster 8 seems
+particularly interesting: it captures genes with strong differences between
+the differant influenza treatments and the control, while the control remains
+relatively flat.
+
+Heatmaps are useful to investigate the range of expression patterns for
+specific genes. Here, we are going to plot heatmaps of the normalized gene
+expression patterns and the rescaled gene expression patterns side by side.
+
+First, select the genes of interest.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cluster_to_plot =}\StringTok{ }\DecValTok{8}
+\NormalTok{genes_to_plot =}\StringTok{  }\KeywordTok{names}\NormalTok{(labels[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_to_plot])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{),}\DataTypeTok{nrow=}\DecValTok{1}\NormalTok{), }\DataTypeTok{widths=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+
+\NormalTok{data_to_plot =}\StringTok{ }\NormalTok{data[genes_to_plot, ]}
+\NormalTok{submeta =}\StringTok{ }\NormalTok{meta}
+\NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(}
+\NormalTok{  submeta}\OperatorTok{$}\NormalTok{Group,}
+\NormalTok{  submeta}\OperatorTok{$}\NormalTok{Timepoint,}
+\NormalTok{  submeta}\OperatorTok{$}\NormalTok{Replicate)}
+\NormalTok{submeta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(submeta}\OperatorTok{$}\NormalTok{Timepoint)}
+
+\NormalTok{data_to_plot =}\StringTok{ }\NormalTok{data_to_plot[, ord]}
+\NormalTok{submeta =}\StringTok{ }\NormalTok{submeta[ord, ]}
+
+\NormalTok{res =}\StringTok{ }\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
+\NormalTok{    data_to_plot,}
+    \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{color=}\StringTok{"YlGnBu"}\NormalTok{,}
+    \DataTypeTok{annCol=}\NormalTok{submeta[,}
+                \KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
+    \DataTypeTok{annLegend=}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{annColors=}\NormalTok{ann_colors,}
+    \DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"Cluster"}\NormalTok{, cluster_to_plot, }\StringTok{"(raw)"}\NormalTok{),}
+    \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{# Now use the results of the previous call to aheatmap to reorder the genes.}
+\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
+\NormalTok{    moanin}\OperatorTok{:::}\KeywordTok{rescale_values}\NormalTok{(data_to_plot)[res}\OperatorTok{$}\NormalTok{rowInd,],}
+    \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{annCol=}\NormalTok{submeta[,}
+                \KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
+    \DataTypeTok{annLegend=}\OtherTok{TRUE}\NormalTok{,}
+    \DataTypeTok{annColors=}\NormalTok{ann_colors,}
+    \DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"Cluster"}\NormalTok{, cluster_to_plot, }\StringTok{"(rescaled)"}\NormalTok{),}
+    \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+
+Those two heatmaps demonstrate that the clustering method successfully cluster
+genes that are on different scales, and yet share the same dynamical response
+to the treatments.
+
+\hypertarget{how-to-choose-the-number-of-clusters.}{%
+\subsubsection{How to choose the number of clusters.}\label{how-to-choose-the-number-of-clusters.}}
+
+A common question that arises when performing clustering is how to choose the
+number of clusters. A choice for the number of clusters K depends on the goal.
+In this particular case, the end goal is not the clustering, but to facilitate
+interpretation of the differential expression analysis step. As a result, the
+number of clusters should not exceed the number of gene sets the user wants to
+interpret. This allows to set a maximum number of clusters. Let us assume here
+that this number is 20 clusters.
+
+Once the maximum number of clusters is set, several strategies allow to
+identify the number of clusters:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Elbow method}. First introduced in 1953 by Thorndike \citep{thorndike:who},
+  the elbow methods looks at the total with cluster sum of squares
+  as a function of the number of clusters (WCSS). When adding clusters
+  doesn't decrease the WCSS by a sufficient
+  amount, one can consider stopping. This method thus provides visual aid to
+  the user to choose the number of clusters, but often the ``elbow'' is hard to
+  see on real data, where the number of clusters is not clearly defined.
+\item
+  \textbf{Silhouette method}. Similarly to the Elbow method, the Silhouette method
+  refers to a method of validation of consistency within clusters, and
+  provides visual aid to choose the number of clusters.
+\item
+  \textbf{Stability methods} Stability methods are more computationally intensive
+  than any other method, as they rely on assessing the stability of the
+  clustering for every \(k\) to a small randomization of the data. The user is
+  then invited to choose the number of cluster based on a number of similarity
+  measures.
+\end{itemize}
+
+First, let us run the clustering for all possible clusters of interest. We
+will, for each clustering experiment, conserve (1) with within cluster sum of
+squares; (2) the labels assigned to all genes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{all_possible_n_clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{9}\NormalTok{, }\DecValTok{11}\NormalTok{, }\DecValTok{15}\NormalTok{)}
+\NormalTok{all_clustering =}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+\NormalTok{wss_values =}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+
+\NormalTok{i =}\StringTok{ }\DecValTok{1}
+\ControlFlowTok{for}\NormalTok{(n_cluster }\ControlFlowTok{in}\NormalTok{ all_possible_n_clusters)\{}
+\NormalTok{    clustering_results =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans}\NormalTok{(}
+\NormalTok{    y, splines_model,}
+    \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
+    \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
+\NormalTok{    wss_values[i] =}\StringTok{ }\KeywordTok{sum}\NormalTok{(clustering_results}\OperatorTok{$}\NormalTok{WCSS_per_cluster)}
+\NormalTok{    all_clustering[[i]] =}\StringTok{ }\NormalTok{clustering_results}\OperatorTok{$}\NormalTok{clusters}
+\NormalTok{    i =}\StringTok{ }\NormalTok{i }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{elbow-method}{%
+\paragraph{Elbow method}\label{elbow-method}}
+
+The Elbow method to choose the number of clusters relies on visualization aid
+to choose the number of cluster. The method relies on plotting the within
+cluster sum of squares as a function of the number of clusters. At some point,
+the WCSS will stop dropping, giving an angle in the graph. The number of
+cluster is chosen at this ``Elbow point.''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(all_possible_n_clusters, wss_values,}
+     \DataTypeTok{type=}\StringTok{"b"}\NormalTok{, }\DataTypeTok{pch=}\DecValTok{19}\NormalTok{, }\DataTypeTok{frame=}\OtherTok{FALSE}\NormalTok{, }
+     \DataTypeTok{xlab=}\StringTok{"Number of clusters K"}\NormalTok{,}
+     \DataTypeTok{ylab=}\StringTok{"Total within-clusters sum of squares"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/elbow_method-1} \end{center}
+
+\hypertarget{average-silhouette-method}{%
+\paragraph{Average silhouette method}\label{average-silhouette-method}}
+
+The silhouette value is a measure of how similar a data point is to its own
+cluster (cohesion) compared to other clusters (separation).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# function to compute average silhouette for k clusters}
+\NormalTok{average_silhouette =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(labels, y) \{}
+\NormalTok{    silhouette_results =}\StringTok{ }\NormalTok{cluster}\OperatorTok{::}\KeywordTok{silhouette}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(labels[}\DecValTok{1}\NormalTok{]), }\KeywordTok{dist}\NormalTok{(y))}
+    \KeywordTok{return}\NormalTok{(}\KeywordTok{mean}\NormalTok{(silhouette_results[, }\DecValTok{3}\NormalTok{]))}
+\NormalTok{\}}
+
+\CommentTok{# extract the average silhouette}
+\NormalTok{average_silhouette_values =}\StringTok{ }\KeywordTok{list}\NormalTok{()}
+\NormalTok{i =}\StringTok{ }\DecValTok{1}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(all_clustering))\{}
+\NormalTok{    clustering_results =}\StringTok{ }\NormalTok{all_clustering[i]}
+\NormalTok{    average_silhouette_values[i] =}\StringTok{ }\KeywordTok{average_silhouette}\NormalTok{(clustering_results, y)}
+\NormalTok{    i =}\StringTok{ }\NormalTok{i }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\NormalTok{\}}
+
+\KeywordTok{plot}\NormalTok{(all_possible_n_clusters, average_silhouette_values,}
+     \DataTypeTok{type=}\StringTok{"b"}\NormalTok{, }\DataTypeTok{pch=}\DecValTok{19}\NormalTok{, }\DataTypeTok{frame=}\OtherTok{FALSE}\NormalTok{,}
+     \DataTypeTok{xlab=}\StringTok{"Number of clusters K"}\NormalTok{,}
+     \DataTypeTok{ylab=}\StringTok{"Average Silhouettes"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/average_silhouette_method-1} \end{center}
+
+\hypertarget{looking-at-the-stability-of-the-clustering}{%
+\paragraph{Looking at the stability of the clustering}\label{looking-at-the-stability-of-the-clustering}}
+
+On real data, the number of clusters is not only unknown but also
+ambiguous: it will depend on the desired clustering resolution of the user.
+Yet, in the case of biological data, stability and reproducibility of the
+results is necessary to ensure that the biological interpretation of the
+results hold when the data or the model is exposed to reasonable
+perturbations.
+
+Methods that rely on the stability of the clustering results to choose \(k\)
+thus ensure that the biological interpretation of the clusters hold with
+perturbtation to the data. In addition, simulation where the data is generated
+with a well defined \(k\) show that the clustering is more stable for the
+correct of number of the clusters.
+
+Most methods method to find the number of clusters with stability measures
+only provide visual aids to guide the user. The first element often visualized
+is the consensus matrix: the consensus matrix is an \(n \times n\) matrix that
+stores the proportion of clustering in which two items are clustered together.
+A perfect consensus matrix ordered such as each elements that belong to the
+same cluster are adjacent to one another which show blocks along the diagonal
+close to 1.
+
+To perform such analysis, the first step is run the clustering several times
+on a resampled dataset--either using bootstrap or subsampling.
+
+Using the bootstrapping strategy:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n_genes =}\StringTok{ }\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes, }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{)}
+
+\NormalTok{bootstrapped_y =}\StringTok{ }\NormalTok{y[indices, ]}
+\end{Highlighting}
+\end{Shaded}
+
+Using the subsampling strategy, keeping 80\% of the genes:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{subsample_proportion =}\StringTok{ }\DecValTok{1}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion, }\DataTypeTok{replace=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{subsampled_y =}\StringTok{ }\NormalTok{y[indices, ]}
+\end{Highlighting}
+\end{Shaded}
+
+Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_5.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
+\NormalTok{consensus_matrix_stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{5}\NormalTok{,}
+                            \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{5}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
+          \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
+          \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_20.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
+\NormalTok{consensus_matrix_stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{20}\NormalTok{,}
+                             \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{20}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
+          \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
+          \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-2} \end{center}
+
+\hypertarget{the-model-explorer-strategy}{%
+\subparagraph{The model explorer strategy}\label{the-model-explorer-strategy}}
+
+The model explorer algorithm \citep{ben-hur:stability} proposes to estimate the
+number of clusters exploiting the observation that if the number of clusters
+is correct, the clustering results are stable to bootstrapping. The
+distribution of similaries between bootstrapped results for each \(k\) can thus
+be compared for different values of \(k\) and guide the user in the choice of
+number of clusters.
+
+The model explorer strategy works as follows. First, choose a similarity
+measure between two partitions or clusters \(S(C_1, C_2)\). Examples are the
+normalized mutual information or Fowlkes-Mallows. Then perform \(n\) bootstrap
+experiments to estimate the cluster centroids, followed by a step of assigning
+a label to all data points. Finally, compute the pairwise similarity measure
+between all bootstrapped partition, and plot the cumulative density of the
+obtained scores.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_model_explorer}\NormalTok{(all_labels)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-32-1} \end{center}
+
+From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
+but not as stable as \(k=2\). The model explorer strategy, in addition to
+visualizing the diversity of the centroids, can thus help assessing an
+adequate number of clusters.
+
+Now, replot the same model explorer, but only for the clustering experiments
+\(k=6\), \(k=7\), \(k=8\), \(k=9\) and \(k=10\) so that we can see more clearly the stability
+measures in that range.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"C6"}\NormalTok{, }\StringTok{"C7"}\NormalTok{, }\StringTok{"C8"}\NormalTok{, }\StringTok{"C9"}\NormalTok{, }\StringTok{"C10"}\NormalTok{)}
+\NormalTok{selected_labels =}\StringTok{ }\NormalTok{all_labels[clusters]}
+\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_model_explorer}\NormalTok{(selected_labels)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-33-1} \end{center}
+
+\hypertarget{consensus-clustering-as-a-way-to-find-k}{%
+\subparagraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
+
+The consensus clustering \citep{monti:consensus} relies on a similar idea but
+instead of looking at the cumulative density of similarity measures of
+bootstrapped clustering, the authors suggests plotting the cumulative density
+of elements of the consensus matrix.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_cdf_consensus}\NormalTok{(all_labels)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=6.67in]{images/clustering_CDF_consensus} \end{center}
+
+The stability of the clustering based on the consensus matrix can then be
+measured via a single number by looking at the area under the curve: the more
+stable the clustering, the closer to 0 or 1 will be the entries of consensus
+matrix. The consensus clustering strategy thus suggest at looking at either
+the AUC as a function of the number of the clusters or the ``improvement'' in
+the AUC as a function of the number of cluster.
+
+\begin{center}\includegraphics[width=6.67in]{images/clustering_AUC_consensus} \end{center}
+
+\begin{center}\includegraphics[width=6.67in]{images/clustering_delta_AUC_consensus} \end{center}
+
+The consensus clustering method suggest that the most stable is \(k=2\), which
+separates over-expressed genes from under-expressed genes. While it is indeed
+a very stable clustering, it does not capture the range of gene expression
+patterns present in the data. This shows the limitation of such method on real
+data, where the number of clusters is not clearly defined.
+
+\hypertarget{downstream-analysis-of-clusters.}{%
+\subsection{Downstream analysis of clusters.}\label{downstream-analysis-of-clusters.}}
+
+Once good clusters are obtained, the next step is to leverage the clustering
+to ease interpretation. Classic enrichment analysis step can then be performed
+in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
+term enrichment analysis, motif enrichment analysis, etc.
+
+First, let us clean up the gene obtained and only select the genes we are
+going to use in the enrichment analysis. One can either use the whole set of
+genes, only the set of differentially expressed genes in each cluster, or a
+subset of genes that fit well to a cluster (based on some criterion).
+
+\hypertarget{finding-enriched-pathways-using-biomart-and-keggprofile}{%
+\subsubsection{\texorpdfstring{Finding enriched pathways using \texttt{biomaRt} and \texttt{KEGGprofile}}{Finding enriched pathways using biomaRt and KEGGprofile}}\label{finding-enriched-pathways-using-biomart-and-keggprofile}}
+
+Let us first tackle the case of pathway enrichment analysis. We will leverage
+the packages \texttt{biomaRt} \citep{durinck:biomart} and \texttt{KEGGprofile} \citep{zhao:keggprofile}
+for this step. \texttt{KEGGprofile} is a
+package that easily allows to perform pathway enrichment analysis on a set of
+genes labeled with the ensembl annotation. We thus need to convert the gene
+names into the appropriate format. This is where \texttt{biomaRt} comes in handy: it
+enables easy conversion from one gene annotation to another. Here, we will use
+it to convert the gene names from the Refseq annotation to the ensembl one.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ensembl =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{useMart}\NormalTok{(}\StringTok{"ensembl"}\NormalTok{)}
+\NormalTok{ensembl =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{useDataset}\NormalTok{(}\StringTok{"mmusculus_gene_ensembl"}\NormalTok{, }\DataTypeTok{mart=}\NormalTok{ensembl)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cluster =}\StringTok{ }\DecValTok{8}
+\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels)}
+\NormalTok{gene_names =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels)}
+\NormalTok{genes =}\StringTok{ }\NormalTok{gene_names[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster]}
+
+\CommentTok{# convert gene names}
+\NormalTok{genes =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"ensembl_gene_id"}\NormalTok{, }\StringTok{"entrezgene"}\NormalTok{),}
+        \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{, }\DataTypeTok{values=}\NormalTok{genes,}
+        \DataTypeTok{mart=}\NormalTok{ensembl)[}\StringTok{"entrezgene"}\NormalTok{]}
+\NormalTok{genes =}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(genes))}
+\NormalTok{pathways =}\StringTok{ }\NormalTok{KEGGprofile}\OperatorTok{::}\KeywordTok{find_enriched_pathway}\NormalTok{(}
+\NormalTok{    genes, }\DataTypeTok{species=}\StringTok{"mmu"}\NormalTok{,}
+    \DataTypeTok{download_latest=}\OtherTok{TRUE}\NormalTok{)}\OperatorTok{$}\NormalTok{stastic}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabu} to \linewidth {>{\raggedright}X>{\raggedright}X>{\raggedleft}X>{\raggedleft}X}
+\hline
+  & Pathway & Percentage & Adj. p-value\\
+\hline
+05169 & Epstein-Barr virus infection & 37 & 0\\
+\hline
+04060 & Cytokine-cytokine receptor interaction & 31 & 0\\
+\hline
+05164 & Influenza A & 38 & 0\\
+\hline
+04668 & TNF signaling pathway & 45 & 0\\
+\hline
+04621 & NOD-like receptor signaling pathway & 34 & 0\\
+\hline
+05162 & Measles & 37 & 0\\
+\hline
+04630 & JAK-STAT signaling pathway & 33 & 0\\
+\hline
+05160 & Hepatitis C & 34 & 0\\
+\hline
+04620 & Toll-like receptor signaling pathway & 40 & 0\\
+\hline
+05167 & Kaposi sarcoma-associated herpesvirus infection & 29 & 0\\
+\hline
+\end{tabu}
+
+\hypertarget{finding-enriched-go-terms}{%
+\subsubsection{Finding enriched GO terms}\label{finding-enriched-go-terms}}
+
+To find GO terms, we use \texttt{biomaRt} to find the mapping between GO terms and
+gene mapping. The GO enrichment library \texttt{topGO} \citep{alexa:topgo} expects the GO term to gene
+mapping to be a list where each item is a mapping between a gene name and a GO
+term ID vector.
+
+\begin{verbatim}
+$NM_199153
+[1] "GO:0016020" "GO:0016021" "GO:0007186" "GO:0004930" "GO:0007165"
+[6] "GO:0050896" "GO:0050909"
+
+$NM_201361
+ [1] "GO:0016020" "GO:0016021" "GO:0003674" "GO:0008150" "GO:0005794"
+ [6] "GO:0005829" "GO:0005737" "GO:0005856" "GO:0005874" "GO:0005739"
+[11] "GO:0005819" "GO:0000922" "GO:0072686"
+\end{verbatim}
+
+\texttt{biomaRt} queries results a matrix with two named columns of gene names and GO
+term ID.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{genes =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"go_id"}\NormalTok{, }\StringTok{"refseq_mrna"}\NormalTok{),}
+          \DataTypeTok{values=}\NormalTok{gene_names,}
+          \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{,}
+          \DataTypeTok{mart=}\NormalTok{ensembl)}
+
+\CommentTok{# Create gene to GO id mapping}
+\NormalTok{gene_id_go_mapping =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{create_go_term_mapping}\NormalTok{(genes)}
+\end{Highlighting}
+\end{Shaded}
+
+Once the gene ID to GO mapping list is created, \texttt{moanin} provides a simple
+interface to \texttt{topGO} to fetch enriched GO terms. Here, we show an example of
+running a GOterm enrichment on the ``Biological process'' ontology (BP).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{assignments =}\StringTok{ }\NormalTok{labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster}
+
+\NormalTok{go_terms_enriched =}\StringTok{ }\KeywordTok{find_enriched_go_terms}\NormalTok{(}
+\NormalTok{    assignments,}
+\NormalTok{    gene_id_go_mapping, }\DataTypeTok{ontology=}\StringTok{"BP"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabu} to \linewidth {>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedright}X>{\raggedleft}X}
+\hline
+  & GO ID & Description & Annotated & Significant & Expected & P-value & adj. p-value\\
+\hline
+5 & GO:0003002 & regionalization & 172 & 153 & 134.46 & 0.00024 & 0.2416\\
+\hline
+6 & GO:0048562 & embryonic organ morphogenesis & 154 & 137 & 120.39 & 0.00035 & 0.2936\\
+\hline
+7 & GO:0010970 & transport along microtubule & 81 & 74 & 63.32 & 0.00057 & 0.4098\\
+\hline
+8 & GO:0060173 & limb development & 92 & 84 & 71.92 & 0.00070 & 0.4404\\
+\hline
+9 & GO:0060070 & canonical Wnt signaling pathway & 147 & 130 & 114.92 & 0.00090 & 0.5033\\
+\hline
+10 & GO:0055114 & oxidation-reduction process & 531 & 457 & 415.10 & 0.00135 & 0.6223\\
+\hline
+11 & GO:0019395 & fatty acid oxidation & 53 & 51 & 41.43 & 0.00136 & 0.6223\\
+\hline
+12 & GO:0006805 & xenobiotic metabolic process & 44 & 42 & 34.40 & 0.00168 & 0.7046\\
+\hline
+13 & GO:0090596 & sensory organ morphogenesis & 134 & 118 & 104.75 & 0.00224 & 0.8197\\
+\hline
+14 & GO:0010811 & positive regulation of cell-substrate ad... & 78 & 71 & 60.98 & 0.00228 & 0.8197\\
+\hline
+15 & GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.80 & 0.00298 & 0.9999\\
+\hline
+16 & GO:0051056 & regulation of small GTPase mediated sign... & 151 & 131 & 118.04 & 0.00349 & 1.0000\\
+\hline
+17 & GO:0042738 & exogenous drug catabolic process & 22 & 22 & 17.20 & 0.00441 & 1.0000\\
+\hline
+18 & GO:1901381 & positive regulation of potassium ion tra... & 22 & 22 & 17.20 & 0.00441 & 1.0000\\
+\hline
+19 & GO:0007368 & determination of left/right symmetry & 67 & 61 & 52.38 & 0.00464 & 1.0000\\
+\hline
+\end{tabu}
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+This workflow provides a tutoral for the analysis of time-course gene
+expression data in R, illustrated through the analysis of mice lung tissue
+exposed to different influenza strain. It covers four main steps; (1) quality
+control and normalization; (2) differential expression analysis; (3)
+clustering of time-course gene expression data; (4) downstream analysis of
+clusters.
+
+\hypertarget{software-and-data-availability}{%
+\section{Software and data availability}\label{software-and-data-availability}}
+
+The source code for this workflow can be found at \url{https://github.com/NelleV/2019timecourse-rnaseq-pipeline}.
+Data used in this workflow are available from NCBI GEO, accession GSE95601.
+
+\hypertarget{author-contributions}{%
+\section{Author contributions}\label{author-contributions}}
+
+NV and EP wrote the workflow.
+
+\hypertarget{competing-interests}{%
+\section{Competing interests}\label{competing-interests}}
+
+The authors declare that they have no competing interests.
+
+\hypertarget{grant-information}{%
+\section{Grant information}\label{grant-information}}
+
+This research was funded in part by a Department of Energy (DOE) grant
+(DE-SC0014081); by the Gordon and Betty Moore Foundation (Grant GBMF3834) and
+the Alfred P. Sloan Foundation (Grant 2013-10-27) to the University of
+California, Berkeley {[}N.V.{]}; by a ENS-CFM Data Science Chair {[}E.P.{]}.
+
+\emph{I confirm that the funders had no role in study design, data collection and
+analysis, decision to publish, or preparation of the manuscript.}
+
+\hypertarget{acknowledgments}{%
+\section{Acknowledgments}\label{acknowledgments}}
+
+The authors thank Karthik Ram and the Ropensci community for valuable
+feedback.
+
+\renewcommand\refname{References}
+{\small\bibliography{bibliography.bib}}
+
+\end{document}
