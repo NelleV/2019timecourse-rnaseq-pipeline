@@ -1,12 +1,12 @@
 RMD_FILES = $(wildcard *.Rmd)
-# RMD_FILES = $(filter-out manuscript.Rmd, $(ALL_RMD_FILES))
+RMD_FILES = $(filter-out manuscript.Rmd, $(ALL_RMD_FILES))
 SUPP_RMD_FILES = $(wildcard miscellaneous/*.Rmd)
 
 HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(RMD_FILES))
 SUPP_HTML_FILES = $(patsubst %.Rmd, reports/%.html, $(SUPP_RMD_FILES))
 
 
-all: html 
+all: html  pdf
 
 pdf: reports/manuscript.pdf
 
