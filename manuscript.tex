@@ -116,6 +116,19 @@ time-course gene expression data, clustering, differential expression, workflow
 \item
   Currently have two functions ``plot\_genes'', ``plot\_centroids'', that do exactly
   the same thing. Find a better name for both of them
+\item
+  switch to camel case function names
+\item
+  shorten function names
+\item
+  Remove the namespace call
+\item
+  Move the normalization to a supplementary data
+\item
+  Make clear that it applies to RNASeq and how to call the different functions
+  toRNASeq
+\item
+  Check that clustering can deal with count data.
 \end{itemize}
 
 \hypertarget{introduction}{%
@@ -503,6 +516,8 @@ mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
 \textbf{FIXME rename the function to something better}
 
 \textbf{EAP: And don't use `week' in function name!}
+
+\textbf{Add a helper function to make the contrasts for timely DE}
 
 \begin{Shaded}
 \begin{Highlighting}[]
