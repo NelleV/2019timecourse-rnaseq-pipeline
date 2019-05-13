@@ -1,4 +1,4 @@
-RMD_FILES = $(wildcard *.Rmd)
+ALL_RMD_FILES = $(wildcard *.Rmd)
 RMD_FILES = $(filter-out manuscript.Rmd, $(ALL_RMD_FILES))
 SUPP_RMD_FILES = $(wildcard miscellaneous/*.Rmd)
 

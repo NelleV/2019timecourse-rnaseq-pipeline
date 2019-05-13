@@ -5,15 +5,15 @@ library("edgeR")
 
 #' Fit weekly differential expression analysis
 #'
-#' @param counts Gene expression data
+#' @param data Gene expression data
 #' @param splines_model splines_model
 #' @param contrasts Contrast to use.
 #' @param use_voom_weights boolean: whether to use voom weights or not
 #'
 #' @export
-weekly_differential_expression_analysis = function(counts, splines_model,
-						   contrasts,
-						   use_voom_weights=TRUE){
+DE_timepoints = function(data, splines_model,
+			 contrasts,
+			 use_voom_weights=TRUE){
     meta = splines_model$meta
 
     design = stats::model.matrix(~WeeklyGroup + 0, data=meta)
@@ -26,12 +26,12 @@ weekly_differential_expression_analysis = function(counts, splines_model,
         levels=design)
 
     if(use_voom_weights){
-        y = edgeR::DGEList(counts=counts)
+        y = edgeR::DGEList(counts=data)
 	y = edgeR::calcNormFactors(y, method="upperquartile")
         v = limma::voom(y, design, plot=FALSE)
 	v = limma::lmFit(v)
     }else{
-	v = limma::lmFit(counts, design)	
+	v = limma::lmFit(data, design)	
     }
 
     fit = limma::contrasts.fit(v, allcontrasts)
@@ -43,7 +43,7 @@ weekly_differential_expression_analysis = function(counts, splines_model,
 
     combine_results = function(ii, fit2){
 	contrast_formula = contrasts[ii]
-	de_analysis = data.frame(row.names=row.names(counts))
+	de_analysis = data.frame(row.names=row.names(data))
 
         base_colname = gsub(" ", "", contrast_formula, fixed=TRUE)
 	colname_pval = paste(base_colname, "-pval", sep="")

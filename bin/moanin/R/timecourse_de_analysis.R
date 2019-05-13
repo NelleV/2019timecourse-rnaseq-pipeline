@@ -154,13 +154,13 @@ summarise = function(basis, ng_levels) {
 #'	Object containing all related information to the splines model used.
 #' @param contrasts Contrast using \code{makeContrasts} from \code{limma}.
 #' @param center boolean, whether to center the data matrix
-#' @param weights Weights matrix for the fitting.
+#' @param use_voom_weights boolean, optional, default: TRUE
+#'	Whether to use voom weights.
 #' @export
-timecourse_differential_expression_analysis = function(data,
-						       splines_model,
-						       contrasts,
-						       center=FALSE,
-						       weights=NULL){
+DE_timecourse = function(data, splines_model,
+			 contrasts,
+			 center=FALSE,
+			 use_voom_weights=TRUE){
 
     basis = splines_model$basis
     meta = splines_model$meta
