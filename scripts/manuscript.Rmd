@@ -425,11 +425,13 @@ Here we have provided the meta data that defines... `create_splines_model` will 
 
 ### Weekly differential expression analysis
 
-`moanin` provides a simple interface to perform a time by time differential
-expression analysis. Under the hood, it simply calls `limma` [@ritchie:limma] on the set of
-contrasts provided. Here, we show an example between the control mouse and the
+`moanin` provides a simple interface to perform a timepoint by timepoint differential
+expression analysis. This is traditionally done by the user defining the comparisons (called `contrasts` in linear models).  Under the hood, simply calls `limma` [@ritchie:limma] on the set of
+contrasts provided. **EAP: Can we comment on using it for RNA-Seq??** 
+
+Here, we show an example where we define our contrasts to be the difference between the control mouse ("M") and the
 mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
-(H5N1), but the function works with any form contrasts.
+(H5N1) ("VL") for each time point, but the function works with any form contrasts. **FIXME: Reference to limma vignette for how to define the contrasts** **EAP: Could you make simple function that creates them automatically for two conditions -- i.e. find union of time points for two conditions... Then we could show an example with just a couple done manually, and then say we can also use a little helper function in the `moanin` that will do it for all time points**
 
 **FIXME rename the function to something better** 
 
@@ -512,8 +514,8 @@ contrasts = c("M.0-VH.0",
 VH_weekly_de_analysis =  moanin::weekly_differential_expression_analysis(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
-
-``` 
+	 
+```
 
 
 Let's look at the distribution of genes found differentially expressed per
