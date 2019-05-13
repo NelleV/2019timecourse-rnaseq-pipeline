@@ -1,0 +1,141 @@
+---
+title: "Clustering: A pipeline to analyse time-course gene expression data"
+output: rmarkdown::html_vignette
+bibliography: bibliography.bib
+---
+
+
+```{r echo=FALSE, results="hide", message=FALSE}
+# Loading dependencies
+library(devtools)
+library(limma)
+library(splines)
+library(stats)
+library(moanin)
+library(NMF)
+source("utils.R")
+# library(moanin)
+```
+
+```{r echo=FALSE, results="hide"}
+# Set options
+df = 6
+
+# Preprocessing & filtering
+is_count = FALSE
+take_log = FALSE    
+filter_expression = FALSE
+
+###############################################################################
+# Clustering
+
+# Whether to filter genes
+filter_genes = TRUE
+keep_all_significant = FALSE
+n_genes_to_keep = 5000
+n_clusters = 20
+percentage_genes_to_label = 0.5
+```
+
+```{r echo=FALSE, results="hide"}
+# Set data files and options
+data("shoemaker2015")
+
+data = shoemaker2015$data
+meta = shoemaker2015$meta
+
+data = read.table(".results/quantile_normalized.txt") 
+
+# Right now, the package doesn't contain the normalized data
+de_analysis = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
+
+# Extract pvalues and log_fold change
+lfc_col_to_keep = colnames(de_analysis)[
+    grepl("-lfc_max", colnames(de_analysis))]
+lfc_max = de_analysis[, lfc_col_to_keep]
+
+pval_col_to_keep = colnames(de_analysis)[
+    grepl("-pval", colnames(de_analysis))]
+pvalues = de_analysis[, pval_col_to_keep]
+
+splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
+```
+
+# Clustering of time-course data
+
+The next step is to perform clustering. First, we reduce the set of genes of
+interest to genes that are (1) significant; (2) "highly" differentially
+expressed. First, we select the genes that have a log-fold change of at least
+2 across at least one experiment for one time point. We thus use the object
+`lfc_max`. 
+
+XXX
+
+
+```{r filter_genes}
+if(filter_genes){
+    # First, filter out any genes that doesn't have a log fold change of at
+    # least 2 at at least one of the time points.
+    
+    genes_to_keep = row.names(lfc_max[rowSums(lfc_max > 2) > 0, ])
+    pvalues = pvalues[genes_to_keep, ]
+
+    if(length(genes_to_keep) > n_genes_to_keep){
+
+	# Then rank by fisher's p-value and take max the number of genes of
+	# interest
+	# Filter out q-values for the pvalues table
+	fishers_pval = moanin:::fisher_method(pvalues)
+	fishers_qval = stats::p.adjust(fishers_pval)
+        if(keep_all_significant){
+	   genes_to_keep = names(fishers_qval[fishers_qval < 0.05])
+	}else{
+	    genes_to_keep = names(sort(fishers_pval)[1:n_genes_to_keep])
+	}
+    }
+
+    y = as.matrix(data[genes_to_keep, ])
+}else{
+    y = as.matrix(data)
+}
+```
+
+After filtering, we consider `r dim(y)[1]` genes for the clustering.
+
+```{r clustering}
+
+#############################################################################
+# Fit the splines
+
+kmeans_clusters = moanin:::splines_kmeans(
+    y, splines_model, n_clusters=20,
+    random_seed=42,
+    n_init=20)
+
+# XXX is there a bug here?
+all_scores = data.frame(row.names=row.names(data))
+for(k in 1:20){
+     scores = moanin:::score_genes_centroid(data, kmeans_clusters$centroids[k,])
+     all_scores[paste0("cluster_", k)] = scores
+ }
+
+# Only assign labels to X% of the genes
+max_score = quantile(moanin:::row_min(all_scores), c(percentage_genes_to_label))
+genes_to_not_consider = moanin:::row_min(all_scores) >= max_score
+labels = moanin:::row_argmin(all_scores)
+labels[genes_to_not_consider] = NA
+```
+
+```{r, fig.width=4, fig.height=4}
+hist(all_scores[, 1], col="black")
+hist(all_scores[, 2], col="black")
+
+```
+
+```{r}
+table(kmeans_clusters$clusters)
+```
+
+```{r}
+table(labels)
+```

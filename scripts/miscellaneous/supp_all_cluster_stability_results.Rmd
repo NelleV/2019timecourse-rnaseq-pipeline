@@ -1,0 +1,38 @@
+---
+title: "Clustering: stability"
+output: rmarkdown::html_vignette
+---
+
+```{r fig.width=6, fig.height=4}
+library(NMF)
+library(moanin)
+files = c(
+    "results/stability_5.tsv",
+    "results/stability_6.tsv",
+    "results/stability_7.tsv",
+    "results/stability_8.tsv",
+    "results/stability_9.tsv",
+    "results/stability_10.tsv",
+    "results/stability_11.tsv",
+    "results/stability_12.tsv",
+    "results/stability_13.tsv",
+    "results/stability_14.tsv",
+    "results/stability_15.tsv",
+    "results/stability_16.tsv",
+    "results/stability_17.tsv",
+    "results/stability_18.tsv",
+    "results/stability_19.tsv",
+    "results/stability_20.tsv")
+
+
+for(filename in files){
+    stability_5 = read.table(filename, sep="\t")
+    consensus_matrix_stability_5 = moanin::consensus_matrix(stability_5,
+							scale=FALSE)
+    NMF::aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
+		  Colv=FALSE,
+		  treeheight=0)
+
+}
+```
+

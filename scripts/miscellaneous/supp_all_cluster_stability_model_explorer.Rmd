@@ -1,0 +1,24 @@
+---
+title: "Clustering: stability model explorer"
+output: rmarkdown::html_vignette
+---
+
+```{r}
+library(NMF)
+library(moanin)
+library(NMI)
+n_clusters = 5:20
+
+all_labels = list()
+for(i in n_clusters){
+    filename = paste0("results/stability_", i, ".tsv")
+    stability = read.table(filename, sep="\t")
+    all_labels[[paste0("C", i)]] = stability
+}
+```
+
+```{r fig.width=8, fig.height=8}
+library(moanin)
+moanin::plot_model_explorer(all_labels)
+```
+

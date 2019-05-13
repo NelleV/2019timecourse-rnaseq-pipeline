@@ -83,4 +83,15 @@ if(!require(KEGGprofile)){
     biocLite("KEGGprofile")
 }
 
+if(!require("NMI")){
+    install.packages("NMI")
+}
+
+if(!require(zoo)){
+    install.packages("zoo")
+}
+
+if(!require(BiocWorkflowTools)){
+    biocLite("BiocWorkflowTools")
+}
 

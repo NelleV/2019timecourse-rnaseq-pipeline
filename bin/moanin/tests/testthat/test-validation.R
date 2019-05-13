@@ -15,6 +15,16 @@ test_that("validation:check_meta", {
     meta_without_replicate = subset(meta, select=c("Timepoint", "Group"))
     expect_silent(check_meta(meta_without_replicate))
     expect_error(check_meta(meta_without_replicate, check_replicates=TRUE))
+
+    meta_timepoint_not_numeric = meta
+    meta_timepoint_not_numeric$Timepoint = as.factor(meta_timepoint_not_numeric$Timepoint)
+    expect_error(check_meta(meta_timepoint_not_numeric))
+
+    meta_group_not_factor = meta
+    meta_group_not_factor$Group = as.character(meta$Group)
+    expect_error(check_meta(meta_group_not_factor))
+
+
 })
 
 test_that("validation:check_data_meta", {

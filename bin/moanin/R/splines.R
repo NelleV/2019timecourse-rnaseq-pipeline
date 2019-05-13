@@ -36,22 +36,68 @@ fit_splines = function(data, splines_model, weights=NULL){
 #'
 #' @param data the data
 #' @param splines_model splines_model
-#' @param weights weigts
+#' @param weights weights
 #'
 #' @return y_fitted the fitted y values
 #'
 #' @export
-fit_predict_splines = function(data, splines_model, weights=NULL){
+fit_predict_splines = function(data, splines_model, weights=NULL, meta_prediction=NULL){
     basis = splines_model$basis
+    meta = splines_model$meta
     if(!is.null(weights)){
 	stop("moanin::fit_predict_splines: not implemented")
     }
-    y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
+    if(is.null(meta_prediction)){
+        y_fitted = t(stats::lm.fit(basis, t(data))$fitted.values)
+    }else{
+	degrees_of_freedom = splines_model$degrees_of_freedom
+	fitting_data = t(as.matrix(data))
+	formula_data = list(
+	    "Group"=meta$Group,
+	    "Timepoint"=meta$Timepoint,
+	    "fitting_data"=fitting_data,
+	    "degrees_of_freedom"=splines_model$degrees_of_freedom)
+
+	updated_formula = stats::update(splines_model$formula, fitting_data ~ .)
+	model = stats::lm(updated_formula, formula_data)	
+	y_fitted = stats::predict(model, meta_prediction)
+    }
     return(y_fitted)
 }
 
 
-rescale_values = function(y, meta, group=NULL){
+#' Create prediction meta data from splines model
+#'
+#' @param splines_model a Splines model object
+#' @param num_timepoints integer, optional, default: 100
+#'	Number of timepoints to use for the prediction metadata
+#'
+#' @export
+create_meta_prediction = function(splines_model, num_timepoints=100){
+    # Create splines_model for prediction
+    timepoints_pred = NULL
+    groups_pred = NULL
+    meta = droplevels(splines_model$meta)
+    groups = levels(meta$Group) 
+    for(group in groups){
+	mask = meta$Group == group
+	time = meta$Timepoint[mask]
+
+	timepoints_pred = c(
+	    timepoints_pred,
+	    seq(min(time), max(time), length=100))
+	groups_pred = c(
+	    groups_pred,
+	    rep(group, 100))
+    }
+    meta_prediction = data.frame(
+	"Timepoint"=timepoints_pred,
+	"Replicates"=rep(1, length(timepoints_pred)),
+	"Group"=groups_pred)
+    return(meta_prediction)
+}
+
+rescale_values = function(y, meta=NULL, group=NULL){
     if(is.null(group)){
 	ymin = row_min(y) 
 	y = y - ymin
@@ -97,16 +143,23 @@ row_argmin = function(X){
 
 
 # Worst name ever
-align_data_onto_centroid = function(data, centroid){
+align_data_onto_centroid = function(data, centroid, positive_scaling=TRUE){
     n_samples = dim(data)[2]
     n_genes = dim(data)[1]
     if(n_samples != length(centroid)){
 	stop("align_data_onto_centroid: problem in dimensions")
     }
-    scaling_factors = (
-	rowSums(rep(centroid - mean(centroid), each=n_genes) * data) /
-	rowSums((data - rowMeans(data)) * data))
-    scaling_factors[scaling_factors < 0] = 0
+    centered_centroid = centroid - mean(centroid)
+    # Identify if some rows of the data are only zeros.
+    only_zero_genes = rowSums(abs(data)) == 0
+    scaling_factors = apply(
+	data, 1,
+	function(x){sum(centered_centroid * x)/sum((x - mean(x))*x)}) 
+    if(positive_scaling){
+        scaling_factors[scaling_factors < 0] = 0
+    }
+    # Now replace the scaling factors of only 0 genes by 0
+    scaling_factors[only_zero_genes] = 0
     shift_factors = rowMeans(
 	rep(centroid, each=n_genes) - rep(scaling_factors, times=n_samples) * data)
 
@@ -116,14 +169,28 @@ align_data_onto_centroid = function(data, centroid){
 }
 
 
-score_genes_centroid = function(data, centroid){
+score_genes_centroid = function(data, centroid, positive_scaling=TRUE, scale=TRUE){
     n_genes = dim(data)[1]
-    data_fitted = align_data_onto_centroid(data, centroid)
+    data_fitted = align_data_onto_centroid(
+	data, centroid, positive_scaling=positive_scaling)
 
-    scores = row_sum((data_fitted - rep(centroid, times=n_genes))**2)
+    scores = apply(
+	data_fitted,
+	1,
+	function(y){sqrt(sum((centroid - y)^2))})
 
-    scores = scores / max(scores)
-    return(scores)
+    if(scale){
+	all_zeros_gene = matrix(0, 1, dim(data)[2])
+        all_zeros_gene = align_data_onto_centroid(
+	    all_zeros_gene,
+	    centroid,
+	    positive_scaling=positive_scaling)
+	score = sqrt(sum((centroid - all_zeros_gene)**2))
+	max_score = score
+    }else{
+	max_score = 1
+    }
+    return(scores / max_score)
 }
 
 
@@ -133,8 +200,8 @@ score_genes_centroid = function(data, centroid){
 #' 
 #' @param pvalues pvalues
 #'
-#' @keywords internal
-fisher_method = function(pvalues){
+#' @export
+pvalues_fisher_method = function(pvalues){
     # TODO Add a check that all pvalues are "valid"
     keep = (pvalues >= 0) & (pvalues <= 1)
     pvalues[pvalues == 0] = 1e-285

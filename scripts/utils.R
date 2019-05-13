@@ -1,14 +1,14 @@
 group_colors = c(
     "M"="dodgerblue4",
-    "C"="gold",
-    "K"="orange",
+    "K"="gold",
+    "C"="orange",
     "VH"="red4",
     "VL"="red2")
 time_colors = grDevices::rainbow(14)
 names(time_colors) = c(0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60, 72, 120, 168)
 
 ann_colors = list(
-    Time=time_colors,
+    Timepoint=time_colors,
     Group=group_colors
     )
 
