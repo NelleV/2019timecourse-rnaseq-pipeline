@@ -154,7 +154,11 @@ regulated by virus concentration.
 
 ## Quality control and normalization
 
+The first steps of analysis of gene expression data is always to do normalization and quality control checks of the data. In what follows, we show an example of this for the influenza data using generic methods; these steps are not in specific to time course, but could be done for any gene expression analysis. 
+
 ### Pre-processing and normalization
+
+**EAP: Should we make this part of the pipeline, or just start with normalization? It's very microarray heavy... We could have a vignette in `moanin` documenting the creation of a normalized version of the data.**
 
 The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
 with accession number GSE63786. The dataset has a total of 209 samples, with
@@ -281,7 +285,9 @@ data = shoemaker2015$data
 
 Plotting the smoothed empirical densities of probe values for each sample and
 estimating the variations across samples before and after normalization is a
-first quality control step. Typically, two other quality control and
+first quality control step. **EAP: Cut or move this sentence, so that this entire section is applicable to microarray or mRNA-Seq**
+
+Typically, two other quality control and
 exploratory analysis steps are also performed before and after normalization:
 (1) low dimensionality embedding of the samples; (2) correlation plots between
 each samples. In both cases, we expect a strong biological signal, while
@@ -315,7 +321,7 @@ percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
 
 We then plot the two first components, and color each sample by (1) its
-condition; (2) its sampling time. We use different markers for each replicate.
+condition; (2) its sampling time. We use different markers for each replicate. **EAP: Unclear what 'markers' refers to**
 We also plot the second and third components in the second row.
 
 ```{r pca_plots, fig.width=6, fig.height=6}
@@ -391,15 +397,30 @@ most different from control samples.
 
 ## Differential expression analysis of time-course data
 
-The next step is typically to run a differential expression analysis. Most of
-`moanin`'s function rely on an object containing a number of information such
-as the metadata and the splines model used. We start by creating the
+The next step in a gene expression analysis is typically to run a differential expression analysis, generally to find genes different between different conditions. For time-course data, we will consider two different approaches 
+
+1) Per-time point analysis, where we consider each time point a different condition and determine what genes are changing between time points, or between conditions at a single time-point.
+
+2) Global analysis, where we consider the expression pattern globally over time, and consider what genes have either different patterns between conditions or a changing pattern (i.e. non-constant) over time. 
+
+We note that we could have time course data on either a single condition or time course data on multiple conditions (such as the influenza dataset we are considering), which will alter slightly the types of questions we are interested in, but the two basic approaches remains the same. In what follows, we will focus on the situation where we have multiple conditions. **EAP: Any reason one and not the other. Maybe should change this sentence**
+
+
+
+
+In both situations, a common approach first step is to fit a spline model to each gene **FIXME add refs**, and then use that spline model to test for different kinds of differential expression across time. 
+
+`moanin` is set up to facilitate working with these spline models for differential expression. Most of
+`moanin`'s functions rely on creating a `splines_model` object to contain the metadata and the splines model to be used. 
+
+We start by creating the
 `splines_model` object using the `create_splines_model` function.
 
 ```{r}
 splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
 ```
 
+Here we have provided the meta data that defines... `create_splines_model` will .... **FIXME add information about what meta data is expected, describe what `create_splines_model` does (does it fit the splines? Just hold create an object? Create basis functions?)**. 
 
 ### Weekly differential expression analysis
 
