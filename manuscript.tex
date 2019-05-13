@@ -184,6 +184,8 @@ functions in a R package called \texttt{moanin}.
 \caption{Workflow for analyzing time-course datasets.}\label{fig:schema}
 \end{figure}
 
+\textbf{EAP: General comment. Your function names are incredibly long compared to standard functions. Also, will want to get rid of \texttt{moanin::} in front of functions. It's more precise, but an average user doesn't ever experience the \texttt{::} command; usually just package creaters. }
+
 \hypertarget{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}{%
 \section{Analysis of the dynamical response of mouse lung tissue to influenza}\label{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}}
 
@@ -468,11 +470,11 @@ The next step in a gene expression analysis is typically to run a differential e
   Global analysis, where we consider the expression pattern globally over time, and consider what genes have either different patterns between conditions or a changing pattern (i.e.~non-constant) over time. A common approach first step is to fit a spline model to each gene \textbf{FIXME add refs}, and then use that spline model to test for different kinds of differential expression across time.
 \end{enumerate}
 
-The per-time point analysis is often the entire approach advocated for dealing with small time-course datasets, where there are only a few time points \textbf{FIXME add citation to edgeR/limma vignette or DESEQ2}. For long time-course datasets, however, such an approach results in creating many different tests, for example for every pair of adjacent timepoints, the results of which are difficult to integrate. We find in practice that the global analysis simplifies analysis and of longer time courses data, with per-time point analysis reserved for particularly interesting comparisons of individual time-points.
+The per-time point analysis is using classical differential expression approaches, and is often the approach advocated when dealing with small time-course datasets, where there are only a few time points \textbf{FIXME add citation to edgeR/limma vignette or DESEQ2}. For long time-course datasets, however, a separate test for each time-point results in creating many different tests, for example one for every time point, the results of which are difficult to integrate. We find in practice that the global analysis simplifies analysis and of longer time courses data, with per-time point analysis reserved for particularly interesting comparisons of individual time-points.
 
 We note that we could have time course data on either a single condition or time course data on multiple conditions (such as the influenza dataset we are considering), which will alter slightly the types of questions we are interested in, but the two basic approaches remains the same. In what follows, we will focus on the situation where we have multiple conditions. \textbf{EAP: Any reason one and not the other. Maybe should change this sentence}
 
-\textbf{Use with \texttt{moanin}} \texttt{moanin} provides functionality for performing both of these types of approaches. In both situations, we first set up a object (a \texttt{splines\_model} object) to hold the meta data, as well as information for fitting the spline model.
+\textbf{Use with \texttt{moanin}} \texttt{moanin} provides functionality for performing both of these types of approaches, though our focus is on the global approach. In both situations, we first need to set up a object (a \texttt{splines\_model} object) to hold the meta data, as well as information for fitting the spline model.
 
 We start by creating the
 \texttt{splines\_model} object using the \texttt{create\_splines\_model} function.
@@ -485,14 +487,18 @@ We start by creating the
 
 Here we have provided the meta data that defines\ldots{} \texttt{create\_splines\_model} will \ldots{}. \textbf{FIXME add information about what meta data is expected, describe what \texttt{create\_splines\_model} does (does it fit the splines? Just hold create an object? Create basis functions?)}.
 
+\textbf{EAP: General comment: you need a few more print() and head() of some objects to demonstrate what the output looks like}
+
 \hypertarget{weekly-differential-expression-analysis}{%
 \subsubsection{Weekly differential expression analysis}\label{weekly-differential-expression-analysis}}
 
-\texttt{moanin} provides a simple interface to perform a time by time differential
-expression analysis. Under the hood, it simply calls \texttt{limma} \citep{ritchie:limma} on the set of
-contrasts provided. Here, we show an example between the control mouse and the
+\texttt{moanin} provides a simple interface to perform a timepoint by timepoint differential
+expression analysis. This is traditionally done by the user defining the comparisons (called \texttt{contrasts} in linear models). Under the hood, simply calls \texttt{limma} \citep{ritchie:limma} on the set of
+contrasts provided. \textbf{EAP: Can we comment on using it for RNA-Seq??}
+
+Here, we show an example where we define our contrasts to be the difference between the control mouse (``M'') and the
 mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
-(H5N1), but the function works with any form contrasts.
+(H5N1) (``VL'') for each time point, but the function works with any form contrasts. \textbf{FIXME: Reference to limma vignette for how to define the contrasts} \textbf{EAP: Could you make simple function that creates them automatically for two conditions -- i.e.~find union of time points for two conditions\ldots{} Then we could show an example with just a couple done manually, and then say we can also use a little helper function in the \texttt{moanin} that will do it for all time points}
 
 \textbf{FIXME rename the function to something better}
 
@@ -523,6 +529,8 @@ mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
 \end{Highlighting}
 \end{Shaded}
 
+We can repeat this for each of the conditions
+
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
@@ -533,7 +541,7 @@ considering each time-point independantly highlights the challenges of such
 approach. Timepoint 6H and 18H of the Kawasaki strain have fewer numbers of
 genes found differentially expressed than timepoints 3H and 9H: this is likely
 due to biological or technical variances for specific genes at specific
-timepoints.
+timepoints. \textbf{EAP: We should add more to this}
 
 As a summary, classic differential expression methods are appropriate for
 unordered treatments, but fail to use the temporal structure of the data.
@@ -541,11 +549,15 @@ unordered treatments, but fail to use the temporal structure of the data.
 \hypertarget{time-course-differential-expression-analysis-between-two-groups}{%
 \subsubsection{Time-course differential expression analysis between two groups}\label{time-course-differential-expression-analysis-between-two-groups}}
 
-To leverage this temporal structure, Storey et al \citep{storey:significance} proposes to
-model time-course micro-array with splines functions, and to use a log-ratio
-likelihood test to detect differentially expressed genes. \texttt{moanin} extends
-this idea by providing functions to perform time-course differential
-expression analysis using \texttt{limma} contrasts.
+To leverage this temporal structure, Storey et al \citep{storey:significance} proposed to
+model each gene in time-course micro-array with a splines function, and to use a log-ratio likelihood test to detect differentially expressed genes.
+
+\texttt{moanin} extends
+this idea by providing functionality to compare time course data between different treatment conditions, using a similar mechanism of contrasts -- only now the contrasts are differences between the estimated means.
+
+\textbf{FIXME add in equations, like from the EPICON paper, to describe them mathematically}
+
+\textbf{EAP: Do we need this call to limma by the user, or can these not be done internally by the \texttt{timecourse\_differential\_expression\_analysis} function? We can still preserve the option of user defining their own, but would be nicer to make this simpler for the user (e.g.~an if clause that tests whether input is matrix or character vector)}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -629,6 +641,8 @@ min & \(\min_t \|lfc(t)\|\) & Always positive\tabularnewline
 epicon & \$\$ & Captures overall strength of response and overall direction\tabularnewline
 \bottomrule
 \end{longtable}
+
+\textbf{EAP: \texttt{epicon} is going to be weird for general use}
 
 \begin{Shaded}
 \begin{Highlighting}[]
