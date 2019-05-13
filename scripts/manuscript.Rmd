@@ -69,6 +69,13 @@ knitr::opts_chunk$set(
 - Add legends to the plots that don't have.
 - Currently have two functions "plot_genes", "plot_centroids", that do exactly
   the same thing. Find a better name for both of them
+- switch to camel case function names
+- shorten function names
+- Remove the namespace call
+- Move the normalization to a supplementary data
+- Make clear that it applies to RNASeq and how to call the different functions
+  to RNASeq
+- Check that clustering can deal with count data.
 
 
 # Introduction
@@ -439,6 +446,8 @@ mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
 **FIXME rename the function to something better** 
 
 **EAP: And don't use 'week' in function name!**
+
+**Add a helper function to make the contrasts for timely DE**
 
 ```{r weekly_differential_analysis}
 meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Timepoint))
