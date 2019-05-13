@@ -58,7 +58,7 @@ differential expression analysis along lineages
 
 Gene expression studies provide simultaneous quantification of the level of mRNA from all genes in a sample. High-throughput studies of gene expression have a long history, starting with microarray technologies in the 1990s through to single-cell technologies. While many expression studies are designed to compare the gene expression in distinct groups, there is also a long history of time-course expression studies, where the the gene expression is compared across time by measuring mRNA levels from different samples across time.\footnote{Because the collection of the mRNA is often destructive, samples at different time points are generally from different biological samples; longitudinal studies, for example tracking the same subject over time, are certainly possible in certain settings, but not directly considered here.} Such time course studies can vary from measuring a few distinct time points, to sampling ten to twenty time points. Many longer time series are particularly interested in investigating development over time. More recently, single-cell studies track single cells through their development, and a single cell is measured at a particular moment in its developmental progression -- a value that is not know but estimated from the data as its ``pseudo-time''.
 
-While there are many methods that have been proposed for discrete aspects of time course data, the entire workflow for analysis of such data remains difficult, particularly for long, developmental time series. Most methods proposed for time course data are concerned with detecting genes that are changing over time (differential expression analysis), examples being \texttt{edge}\todo[Other methods to mention: impulse models, what else? Citations!]. However, with long time course datasets, particularly in developmental systems, a massive number of genes will show \emph{some} change. For example, in the \xxx system, over \xxx\% of genes are shown to be changing over time. The task in these settings is often not to detect changes in genes, but to categorize into biologically interpretable patterns the vast number of changes discovered. 
+While there are many methods that have been proposed for discrete components of time course data, the entire workflow for analysis of such data remains difficult, particularly for long, developmental time series. Most methods proposed for time course data are concerned with detecting genes that are changing over time (differential expression analysis), examples being \texttt{edge}\todo[Other methods to mention: impulse models, what else? Citations!]. However, with long time course datasets, particularly in developmental systems, a massive number of genes will show \emph{some} change. For example, in the \xxx system, over \xxx\% of genes are shown to be changing over time. The task in these settings is often not to detect changes in genes, but to categorize into biologically interpretable patterns the vast number of changes discovered. In this context, the clustering of genes and interpretation of the genes can be far more relevant, and the 
 
 We present here a workflow for such an analysis that consists of \xxx main parts (Figure \ref{fig:workflow}):
 \begin{enumerate}
@@ -73,7 +73,7 @@ We present here a workflow for such an analysis that consists of \xxx main parts
 \label{fig:workflow}
 \end{figure}
 
-This workflow represents an integration of both novel implementations of previously established methods and new methodologies for the settings of developmental time series. We provide the various steps of the workflow as functions in a R package, \citettt{\xxx}, along with command-line tools for running the entire workflow in a single command. 
+This workflow represents an integration of both novel implementations of previously established methods and new methodologies for the settings of developmental time series. We provide the various steps of the workflow as functions in a R package, \citettt{\xxx}, along with command-line tools for running the entire workflow. 
 
 \section{Results}
 \subsection{Quality control analysis}
@@ -87,7 +87,7 @@ This workflow represents an integration of both novel implementations of previou
 
 \subsection{Differential expression analysis}
 
-Several techniques for mRNA-expression analysis were
+A vast number of techniques Several techniques for mRNA-expression analysis 
 
 \subsection{Clustering}
 
