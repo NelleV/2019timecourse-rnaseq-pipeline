@@ -397,21 +397,22 @@ most different from control samples.
 
 ## Differential expression analysis of time-course data
 
-The next step in a gene expression analysis is typically to run a differential expression analysis, generally to find genes different between different conditions. For time-course data, we will consider two different approaches 
+### Approaches to DE analysis in time-course data
 
-1) Per-time point analysis, where we consider each time point a different condition and determine what genes are changing between time points, or between conditions at a single time-point.
+The next step in a gene expression analysis is typically to run a differential expression analysis, generally to find genes different between different conditions. For time-course data, there are two different approaches for determining differentially expressed genes,
 
-2) Global analysis, where we consider the expression pattern globally over time, and consider what genes have either different patterns between conditions or a changing pattern (i.e. non-constant) over time. 
+1) Per-time point analysis, where we consider each time point a different condition and determine what genes are changing between time points, or between conditions at a single time-point. 
+
+2) Global analysis, where we consider the expression pattern globally over time, and consider what genes have either different patterns between conditions or a changing pattern (i.e. non-constant) over time. A common approach first step is to fit a spline model to each gene **FIXME add refs**, and then use that spline model to test for different kinds of differential expression across time. 
+
+
+The per-time point analysis is often the entire approach advocated for dealing with small time-course datasets, where there are only a few time points **FIXME add citation to edgeR/limma vignette or DESEQ2**. For long time-course datasets, however, such an approach results in creating many different tests, for example for every pair of adjacent timepoints, the results of which are difficult to integrate. We find in practice that the global analysis simplifies analysis and of longer time courses data, with per-time point analysis reserved for particularly interesting comparisons of individual time-points. 
 
 We note that we could have time course data on either a single condition or time course data on multiple conditions (such as the influenza dataset we are considering), which will alter slightly the types of questions we are interested in, but the two basic approaches remains the same. In what follows, we will focus on the situation where we have multiple conditions. **EAP: Any reason one and not the other. Maybe should change this sentence**
 
 
 
-
-In both situations, a common approach first step is to fit a spline model to each gene **FIXME add refs**, and then use that spline model to test for different kinds of differential expression across time. 
-
-`moanin` is set up to facilitate working with these spline models for differential expression. Most of
-`moanin`'s functions rely on creating a `splines_model` object to contain the metadata and the splines model to be used. 
+**Use with `moanin`** `moanin` provides functionality for performing both of these types of approaches. In both situations, we first set up a object (a `splines_model` object) to hold the meta data, as well as information for fitting the spline model. 
 
 We start by creating the
 `splines_model` object using the `create_splines_model` function.
@@ -430,7 +431,9 @@ contrasts provided. Here, we show an example between the control mouse and the
 mouse infected with the high dose of the influenza strain A/Vietnam/1203/04
 (H5N1), but the function works with any form contrasts.
 
-**FIXME rename the function to something better**
+**FIXME rename the function to something better** 
+
+**EAP: And don't use 'week' in function name!**
 
 ```{r weekly_differential_analysis}
 meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Timepoint))
