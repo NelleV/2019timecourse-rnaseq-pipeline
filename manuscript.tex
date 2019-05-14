@@ -227,121 +227,14 @@ regulated by virus concentration.
 \hypertarget{quality-control-and-normalization}{%
 \subsection{Quality control and normalization}\label{quality-control-and-normalization}}
 
-The first steps of analysis of gene expression data is always to do normalization and quality control checks of the data. In what follows, we show an example of this for the influenza data using generic methods; these steps are not in specific to time course, but could be done for any gene expression analysis.
+The first steps of analysis of gene expression data is always to do
+normalization and quality control checks of the data. In what follows, we show
+an example of this for the influenza data using generic methods; these steps
+are not in specific to time course, but could be done for any gene expression
+analysis.
 
-\hypertarget{pre-processing-and-normalization}{%
-\subsubsection{Pre-processing and normalization}\label{pre-processing-and-normalization}}
-
-\textbf{EAP: Should we make this part of the pipeline, or just start with normalization? It's very microarray heavy\ldots{} We could have a vignette in \texttt{moanin} documenting the creation of a normalized version of the data.}
-
-The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
-with accession number GSE63786. The dataset has a total of 209 samples, with
-45018 probes (1 sample was removed by the authors prior to uploading the
-dataset on GEO).
-
-Note that in the following, we assume that the user has access to a data
-folder \texttt{data/shoemaker2015/rawdata}, containing the microarray data.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{data_dir =}\StringTok{ "data/shoemaker2015/rawdata"}
-\end{Highlighting}
-\end{Shaded}
-
-Given the source and a \texttt{Targets.txt} structured as follows, microarray can be
-loaded thanks to the limma library.
-
-\begin{verbatim}
-FileName
-GSM1557140_AR0313_043raw.txt.gz
-GSM1557141_AR0313_044raw.txt.gz
-GSM1557142_AR0313_045raw.txt.gz
-GSM1557143_AR0313_055raw.txt.gz
-GSM1557144_AR0313_056raw.txt.gz
-GSM1557145_AR0313_057raw.txt.gz
-GSM1557146_AR0313_058raw.txt.gz
-GSM1557147_AR0313_059raw.txt.gz
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{targets =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{readTargets}\NormalTok{()}
-\NormalTok{RG =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{read.maimages}\NormalTok{(}
-\NormalTok{  targets, }\DataTypeTok{source=}\StringTok{"agilent"}\NormalTok{,}
-  \DataTypeTok{path=}\NormalTok{data_dir,}
-  \DataTypeTok{other.columns=}\StringTok{"gIsWellAboveBG"}\NormalTok{,}
-  \DataTypeTok{green.only=}\OtherTok{TRUE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-The normalization strategy we apply here relies on \texttt{limma} and is as follows:
-
-\begin{itemize}
-\tightlist
-\item
-  First, normalize probe intensity using background information using the
-  ``norm-exponential'' strategy.
-\item
-  Then normalize across micro-arrrays using quantile normalization.
-\end{itemize}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# Perform background correction using norm-exponential strategy and normalize}
-\CommentTok{# across samples using quantile normalization.}
-\NormalTok{RG =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{backgroundCorrect}\NormalTok{(RG, }\DataTypeTok{method=}\StringTok{"normexp"}\NormalTok{)}
-\NormalTok{RG.q =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{normalizeBetweenArrays}\NormalTok{(RG, }\DataTypeTok{method=}\StringTok{"quantile"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-Plotting the smoothed empirical densities of the probe values before
-normalization shows considerable variations betweens arrays. Once the data has
-been normalized across array using quantile normalization, the smoothed
-empirical densities of each sample perfectly overlap.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# Plot the densities of the probes before and after normalization.}
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{2.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{, }\FloatTok{2.0}\NormalTok{))}
-\NormalTok{limma}\OperatorTok{::}\KeywordTok{plotDensities}\NormalTok{(RG, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{,}
-             \DataTypeTok{main=}\StringTok{"Before normalization"}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{0.8}\NormalTok{)}
-\NormalTok{limma}\OperatorTok{::}\KeywordTok{plotDensities}\NormalTok{(RG.q, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{,}
-             \DataTypeTok{main=}\StringTok{"After normalization"}\NormalTok{, }\DataTypeTok{cex=}\FloatTok{0.8}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/plotting_densities-1} \end{center}
-
-We then clean up the names of each gene and each sample to match the original
-data. Finally, we further filter out probes based on the following criteria:
-(1) removing the 1486 control probes; (2) removing
-4823 low-expressed genes.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{sample_names =}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\KeywordTok{strsplit}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(RG.q), }\StringTok{"_"}\NormalTok{), .subset2,  }\DecValTok{1}\NormalTok{)}
-\KeywordTok{colnames}\NormalTok{(RG.q) =}\StringTok{ }\NormalTok{sample_names}
-\KeywordTok{row.names}\NormalTok{(RG.q) =}\StringTok{ }\KeywordTok{make.names}\NormalTok{(RG}\OperatorTok{$}\NormalTok{genes}\OperatorTok{$}\NormalTok{SystematicName, }\DataTypeTok{unique=}\OtherTok{TRUE}\NormalTok{)}
-\NormalTok{idx_to_keep =}\StringTok{ }\KeywordTok{which}\NormalTok{(}
-  \OperatorTok{!}\NormalTok{(RG}\OperatorTok{$}\NormalTok{genes}\OperatorTok{$}\NormalTok{Systematic }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"DarkCorner"}\NormalTok{, }\StringTok{"GE_BrightCorner"}\NormalTok{,}
-                   \StringTok{"NegativeControl"}\NormalTok{)))}
-
-\NormalTok{data =}\StringTok{ }\NormalTok{RG.q[idx_to_keep,]}
-
-\CommentTok{# Filter out control probes.}
-\NormalTok{control_probes =}\StringTok{ }\NormalTok{data}\OperatorTok{$}\NormalTok{genes[, }\StringTok{"ControlType"}\NormalTok{] }\OperatorTok{==}\StringTok{ }\DecValTok{1}
-\NormalTok{is_expressed =}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(data}\OperatorTok{$}\NormalTok{other}\OperatorTok{$}\StringTok{"gIsWellAboveBG"} \OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{>=}\StringTok{ }\DecValTok{4}
-
-\NormalTok{data =}\StringTok{ }\NormalTok{data[}\OperatorTok{!}\NormalTok{control_probes }\OperatorTok{&}\StringTok{ }\NormalTok{is_expressed, ]}\OperatorTok{$}\NormalTok{E}
-\end{Highlighting}
-\end{Shaded}
-
-After filtering, we are left with 39544 probes of interest in
-209 samples.
-
-Now that we have normalized and filtered the gene expressions, let's load the
-metadata. The package \texttt{moanin} contains the normalized data and meta of
-\citep{shoemaker:ultrasensitive}.
+First let's load the data. The package \texttt{moanin} contains the normalized
+data and meta of \citep{shoemaker:ultrasensitive}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -355,15 +248,11 @@ metadata. The package \texttt{moanin} contains the normalized data and meta of
 \hypertarget{exploratory-analysis-and-quality-control}{%
 \subsubsection{Exploratory analysis and quality control}\label{exploratory-analysis-and-quality-control}}
 
-Plotting the smoothed empirical densities of probe values for each sample and
-estimating the variations across samples before and after normalization is a
-first quality control step. \textbf{EAP: Cut or move this sentence, so that this entire section is applicable to microarray or mRNA-Seq}
-
-Typically, two other quality control and
-exploratory analysis steps are also performed before and after normalization:
-(1) low dimensionality embedding of the samples; (2) correlation plots between
-each samples. In both cases, we expect a strong biological signal, while
-replicate samples should be strongly clustered or correlated with one another.
+Typically, two quality control and exploratory analysis steps are also
+performed before and after normalization: (1) low dimensionality embedding of
+the samples; (2) correlation plots between each samples. In both cases, we
+expect a strong biological signal, while replicate samples should be strongly
+clustered or correlated with one another.
 
 Before performing any additional exploratory analysis, let us only keep highly
 variable genes: we keep for this step only the top 50\% most variable genes.
@@ -377,7 +266,7 @@ variable genes: we keep for this step only the top 50\% most variable genes.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-5-1} \end{center}
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data.
@@ -589,7 +478,7 @@ We can repeat this for each of the conditions
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-12-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
 The distribution of number of genes found differentially expressed by
 considering each time-point independantly highlights the challenges of such
@@ -639,7 +528,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -716,7 +605,7 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -734,7 +623,7 @@ computation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
 visualize gene time-course data. Here, we plot the 12 genes with the smallest
@@ -748,7 +637,7 @@ p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
 
 And here we visualize the genes with the largest absolute EPICON log-fold
 change.
@@ -763,7 +652,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-16-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -849,7 +738,7 @@ with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
 
 The scoring and labeling can be done via the \texttt{splines\_kmeans\_score\_and\_label}
 function.
@@ -871,13 +760,13 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labelinig step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
 
 The scoring and label step allows to label genes that were removed during the
 filtering step, yet are good matches to the centroids found during the
 clustering.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -940,7 +829,7 @@ First, select the genes of interest.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1118,7 +1007,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1131,7 +1020,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-2} \end{center}
 
 \hypertarget{the-model-explorer-strategy}{%
 \subparagraph{The model explorer strategy}\label{the-model-explorer-strategy}}
@@ -1157,7 +1046,7 @@ obtained scores.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-32-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1176,7 +1065,7 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-33-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
 \subparagraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
