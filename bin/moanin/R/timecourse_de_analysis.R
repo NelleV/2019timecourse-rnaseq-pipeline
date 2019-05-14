@@ -170,6 +170,14 @@ DE_timecourse = function(data, splines_model,
 
     check_data_meta(data, meta)
 
+    if(use_voom_weights){
+        y = edgeR::DGEList(counts=counts)
+	y = edgeR::calcNormFactors(y, method="upperquartile")
+        v = limma::voom(y, contrasts, plot=FALSE)
+	weights = limma::lmFit(v)
+    }else{
+	weights = NULL
+    }
 
     y = data
 
