@@ -164,125 +164,14 @@ regulated by virus concentration.
 
 ## Quality control and normalization
 
-The first steps of analysis of gene expression data is always to do normalization and quality control checks of the data. In what follows, we show an example of this for the influenza data using generic methods; these steps are not in specific to time course, but could be done for any gene expression analysis. 
+The first steps of analysis of gene expression data is always to do
+normalization and quality control checks of the data. In what follows, we show
+an example of this for the influenza data using generic methods; these steps
+are not in specific to time course, but could be done for any gene expression
+analysis. 
 
-### Pre-processing and normalization
-
-**EAP: Should we make this part of the pipeline, or just start with normalization? It's very microarray heavy... We could have a vignette in `moanin` documenting the creation of a normalized version of the data.**
-
-The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
-with accession number GSE63786. The dataset has a total of 209 samples, with
-45018 probes (1 sample was removed by the authors prior to uploading the
-dataset on GEO).
-
-Note that in the following, we assume that the user has access to a data
-folder `data/shoemaker2015/rawdata`, containing the microarray data. 
-
-```{r}
-data_dir = "data/shoemaker2015/rawdata"
-```
-
-Given the source and a `Targets.txt` structured as follows, microarray can be
-loaded thanks to the limma library.
-
-```
-FileName
-GSM1557140_AR0313_043raw.txt.gz
-GSM1557141_AR0313_044raw.txt.gz
-GSM1557142_AR0313_045raw.txt.gz
-GSM1557143_AR0313_055raw.txt.gz
-GSM1557144_AR0313_056raw.txt.gz
-GSM1557145_AR0313_057raw.txt.gz
-GSM1557146_AR0313_058raw.txt.gz
-GSM1557147_AR0313_059raw.txt.gz
-```
-
-```{r message=FALSE, results="hide", warning=FALSE}
-targets = limma::readTargets()
-RG = limma::read.maimages(
-  targets, source="agilent",
-  path=data_dir,
-  other.columns="gIsWellAboveBG",
-  green.only=TRUE)
-
-```
-
-The normalization strategy we apply here relies on `limma` and is as follows:
-
-  - First, normalize probe intensity using background information using the
-    "norm-exponential" strategy.
-  - Then normalize across micro-arrrays using quantile normalization.
-
-
-
-```{r reading_targets, results="hide", fig.width=4, fig.height=2, message=FALSE, warning=FALSE}
-# Perform background correction using norm-exponential strategy and normalize
-# across samples using quantile normalization.
-RG = limma::backgroundCorrect(RG, method="normexp")
-RG.q = limma::normalizeBetweenArrays(RG, method="quantile")
-```
-
-Plotting the smoothed empirical densities of the probe values before
-normalization shows considerable variations betweens arrays. Once the data has
-been normalized across array using quantile normalization, the smoothed
-empirical densities of each sample perfectly overlap.
-
-```{r plotting_densities, results="hide", fig.width=6, fig.height=3}
-# Plot the densities of the probes before and after normalization.
-par(mfrow=c(1, 2), mar=c(2.0, 2.0, 2.0, 2.0))
-limma::plotDensities(RG, col="black", legend=FALSE,
-		     main="Before normalization", cex=0.8)
-limma::plotDensities(RG.q, col="black", legend=FALSE,
-		     main="After normalization", cex=0.8)
-```
-
-
-```{r echo=FALSE, results="hide"}
-# Get the number for the text. Do not display results or computation
-control_probes = RG.q$genes[, "ControlType"] == 1
-is_expressed = rowSums(RG.q$other$"gIsWellAboveBG" > 0) >= 4
-n_control_probes = sum(control_probes)
-n_lowly_expressed = sum(!is_expressed)
-```
-
-We then clean up the names of each gene and each sample to match the original
-data. Finally, we further filter out probes based on the following criteria:
-(1) removing the `r n_control_probes` control probes; (2) removing 
-`r n_lowly_expressed` low-expressed genes. 
-
-```{r clean_up_names}
-
-sample_names = sapply(strsplit(colnames(RG.q), "_"), .subset2,  1)
-colnames(RG.q) = sample_names
-row.names(RG.q) = make.names(RG$genes$SystematicName, unique=TRUE)
-idx_to_keep = which(
-  !(RG$genes$Systematic %in% c("DarkCorner", "GE_BrightCorner",
-			       "NegativeControl")))
-
-data = RG.q[idx_to_keep,]
-
-# Filter out control probes.
-control_probes = data$genes[, "ControlType"] == 1
-is_expressed = rowSums(data$other$"gIsWellAboveBG" > 0) >= 4
-
-data = data[!control_probes & is_expressed, ]$E
-```
-
-
-
-```{r echo=FALSE, results="hide"}
-# Do not display. setting variables for text
-n_samples = dim(data)[2]
-n_probes = dim(data)[1]
-```
-
-After filtering, we are left with `r n_probes` probes of interest in 
-`r n_samples` samples.
-
-
-Now that we have normalized and filtered the gene expressions, let's load the
-metadata. The package `moanin` contains the normalized data and meta of
-[@shoemaker:ultrasensitive].
+First let's load the data. The package `moanin` contains the normalized
+data and meta of [@shoemaker:ultrasensitive].
 
 ```{r}
 # Now load in the metadata
@@ -294,15 +183,11 @@ data = shoemaker2015$data
 ### Exploratory analysis and quality control
 
 
-Plotting the smoothed empirical densities of probe values for each sample and
-estimating the variations across samples before and after normalization is a
-first quality control step. **EAP: Cut or move this sentence, so that this entire section is applicable to microarray or mRNA-Seq**
-
-Typically, two other quality control and
-exploratory analysis steps are also performed before and after normalization:
-(1) low dimensionality embedding of the samples; (2) correlation plots between
-each samples. In both cases, we expect a strong biological signal, while
-replicate samples should be strongly clustered or correlated with one another.
+Typically, two quality control and exploratory analysis steps are also
+performed before and after normalization: (1) low dimensionality embedding of
+the samples; (2) correlation plots between each samples. In both cases, we
+expect a strong biological signal, while replicate samples should be strongly
+clustered or correlated with one another.
 
 
 Before performing any additional exploratory analysis, let us only keep highly
