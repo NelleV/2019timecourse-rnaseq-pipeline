@@ -634,7 +634,8 @@ contrasts = limma::makeContrasts(
 # to the time-course information, the latter corresponding to the
 # treatment).
 pvalues = moanin::DE_timecourse(
-    data, splines_model, contrasts)
+    data, splines_model, contrasts,
+    use_voom_weights=FALSE)
 qvalues = apply(pvalues, 2, stats::p.adjust)
 
 ```
