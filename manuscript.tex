@@ -334,11 +334,9 @@ Vietnam, then high dose of Vietnam.
 
 \NormalTok{variance_filtered_data =}\StringTok{ }\NormalTok{variance_filtered_data[, ord]}
 \NormalTok{data_corr =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{cor}\NormalTok{(variance_filtered_data, }\DataTypeTok{method=}\StringTok{"pearson"}\NormalTok{)}
-
 \NormalTok{data_corr_meta =}\StringTok{ }\NormalTok{meta[ord, ]}
+\NormalTok{data_corr_meta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(data_corr_meta}\OperatorTok{$}\NormalTok{Timepoint)}
 
-\CommentTok{# Copy the metadata before changing the timepoints into factors}
-\NormalTok{data_corr_meta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)}
 \NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
 \NormalTok{    data_corr,}
     \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{, }\DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
@@ -456,54 +454,105 @@ object? Create basis functions?)}.
 \hypertarget{weekly-differential-expression-analysis}{%
 \subsubsection{Weekly differential expression analysis}\label{weekly-differential-expression-analysis}}
 
-\texttt{moanin} provides a simple interface to perform a timepoint by timepoint differential
-expression analysis. This is traditionally done by the user defining the comparisons (called \texttt{contrasts} in linear models). Under the hood, simply calls \texttt{limma} \citep{ritchie:limma} on the set of
-contrasts provided. By default, it expects RNA-Seq contact counts, and will
-estimate voom weights. We tern
+\texttt{moanin} provides a simple interface to perform a timepoint by timepoint
+differential expression analysis. This is traditionally done by the user
+defining the comparisons (called \texttt{contrasts} in linear models). Under the
+hood, simply calls \texttt{limma} \citep{ritchie:limma} on the set of contrasts provided.
+By default, it expects RNA-Seq contact counts, and will estimate voom weights.
+We tern
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse (``M'') and the mouse infected with the high dose of
 the influenza strain A/Vietnam/1203/04 (H5N1) (``VL'') for each time point, but
-the function works with any form contrasts. \textbf{FIXME: Reference to limma
-vignette for how to define the contrasts} \textbf{EAP: Could you make simple
-function that creates them automatically for two conditions -- i.e.~find union
-of time points for two conditions\ldots{} Then we could show an example with just a
-couple done manually, and then say we can also use a little helper function in
-the \texttt{moanin} that will do it for all time points}
+the function works with any form contrasts \citep{ritchie:limma}.
 
-\textbf{Add a helper function to make the contrasts for timely DE}
+First, create the contrasts for all timepoints between the two groups of
+interest:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{meta}\OperatorTok{$}\NormalTok{WeeklyGroup =}\StringTok{ }\KeywordTok{make.names}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group}\OperatorTok{:}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint))}
+\NormalTok{contrasts =}\StringTok{ }\KeywordTok{create_timepoints_contrasts}\NormalTok{(}\StringTok{"M"}\NormalTok{, }\StringTok{"VL"}\NormalTok{, splines_model)}
+\end{Highlighting}
+\end{Shaded}
 
+\begin{tabular}{l}
+\hline
+x\\
+\hline
+M.0-VL.0\\
+\hline
+M.3-VL.3\\
+\hline
+M.6-VL.6\\
+\hline
+M.9-VL.9\\
+\hline
+M.12-VL.12\\
+\hline
+M.18-VL.18\\
+\hline
+M.24-VL.24\\
+\hline
+M.30-VL.30\\
+\hline
+M.36-VL.36\\
+\hline
+M.48-VL.48\\
+\hline
+M.60-VL.60\\
+\hline
+M.72-VL.72\\
+\hline
+M.120-VL.120\\
+\hline
+M.168-VL.168\\
+\hline
+\end{tabular}
+
+Then run the differential expression analysis on all of those timepoints
+jointly.
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \CommentTok{# Define contrast   }
-\NormalTok{contrasts =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"M.0-VL.0"}\NormalTok{,}
-          \StringTok{"M.3-VL.3"}\NormalTok{,}
-          \StringTok{"M.6-VL.6"}\NormalTok{,}
-          \StringTok{"M.9-VL.9"}\NormalTok{,}
-          \StringTok{"M.12-VL.12"}\NormalTok{,}
-          \StringTok{"M.18-VL.18"}\NormalTok{,}
-          \StringTok{"M.24-VL.24"}\NormalTok{,}
-          \StringTok{"M.30-VL.30"}\NormalTok{,}
-          \StringTok{"M.36-VL.36"}\NormalTok{,}
-          \StringTok{"M.48-VL.48"}\NormalTok{,}
-          \StringTok{"M.60-VL.60"}\NormalTok{,}
-          \StringTok{"M.72-VL.72"}\NormalTok{,}
-          \StringTok{"M.120-VL.120"}\NormalTok{,}
-          \StringTok{"M.168-VL.168"}\NormalTok{)}
 \NormalTok{weekly_de_analysis =}\StringTok{  }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{DE_timepoints}\NormalTok{(}
 \NormalTok{     data, splines_model, contrasts,}
      \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+  & M.0-VL.0-pval & M.0-VL.0-qval & M.0-VL.0-lfc & M.3-VL.3-pval & M.3-VL.3-qval & M.3-VL.3-lfc & M.6-VL.6-pval & M.6-VL.6-qval & M.6-VL.6-lfc & M.9-VL.9-pval & M.9-VL.9-qval & M.9-VL.9-lfc & M.12-VL.12-pval & M.12-VL.12-qval & M.12-VL.12-lfc & M.18-VL.18-pval & M.18-VL.18-qval & M.18-VL.18-lfc & M.24-VL.24-pval & M.24-VL.24-qval & M.24-VL.24-lfc & M.30-VL.30-pval & M.30-VL.30-qval & M.30-VL.30-lfc & M.36-VL.36-pval & M.36-VL.36-qval & M.36-VL.36-lfc & M.48-VL.48-pval & M.48-VL.48-qval & M.48-VL.48-lfc & M.60-VL.60-pval & M.60-VL.60-qval & M.60-VL.60-lfc & M.72-VL.72-pval & M.72-VL.72-qval & M.72-VL.72-lfc & M.120-VL.120-pval & M.120-VL.120-qval & M.120-VL.120-lfc & M.168-VL.168-pval & M.168-VL.168-qval & M.168-VL.168-lfc\\
+\hline
+NM\_009912 & 0.2728476 & 0.4745864 & 2.2018266 & 0.7670600 & 0.8760739 & 1.1576881 & 0.0514865 & 0.1487818 & 2.5397431 & 0.1461489 & 0.3125183 & -0.7613983 & 0.2735411 & 0.4753685 & 1.4786596 & 0.5199686 & 0.7057241 & 1.0838768 & 0.0372513 & 0.1172476 & 1.0099581 & 0.1663710 & 0.3415394 & -2.0803981 & 0.0040198 & 0.0209941 & 1.867318 & 0.0000272 & 0.0003259 & -2.877945 & 0.0000001 & 0.0000025 & -2.200448 & 0.0000000 & 0.0000000 & -2.941491 & 0.0000000 & 0.0000000 & 2.659545 & 0.0000000 & 0.0000000 & -4.846082\\
+\hline
+NM\_008725 & 0.8508522 & 0.9242869 & 2.0281764 & 0.1390300 & 0.3020872 & 1.4568427 & 0.0034217 & 0.0184668 & 2.3999010 & 0.0011765 & 0.0078218 & -0.5946375 & 0.2218494 & 0.4142375 & 0.8974352 & 0.0490869 & 0.1436339 & 1.0689628 & 0.0001128 & 0.0011050 & -1.1910616 & 0.2358903 & 0.4313519 & 0.8409000 & 0.0025790 & 0.0147499 & 1.463357 & 0.0000005 & 0.0000098 & -3.732241 & 0.0992368 & 0.2386529 & -3.305718 & 0.2451045 & 0.4423855 & -5.832292 & 0.0028580 & 0.0160083 & 5.103924 & 0.3298546 & 0.5356392 & 6.770567\\
+\hline
+NM\_007473 & 0.0880394 & 0.2192542 & 0.6779618 & 0.9165990 & 0.9592675 & 0.7639279 & 0.6859316 & 0.8250549 & 1.2874572 & 0.4958553 & 0.6863397 & -0.9545717 & 0.9654288 & 0.9838265 & 1.1610592 & 0.0996542 & 0.2393445 & -0.5791692 & 0.3501431 & 0.5558993 & -0.7342619 & 0.9783036 & 0.9900678 & 0.8829109 & 0.9915772 & 0.9963117 & -3.926817 & 0.7895585 & 0.8895260 & -3.706969 & 0.5164039 & 0.7028663 & -2.200317 & 0.0909694 & 0.2244290 & 2.218886 & 0.6982871 & 0.8331540 & -1.433851 & 0.6691637 & 0.8141329 & 7.711609\\
+\hline
+ENSMUST00000094955 & 0.0081879 & 0.0367991 & 1.1856925 & 0.9353016 & 0.9690575 & -0.6333013 & 0.3745215 & 0.5795488 & 2.5957177 & 0.0050684 & 0.0252354 & -0.6988290 & 0.6729944 & 0.8166022 & 1.0178334 & 0.0948389 & 0.2310919 & 0.8228212 & 0.0253932 & 0.0879330 & 1.1482199 & 0.3657233 & 0.5710470 & -1.3750913 & 0.2915369 & 0.4951562 & -3.968832 & 0.5819450 & 0.7532377 & -1.276993 & 0.6373529 & 0.7923844 & 1.548320 & 0.8614351 & 0.9300767 & -4.288514 & 0.8886550 & 0.9448186 & -4.232771 & 0.1879584 & 0.3707972 & 6.442072\\
+\hline
+NM\_001042489 & 0.4191775 & 0.6208106 & 1.2123141 & 0.7607212 & 0.8723405 & 0.5992596 & 0.7748772 & 0.8807955 & 1.1476237 & 0.1995820 & 0.3858600 & 2.6613947 & 0.0205303 & 0.0748885 & -0.8188268 & 0.1910652 & 0.3748543 & -0.5443243 & 0.8270177 & 0.9111679 & 2.7899965 & 0.5239967 & 0.7088274 & -1.3479903 & 0.1409795 & 0.3049960 & -6.548630 & 0.4062041 & 0.6090027 & 1.889101 & 0.4968748 & 0.6871546 & -3.392918 & 0.0003701 & 0.0030031 & -6.639293 & 0.0000135 & 0.0001774 & -5.488106 & 0.0256136 & 0.0884953 & -4.976920\\
+\hline
+NM\_008159 & 0.1231754 & 0.2777536 & 1.1022344 & 0.1169243 & 0.2678638 & 0.7374376 & 0.5781815 & 0.7504472 & 0.9406648 & 0.0059119 & 0.0284812 & -0.8908867 & 0.4381368 & 0.6375400 & 1.2644788 & 0.8998830 & 0.9506910 & -0.5490689 & 0.5634704 & 0.7394176 & -1.4223473 & 0.5015939 & 0.6910094 & -2.3313130 & 0.0000000 & 0.0000000 & 1.321606 & 0.0000000 & 0.0000001 & -2.339338 & 0.0000000 & 0.0000000 & -3.096598 & 0.0000007 & 0.0000123 & -5.350299 & 0.0000125 & 0.0001658 & -6.076895 & 0.0000010 & 0.0000176 & -4.774939\\
+\hline
+NM\_001013813 & 0.0565287 & 0.1593800 & 0.6299949 & 0.1710643 & 0.3480241 & 0.9746582 & 0.0951123 & 0.2315686 & 3.3644621 & 0.4387357 & 0.6380771 & 0.7308201 & 0.0005373 & 0.0040980 & 1.2229788 & 0.3295522 & 0.5353121 & 1.7341606 & 0.0007915 & 0.0056472 & -1.0267100 & 0.0013222 & 0.0086036 & -0.9327780 & 0.0010519 & 0.0071337 & 1.314872 & 0.1685588 & 0.3445806 & 1.623828 & 0.0554666 & 0.1571666 & -4.828044 & 0.0067413 & 0.0315747 & -5.772946 & 0.0006393 & 0.0047334 & -5.776763 & 0.0004591 & 0.0035968 & -5.017664\\
+\hline
+AK039774 & 0.0150416 & 0.0590150 & 0.6372239 & 0.0622016 & 0.1707939 & 0.9714819 & 0.0038649 & 0.0203447 & 1.3168792 & 0.9071986 & 0.9543873 & -0.6495320 & 0.0337680 & 0.1089499 & 1.4620498 & 0.1808765 & 0.3613288 & -0.6084973 & 0.4268483 & 0.6276079 & -1.4219238 & 0.8931509 & 0.9471666 & 0.6812377 & 0.3320222 & 0.5378422 & 1.725274 & 0.0000084 & 0.0001177 & 2.756976 & 0.7523631 & 0.8671706 & -4.265131 & 0.0000850 & 0.0008681 & -5.010475 & 0.0000014 & 0.0000238 & -4.623531 & 0.0066328 & 0.0311737 & -4.795976\\
+\hline
+NM\_013782 & 0.8754233 & 0.9377109 & 0.5940058 & 0.0001107 & 0.0010876 & 1.1803029 & 0.4731855 & 0.6676244 & 1.9274813 & 0.3558245 & 0.5614957 & -0.6697288 & 0.0000009 & 0.0000157 & 1.2377208 & 0.0469473 & 0.1390186 & -1.2969383 & 0.0877739 & 0.2187959 & 0.7832039 & 0.0873966 & 0.2181127 & -0.7705369 & 0.3054160 & 0.5099832 & 1.240504 & 0.0593928 & 0.1651796 & 2.355748 & 0.4210031 & 0.6224586 & -3.879986 & 0.0053367 & 0.0262800 & -5.108367 & 0.0056116 & 0.0273406 & -4.262393 & 0.0042107 & 0.0217896 & -4.617477\\
+\hline
+NM\_028622 & 0.7667946 & 0.8759265 & 1.6477918 & 0.9457494 & 0.9741115 & -1.8648471 & 0.9903079 & 0.9957216 & 1.1660022 & 0.6332637 & 0.7895226 & 2.1081788 & 0.8592452 & 0.9288844 & 1.2212238 & 0.7658228 & 0.8753935 & -1.1079164 & 0.8331999 & 0.9145679 & -0.8793087 & 0.8359000 & 0.9160123 & -1.2284455 & 0.8894396 & 0.9452334 & 1.160648 & 0.5797431 & 0.7516226 & -3.323953 & 0.5675779 & 0.7424636 & -4.125536 & 0.6699768 & 0.8146554 & -6.126729 & 0.6521300 & 0.8025109 & -4.510424 & 0.8460618 & 0.9215885 & 6.351333\\
+\hline
+\end{tabular}
+
 We can repeat this for each of the conditions
 
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-11-1} \end{center}
 
 The distribution of number of genes found differentially expressed by
 considering each time-point independantly highlights the challenges of such
@@ -518,15 +567,23 @@ unordered treatments, but fail to use the temporal structure of the data.
 \hypertarget{time-course-differential-expression-analysis-between-two-groups}{%
 \subsubsection{Time-course differential expression analysis between two groups}\label{time-course-differential-expression-analysis-between-two-groups}}
 
-To leverage this temporal structure, Storey et al \citep{storey:significance} proposed to
-model each gene in time-course micro-array with a splines function, and to use a log-ratio likelihood test to detect differentially expressed genes.
+To leverage this temporal structure, Storey et al \citep{storey:significance}
+proposed to model each gene in time-course micro-array with a splines
+function, and to use a log-ratio likelihood test to detect differentially
+expressed genes.
 
-\texttt{moanin} extends
-this idea by providing functionality to compare time course data between different treatment conditions, using a similar mechanism of contrasts -- only now the contrasts are differences between the estimated means.
+\texttt{moanin} extends this idea by providing functionality to compare time course
+data between different treatment conditions, using a similar mechanism of
+contrasts -- only now the contrasts are differences between the estimated
+means.
 
 \textbf{FIXME add in equations, like from the EPICON paper, to describe them mathematically}
 
-\textbf{EAP: Do we need this call to limma by the user, or can these not be done internally by the \texttt{timecourse\_differential\_expression\_analysis} function? We can still preserve the option of user defining their own, but would be nicer to make this simpler for the user (e.g.~an if clause that tests whether input is matrix or character vector)}
+\textbf{EAP: Do we need this call to limma by the user, or can these not be done
+internally by the \texttt{timecourse\_differential\_expression\_analysis} function? We
+can still preserve the option of user defining their own, but would be nicer
+to make this simpler for the user (e.g.~an if clause that tests whether input
+is matrix or character vector)}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -553,7 +610,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-10-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-12-1} \end{center}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -630,7 +687,7 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-16-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -648,7 +705,7 @@ computation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
 visualize gene time-course data. Here, we plot the 12 genes with the smallest
@@ -662,7 +719,7 @@ p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-16-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
 
 And here we visualize the genes with the largest absolute EPICON log-fold
 change.
@@ -677,7 +734,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -763,7 +820,7 @@ with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 The scoring and labeling can be done via the \texttt{splines\_kmeans\_score\_and\_label}
 function.
@@ -785,13 +842,13 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labelinig step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
 
 The scoring and label step allows to label genes that were removed during the
 filtering step, yet are good matches to the centroids found during the
 clustering.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -854,7 +911,7 @@ First, select the genes of interest.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1032,7 +1089,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1045,7 +1102,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-2} \end{center}
 
 \hypertarget{the-model-explorer-strategy}{%
 \subparagraph{The model explorer strategy}\label{the-model-explorer-strategy}}
@@ -1071,7 +1128,7 @@ obtained scores.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1090,7 +1147,7 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-32-1} \end{center}
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
 \subparagraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
