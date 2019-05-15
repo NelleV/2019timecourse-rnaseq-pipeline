@@ -19,8 +19,9 @@ test_that("time-course DE analysis", {
 	contrasts=contrast_formulas,
 	levels=levels(meta$Group))
 
-    expect_silent(moanin::timecourse_differential_expression_analysis(
-	as.matrix(data), splines_model, contrasts=contrast))
+    expect_silent(moanin::DE_timecourse(
+	as.matrix(data), splines_model, contrasts=contrast,
+	use_voom_weights=FALSE))
 
     # Now test with several contrasts
     contrast_formulas = c("K-M", "C-M")
@@ -28,8 +29,8 @@ test_that("time-course DE analysis", {
 	contrasts=contrast_formulas,
 	levels=levels(meta$Group))
 
-    expect_silent(moanin::timecourse_differential_expression_analysis(
-    	as.matrix(data), splines_model, contrasts=contrast))
-
+    expect_silent(moanin::DE_timecourse(
+    	as.matrix(data), splines_model, contrasts=contrast,
+	use_voom_weights=FALSE))
 
 })

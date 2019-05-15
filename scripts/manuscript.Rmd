@@ -129,7 +129,7 @@ analysing gene expression data, some specific for time-course data, others
 broadly used by the community. We provide the various steps of the workflow as
 functions in a R package called `moanin`.
 
-```{r schema, echo=FALSE, fig.width=4, fig.cap="Workflow for analyzing time-course datasets."}
+```{r schema, echo=FALSE, fig.width=3, fig.cap="Workflow for analyzing time-course datasets."}
 
 knitr::include_graphics("images/fig1_schemas.png")
 
@@ -307,15 +307,16 @@ between conditions at a single time-point.
 2) Global analysis, where we consider the expression pattern globally over
 time, and consider what genes have either different patterns between
 conditions or a changing pattern (i.e. non-constant) over time. A common
-approach first step is to fit a spline model to each gene **FIXME add refs**,
+approach first step is to fit a spline model to each gene
+[@storey:significance],
 and then use that spline model to test for different kinds of differential
 expression across time. 
 
 
 The per-time point analysis is using classical differential expression
 approaches, and is often the approach advocated when dealing with small
-time-course datasets, where there are only a few time points **FIXME add
-citation to edgeR/limma vignette or DESEQ2**. For long time-course datasets,
+time-course datasets, where there are only a few time points 
+[@ritchie:limma, @robinson:edgeR, @love:moderated] . For long time-course datasets,
 however, a separate test for each time-point results in creating many
 different tests, for example one for every time point, the results of which
 are difficult to integrate. We find in practice that the global analysis
@@ -337,8 +338,21 @@ these types of approaches, though our focus is on the global approach. In both
 situations, we first need to set up a object (a `splines_model` object) to
 hold the meta data, as well as information for fitting the spline model. 
 
-We start by creating the
-`splines_model` object using the `create_splines_model` function.
+We start by creating the `splines_model` object using the
+`create_splines_model` function. The `splines_model` object contains a number
+of metadata and options used throughout this analysis: the condition and
+timepoints of each samples, the formula object used or the basis or the
+degrees of freedom of the model. The metadata data.frame object should
+contain at least two columns: one named `Group`, containing the  treatement
+effect, and a second one named `Timepoint` containing the timepoint
+information.
+
+```{r echo=FALSE}
+kable(head(meta))
+```
+
+If no formula is provided, it will default to the following: 
+`formula = ~Group:splines::ns(Timepoint, df=degrees_of_fredoom) + Group + 0` 
 
 ```{r}
 splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
@@ -356,7 +370,8 @@ object? Create basis functions?)**.
 
 `moanin` provides a simple interface to perform a timepoint by timepoint differential
 expression analysis. This is traditionally done by the user defining the comparisons (called `contrasts` in linear models).  Under the hood, simply calls `limma` [@ritchie:limma] on the set of
-contrasts provided. **EAP: Can we comment on using it for RNA-Seq??** 
+contrasts provided. By default, it expects RNA-Seq contact counts, and will
+estimate voom weights. We tern
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse ("M") and the mouse infected with the high dose of
@@ -367,10 +382,6 @@ function that creates them automatically for two conditions -- i.e. find union
 of time points for two conditions... Then we could show an example with just a
 couple done manually, and then say we can also use a little helper function in
 the `moanin` that will do it for all time points**
-
-**FIXME rename the function to something better** 
-
-**EAP: And don't use 'week' in function name!**
 
 **Add a helper function to make the contrasts for timely DE**
 
