@@ -119,11 +119,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \item
   switch to camel case function names
 \item
-  shorten function names
-\item
   Remove the namespace call
-\item
-  Move the normalization to a supplementary data
 \item
   Make clear that it applies to RNASeq and how to call the different functions
   toRNASeq
@@ -197,11 +193,6 @@ functions in a R package called \texttt{moanin}.
 \caption{Workflow for analyzing time-course datasets.}\label{fig:schema}
 \end{figure}
 
-\textbf{EAP: General comment. Your function names are incredibly long compared to
-standard functions. Also, will want to get rid of \texttt{moanin::} in front of
-functions. It's more precise, but an average user doesn't ever experience the
-\texttt{::} command; usually just package creaters.}
-
 \hypertarget{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}{%
 \section{Analysis of the dynamical response of mouse lung tissue to influenza}\label{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}}
 
@@ -261,7 +252,7 @@ variable genes: we keep for this step only the top 50\% most variable genes.
 \begin{Highlighting}[]
 \NormalTok{variance_cutoff =}\StringTok{ }\FloatTok{0.5}
 \NormalTok{variance_per_genes =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data, }\DecValTok{1}\NormalTok{, mad)}
-\NormalTok{min_variance =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{quantile}\NormalTok{(variance_per_genes, }\KeywordTok{c}\NormalTok{(variance_cutoff))}
+\NormalTok{min_variance =}\StringTok{ }\KeywordTok{quantile}\NormalTok{(variance_per_genes, }\KeywordTok{c}\NormalTok{(variance_cutoff))}
 \NormalTok{variance_filtered_data =}\StringTok{ }\NormalTok{data[variance_per_genes }\OperatorTok{>}\StringTok{ }\NormalTok{min_variance,]}
 \end{Highlighting}
 \end{Shaded}
@@ -275,7 +266,7 @@ centered and scaled gene expression data.
 \begin{Highlighting}[]
 \CommentTok{# Reorder genes on condition, time, and replicate}
 
-\NormalTok{pca_data =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{prcomp}\NormalTok{(}\KeywordTok{t}\NormalTok{(variance_filtered_data), }\DataTypeTok{rank=}\DecValTok{3}\NormalTok{, }\DataTypeTok{center=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{scale=}\OtherTok{TRUE}\NormalTok{) }
+\NormalTok{pca_data =}\StringTok{ }\KeywordTok{prcomp}\NormalTok{(}\KeywordTok{t}\NormalTok{(variance_filtered_data), }\DataTypeTok{rank=}\DecValTok{3}\NormalTok{, }\DataTypeTok{center=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{scale=}\OtherTok{TRUE}\NormalTok{) }
 \NormalTok{percent_var =}\StringTok{ }\KeywordTok{round}\NormalTok{(}\DecValTok{100} \OperatorTok{*}\StringTok{ }\KeywordTok{attr}\NormalTok{(pca_data, }\StringTok{"percentVar"}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -286,24 +277,24 @@ We also plot the second and third components in the second row.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{graphics}\OperatorTok{::}\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{))}
-\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(}
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC1"}\NormalTok{],}
     \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group[meta}\OperatorTok{$}\NormalTok{Group],}
     \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
     \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC1"}\NormalTok{)}
-\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\KeywordTok{plot}\NormalTok{(}
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC1"}\NormalTok{],}
     \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)],}
     \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
     \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC1"}\NormalTok{)}
 
-\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\KeywordTok{plot}\NormalTok{(}
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC3"}\NormalTok{],}
     \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group[meta}\OperatorTok{$}\NormalTok{Group],}
     \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
     \DataTypeTok{xlab=}\StringTok{"PC2"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"PC3"}\NormalTok{)}
-\NormalTok{graphics}\OperatorTok{::}\KeywordTok{plot}\NormalTok{(}
+\KeywordTok{plot}\NormalTok{(}
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC2"}\NormalTok{], pca_data}\OperatorTok{$}\NormalTok{x[, }\StringTok{"PC3"}\NormalTok{],}
     \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)],}
     \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)],}
@@ -333,11 +324,11 @@ Vietnam, then high dose of Vietnam.
 \NormalTok{  meta}\OperatorTok{$}\NormalTok{Replicate)}
 
 \NormalTok{variance_filtered_data =}\StringTok{ }\NormalTok{variance_filtered_data[, ord]}
-\NormalTok{data_corr =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{cor}\NormalTok{(variance_filtered_data, }\DataTypeTok{method=}\StringTok{"pearson"}\NormalTok{)}
+\NormalTok{data_corr =}\StringTok{ }\KeywordTok{cor}\NormalTok{(variance_filtered_data, }\DataTypeTok{method=}\StringTok{"pearson"}\NormalTok{)}
 \NormalTok{data_corr_meta =}\StringTok{ }\NormalTok{meta[ord, ]}
 \NormalTok{data_corr_meta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(data_corr_meta}\OperatorTok{$}\NormalTok{Timepoint)}
 
-\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
+\KeywordTok{aheatmap}\NormalTok{(}
 \NormalTok{    data_corr,}
     \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{, }\DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
     \DataTypeTok{annCol=}\NormalTok{data_corr_meta[, }\KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
@@ -436,11 +427,11 @@ GSM1557145 & 5 & K & 3 & 12\\
 \end{tabular}
 
 If no formula is provided, it will default to the following:
-\texttt{formula\ =\ \textasciitilde{}Group:splines::ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}
+\texttt{formula\ =\ \textasciitilde{}Group:ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{splines_model =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{create_splines_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\NormalTok{splines_model =}\StringTok{ }\KeywordTok{create_splines_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -515,7 +506,7 @@ jointly.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Define contrast   }
-\NormalTok{weekly_de_analysis =}\StringTok{  }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{DE_timepoints}\NormalTok{(}
+\NormalTok{weekly_de_analysis =}\StringTok{ }\KeywordTok{DE_timepoints}\NormalTok{(}
 \NormalTok{     data, splines_model, contrasts,}
      \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
@@ -590,7 +581,7 @@ is matrix or character vector)}
 \CommentTok{# Differential expression analysis}
 \NormalTok{timecourse_contrasts =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"M-K"}\NormalTok{, }\StringTok{"M-C"}\NormalTok{, }\StringTok{"M-VL"}\NormalTok{, }\StringTok{"M-VH"}\NormalTok{)}
 
-\NormalTok{contrasts =}\StringTok{ }\NormalTok{limma}\OperatorTok{::}\KeywordTok{makeContrasts}\NormalTok{(}
+\NormalTok{contrasts =}\StringTok{ }\KeywordTok{makeContrasts}\NormalTok{(}
     \DataTypeTok{contrasts=}\NormalTok{timecourse_contrasts,}
     \DataTypeTok{levels=}\KeywordTok{levels}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group))}
 
@@ -598,10 +589,10 @@ is matrix or character vector)}
 \CommentTok{# (data.frame containing a timepoint and group column, the first corresponding}
 \CommentTok{#<c2><a0>to the time-course information, the latter corresponding to the}
 \CommentTok{# treatment).}
-\NormalTok{pvalues =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{DE_timecourse}\NormalTok{(}
+\NormalTok{pvalues =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{(}
 \NormalTok{    data, splines_model, contrasts,}
     \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
-\NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, stats}\OperatorTok{::}\NormalTok{p.adjust)}
+\NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, p.adjust)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -626,7 +617,7 @@ for each individual timepoints.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{log_fold_change_timepoints =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{log_fold_change_timepoints =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
 \NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -673,16 +664,16 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{log_fold_change_epicon =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{log_fold_change_epicon =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
 \NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"epicon"}\NormalTok{)}
 
-\NormalTok{log_fold_change_sum =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{log_fold_change_sum =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
 \NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
 
-\NormalTok{log_fold_change_max =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{log_fold_change_max =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
 \NormalTok{    data, splines_model, contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
 
-\NormalTok{log_fold_change_min =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{log_fold_change_min =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
 \NormalTok{    data, splines_model, contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -714,7 +705,7 @@ p-values.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{top_DE_genes_pval =}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{sort}\NormalTok{(pvalue)[}\DecValTok{1}\OperatorTok{:}\DecValTok{12}\NormalTok{])}
-\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_pval, ], splines_model,}
+\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_pval, ], splines_model,}
            \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -729,7 +720,7 @@ change.
 \NormalTok{top_DE_genes_lfc =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
     \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_epicon),}
      \DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\DecValTok{12}\NormalTok{])}
-\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
+\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
            \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -762,8 +753,8 @@ estimate the centroids with more stability.
 \begin{Highlighting}[]
 \CommentTok{# Then rank by fisher's p-value and take max the number of genes of interest}
 \CommentTok{# Filter out q-values for the pvalues table}
-\NormalTok{fishers_pval =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{pvalues_fisher_method}\NormalTok{(pvalues)}
-\NormalTok{fishers_qval =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{p.adjust}\NormalTok{(fishers_pval)}
+\NormalTok{fishers_pval =}\StringTok{ }\KeywordTok{pvalues_fisher_method}\NormalTok{(pvalues)}
+\NormalTok{fishers_qval =}\StringTok{ }\KeywordTok{p.adjust}\NormalTok{(fishers_pval)}
 
 \NormalTok{genes_to_keep =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(}
 \NormalTok{    log_fold_change_max[}
@@ -802,7 +793,7 @@ The first three steps are performed jointly by the \texttt{splines\_kmeans} func
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# First fit the kmeans clusters}
-\NormalTok{kmeans_clusters =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans}\NormalTok{(}
+\NormalTok{kmeans_clusters =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(}
 \NormalTok{    y, splines_model, }\DataTypeTok{n_clusters=}\DecValTok{8}\NormalTok{,}
     \DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
     \DataTypeTok{n_init=}\DecValTok{20}\NormalTok{)}
@@ -814,7 +805,7 @@ with the splines k-means model.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_centroids}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, splines_model,}
+\KeywordTok{plot_centroids}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, splines_model,}
                \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group,}
                \DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
@@ -829,7 +820,7 @@ function.
 \begin{Highlighting}[]
 \CommentTok{#<c2><a0>Then assign scores and labels to all the data, using a goodness-of-fit}
 \CommentTok{# scoring function.}
-\NormalTok{scores_and_labels =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(}
+\NormalTok{scores_and_labels =}\StringTok{ }\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(}
 \NormalTok{    data, kmeans_clusters)}
 \NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
 
@@ -886,7 +877,7 @@ First, select the genes of interest.
 \NormalTok{data_to_plot =}\StringTok{ }\NormalTok{data_to_plot[, ord]}
 \NormalTok{submeta =}\StringTok{ }\NormalTok{submeta[ord, ]}
 
-\NormalTok{res =}\StringTok{ }\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
+\NormalTok{res =}\StringTok{ }\KeywordTok{aheatmap}\NormalTok{(}
 \NormalTok{    data_to_plot,}
     \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
     \DataTypeTok{color=}\StringTok{"YlGnBu"}\NormalTok{,}
@@ -898,7 +889,7 @@ First, select the genes of interest.
     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{)}
 
 \CommentTok{# Now use the results of the previous call to aheatmap to reorder the genes.}
-\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(}
+\KeywordTok{aheatmap}\NormalTok{(}
 \NormalTok{    moanin}\OperatorTok{:::}\KeywordTok{rescale_values}\NormalTok{(data_to_plot)[res}\OperatorTok{$}\NormalTok{rowInd,],}
     \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
     \DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
@@ -965,7 +956,7 @@ squares; (2) the labels assigned to all genes.
 
 \NormalTok{i =}\StringTok{ }\DecValTok{1}
 \ControlFlowTok{for}\NormalTok{(n_cluster }\ControlFlowTok{in}\NormalTok{ all_possible_n_clusters)\{}
-\NormalTok{    clustering_results =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans}\NormalTok{(}
+\NormalTok{    clustering_results =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(}
 \NormalTok{    y, splines_model,}
     \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
     \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
@@ -1006,7 +997,7 @@ cluster (cohesion) compared to other clusters (separation).
 \begin{Highlighting}[]
 \CommentTok{# function to compute average silhouette for k clusters}
 \NormalTok{average_silhouette =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(labels, y) \{}
-\NormalTok{    silhouette_results =}\StringTok{ }\NormalTok{cluster}\OperatorTok{::}\KeywordTok{silhouette}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(labels[}\DecValTok{1}\NormalTok{]), }\KeywordTok{dist}\NormalTok{(y))}
+\NormalTok{    silhouette_results =}\StringTok{ }\KeywordTok{silhouette}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(labels[}\DecValTok{1}\NormalTok{]), }\KeywordTok{dist}\NormalTok{(y))}
     \KeywordTok{return}\NormalTok{(}\KeywordTok{mean}\NormalTok{(silhouette_results[, }\DecValTok{3}\NormalTok{]))}
 \NormalTok{\}}
 
@@ -1081,11 +1072,11 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_5.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
-\NormalTok{consensus_matrix_stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{5}\NormalTok{,}
+\NormalTok{consensus_matrix_stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{5}\NormalTok{,}
                             \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
-\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{5}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
-          \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
-          \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+\KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{5}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
+     \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
+     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1094,11 +1085,11 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_20.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
-\NormalTok{consensus_matrix_stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{20}\NormalTok{,}
-                             \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
-\NormalTok{NMF}\OperatorTok{::}\KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{20}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
-          \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
-          \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+\NormalTok{consensus_matrix_stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{20}\NormalTok{,}
+                         \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
+\KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{20}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
+     \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
+     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1124,7 +1115,7 @@ obtained scores.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_model_explorer}\NormalTok{(all_labels)}
+\KeywordTok{plot_model_explorer}\NormalTok{(all_labels)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1143,7 +1134,7 @@ measures in that range.
 \begin{Highlighting}[]
 \NormalTok{clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"C6"}\NormalTok{, }\StringTok{"C7"}\NormalTok{, }\StringTok{"C8"}\NormalTok{, }\StringTok{"C9"}\NormalTok{, }\StringTok{"C10"}\NormalTok{)}
 \NormalTok{selected_labels =}\StringTok{ }\NormalTok{all_labels[clusters]}
-\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_model_explorer}\NormalTok{(selected_labels)}
+\KeywordTok{plot_model_explorer}\NormalTok{(selected_labels)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1159,7 +1150,7 @@ of elements of the consensus matrix.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{moanin}\OperatorTok{::}\KeywordTok{plot_cdf_consensus}\NormalTok{(all_labels)}
+\KeywordTok{plot_cdf_consensus}\NormalTok{(all_labels)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1209,8 +1200,8 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{ensembl =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{useMart}\NormalTok{(}\StringTok{"ensembl"}\NormalTok{)}
-\NormalTok{ensembl =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{useDataset}\NormalTok{(}\StringTok{"mmusculus_gene_ensembl"}\NormalTok{, }\DataTypeTok{mart=}\NormalTok{ensembl)}
+\NormalTok{ensembl =}\StringTok{ }\KeywordTok{useMart}\NormalTok{(}\StringTok{"ensembl"}\NormalTok{)}
+\NormalTok{ensembl =}\StringTok{ }\KeywordTok{useDataset}\NormalTok{(}\StringTok{"mmusculus_gene_ensembl"}\NormalTok{, }\DataTypeTok{mart=}\NormalTok{ensembl)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1222,11 +1213,11 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \NormalTok{genes =}\StringTok{ }\NormalTok{gene_names[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster]}
 
 \CommentTok{# convert gene names}
-\NormalTok{genes =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"ensembl_gene_id"}\NormalTok{, }\StringTok{"entrezgene"}\NormalTok{),}
+\NormalTok{genes =}\StringTok{ }\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"ensembl_gene_id"}\NormalTok{, }\StringTok{"entrezgene"}\NormalTok{),}
         \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{, }\DataTypeTok{values=}\NormalTok{genes,}
         \DataTypeTok{mart=}\NormalTok{ensembl)[}\StringTok{"entrezgene"}\NormalTok{]}
 \NormalTok{genes =}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(genes))}
-\NormalTok{pathways =}\StringTok{ }\NormalTok{KEGGprofile}\OperatorTok{::}\KeywordTok{find_enriched_pathway}\NormalTok{(}
+\NormalTok{pathways =}\StringTok{ }\KeywordTok{find_enriched_pathway}\NormalTok{(}
 \NormalTok{    genes, }\DataTypeTok{species=}\StringTok{"mmu"}\NormalTok{,}
     \DataTypeTok{download_latest=}\OtherTok{TRUE}\NormalTok{)}\OperatorTok{$}\NormalTok{stastic}
 \end{Highlighting}
@@ -1282,13 +1273,13 @@ term ID.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{genes =}\StringTok{ }\NormalTok{biomaRt}\OperatorTok{::}\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"go_id"}\NormalTok{, }\StringTok{"refseq_mrna"}\NormalTok{),}
+\NormalTok{genes =}\StringTok{ }\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"go_id"}\NormalTok{, }\StringTok{"refseq_mrna"}\NormalTok{),}
           \DataTypeTok{values=}\NormalTok{gene_names,}
           \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{,}
           \DataTypeTok{mart=}\NormalTok{ensembl)}
 
 \CommentTok{# Create gene to GO id mapping}
-\NormalTok{gene_id_go_mapping =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{create_go_term_mapping}\NormalTok{(genes)}
+\NormalTok{gene_id_go_mapping =}\StringTok{ }\KeywordTok{create_go_term_mapping}\NormalTok{(genes)}
 \end{Highlighting}
 \end{Shaded}
 
