@@ -268,11 +268,9 @@ ord = order(
 
 variance_filtered_data = variance_filtered_data[, ord]
 data_corr = stats::cor(variance_filtered_data, method="pearson")
-
 data_corr_meta = meta[ord, ]
+data_corr_meta$Timepoint = as.factor(data_corr_meta$Timepoint)
 
-# Copy the metadata before changing the timepoints into factors
-data_corr_meta$Timepoint = as.factor(meta$Timepoint)
 NMF::aheatmap(
     data_corr,
     Colv=NA, Rowv=NA,
@@ -368,99 +366,56 @@ object? Create basis functions?)**.
 
 ### Weekly differential expression analysis
 
-`moanin` provides a simple interface to perform a timepoint by timepoint differential
-expression analysis. This is traditionally done by the user defining the comparisons (called `contrasts` in linear models).  Under the hood, simply calls `limma` [@ritchie:limma] on the set of
-contrasts provided. By default, it expects RNA-Seq contact counts, and will
-estimate voom weights. We tern
+`moanin` provides a simple interface to perform a timepoint by timepoint
+differential expression analysis. This is traditionally done by the user
+defining the comparisons (called `contrasts` in linear models).  Under the
+hood, simply calls `limma` [@ritchie:limma] on the set of contrasts provided.
+By default, it expects RNA-Seq contact counts, and will estimate voom weights.
+We tern
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse ("M") and the mouse infected with the high dose of
 the influenza strain A/Vietnam/1203/04 (H5N1) ("VL") for each time point, but
-the function works with any form contrasts. **FIXME: Reference to limma
-vignette for how to define the contrasts** **EAP: Could you make simple
-function that creates them automatically for two conditions -- i.e. find union
-of time points for two conditions... Then we could show an example with just a
-couple done manually, and then say we can also use a little helper function in
-the `moanin` that will do it for all time points**
+the function works with any form contrasts [@ritchie:limma].
 
-**Add a helper function to make the contrasts for timely DE**
+First, create the contrasts for all timepoints between the two groups of
+interest:
+```{r make_timepoints_contarts}
+contrasts = create_timepoints_contrasts("M", "VL", splines_model)
+```
+
+```{r echo=FALSE}
+kable(contrasts)
+```
+
+Then run the differential expression analysis on all of those timepoints
+jointly.
 
 ```{r weekly_differential_analysis}
-meta$WeeklyGroup = make.names(meta$Group:as.factor(meta$Timepoint))
-
 # Define contrast	
-contrasts = c("M.0-VL.0",
-	      "M.3-VL.3",
-	      "M.6-VL.6",
-	      "M.9-VL.9",
-	      "M.12-VL.12",
-	      "M.18-VL.18",
-	      "M.24-VL.24",
-	      "M.30-VL.30",
-	      "M.36-VL.36",
-	      "M.48-VL.48",
-	      "M.60-VL.60",
-	      "M.72-VL.72",
-	      "M.120-VL.120",
-	      "M.168-VL.168")
 weekly_de_analysis =  moanin::DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 ```
 
+```{r echo=FALSE}
+kable(weekly_de_analysis[1:10, ])
+```
+
 We can repeat this for each of the conditions
 
 ```{r echo=FALSE, results="hide"}
-# Hide those results
-# Run the DE analysis on the rest of the influenza strain.
-contrasts = c("M.0-K.0",
-	      "M.3-K.3",
-	      "M.6-K.6",
-	      "M.9-K.9",
-	      "M.12-K.12",
-	      "M.18-K.18",
-	      "M.24-K.24",
-	      "M.30-K.30",
-	      "M.36-K.36",
-	      "M.48-K.48",
-	      "M.60-K.60",
-	      "M.72-K.72",
-	      "M.120-K.120",
-	      "M.168-K.168")
+contrasts = create_timepoints_contrasts("M", "K", splines_model)
 K_weekly_de_analysis =  moanin::DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
-contrasts = c("M.0-C.0",
-	      "M.3-C.3",
-	      "M.6-C.6",
-	      "M.9-C.9",
-	      "M.12-C.12",
-	      "M.18-C.18",
-	      "M.24-C.24",
-	      "M.30-C.30",
-	      "M.36-K.36",
-	      "M.48-C.48",
-	      "M.60-C.60",
-	      "M.72-C.72",
-	      "M.120-C.120",
-	      "M.168-C.168")
+
+contrasts = create_timepoints_contrasts("M", "C", splines_model)
 C_weekly_de_analysis =  moanin::DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
-contrasts = c("M.0-VH.0",
-	      "M.3-VH.3",
-	      "M.6-VH.6",
-	      "M.9-VH.9",
-	      "M.12-VH.12",
-	      "M.18-VH.18",
-	      "M.24-VH.24",
-	      "M.30-VH.30",
-	      "M.36-VH.36",
-	      "M.48-VH.48",
-	      "M.60-VH.60",
-	      "M.72-VH.72",
-	      "M.120-VH.120",
-	      "M.168-VH.168")
+
+contrasts = create_timepoints_contrasts("M", "VH", splines_model)
 VH_weekly_de_analysis =  moanin::DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
@@ -499,7 +454,6 @@ genes found differentially expressed than timepoints 3H and 9H: this is likely
 due to biological or technical variances for specific genes at specific
 timepoints. **EAP: We should add more to this**
 
-
 As a summary, classic differential expression methods are appropriate for
 unordered treatments, but fail to use the temporal structure of the data.
 
@@ -507,15 +461,23 @@ unordered treatments, but fail to use the temporal structure of the data.
 
 ### Time-course differential expression analysis between two groups
 
-To leverage this temporal structure, Storey et al [@storey:significance] proposed to
-model each gene in time-course micro-array with a splines function, and to use a log-ratio likelihood test to detect differentially expressed genes. 
+To leverage this temporal structure, Storey et al [@storey:significance]
+proposed to model each gene in time-course micro-array with a splines
+function, and to use a log-ratio likelihood test to detect differentially
+expressed genes. 
 
-`moanin` extends
-this idea by providing functionality to compare time course data between different treatment conditions, using a similar mechanism of contrasts -- only now the contrasts are differences between the estimated means.
+`moanin` extends this idea by providing functionality to compare time course
+data between different treatment conditions, using a similar mechanism of
+contrasts -- only now the contrasts are differences between the estimated
+means.
 
 **FIXME add in equations, like from the EPICON paper, to describe them mathematically**
 
-**EAP: Do we need this call to limma by the user, or can these not be done internally by the `timecourse_differential_expression_analysis` function? We can still preserve the option of user defining their own, but would be nicer to make this simpler for the user (e.g. an if clause that tests whether input is matrix or character vector)**
+**EAP: Do we need this call to limma by the user, or can these not be done
+internally by the `timecourse_differential_expression_analysis` function? We
+can still preserve the option of user defining their own, but would be nicer
+to make this simpler for the user (e.g. an if clause that tests whether input
+is matrix or character vector)**
 
 ```{r de_analysis}
 # Differential expression analysis

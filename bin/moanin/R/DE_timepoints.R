@@ -65,3 +65,45 @@ DE_timepoints = function(data, splines_model,
 				 combine_results, fit2=fit))
     return(all_results)
 }
+
+
+#' Creates pairwise contrasts for all timepoints
+#'
+#' @param group1 First group to consider
+#' @param group2 Second group to consider
+#' @param splines_model splines model object
+#'
+#' @examples
+#' data(shoemaker2015)
+#' meta = shoemaker2015$meta
+#' splines_model = moanin::create_splines_model(meta)
+#' contrasts = create_timepoints_contrasts("C", "M", splines_model)
+#'
+#' @export
+create_timepoints_contrasts = function(group1, group2, splines_model){
+    meta = splines_model$meta
+    meta = meta[meta$Group %in% c(group1, group2),]
+    all_timepoints = sort(unique(meta$Timepoint))
+    contrasts = rep(NA, length(all_timepoints))
+    for(i in 1:length(all_timepoints)){
+	# First, check that the two conditions have been sampled for this
+	# timepoint
+	timepoint = all_timepoints[i]
+	submeta = meta[meta$Timepoint == timepoint, ]
+	if(length(unique(submeta$WeeklyGroup)) == 2){
+	    groups = as.character(unique(submeta$WeeklyGroup))
+	    contrasts[i] = paste0(group1, ".", timepoint, "-", group2, ".", timepoint)
+	}else if(length(unique(submeta$WeeklyGroup)) == 1){
+	    if(unique(submeta$Group)[1] ==  group1){
+		missing_condition = group2
+	    }else{
+		missing_condition = group1
+	    }
+	    msg = paste(
+		"moanin::create_timepoints_contrasts: timepoint",
+		timepoint, "is missing in condition", missing_condition)
+	    warning(msg)
+	}
+    }
+    return(contrasts[!is.na(contrasts)])
+}
