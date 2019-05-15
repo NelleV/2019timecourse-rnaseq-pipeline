@@ -70,9 +70,7 @@ knitr::opts_chunk$set(
 - Currently have two functions "plot_genes", "plot_centroids", that do exactly
   the same thing. Find a better name for both of them
 - switch to camel case function names
-- shorten function names
 - Remove the namespace call
-- Move the normalization to a supplementary data
 - Make clear that it applies to RNASeq and how to call the different functions
   to RNASeq
 - Check that clustering can deal with count data.
@@ -135,11 +133,6 @@ knitr::include_graphics("images/fig1_schemas.png")
 
 ```
 
-**EAP: General comment. Your function names are incredibly long compared to
-standard functions. Also, will want to get rid of `moanin::` in front of
-functions. It's more precise, but an average user doesn't ever experience the
-`::` command; usually just package creaters.**
-
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
 This workflow is illustrated using data from a micro-array time-course
@@ -196,14 +189,14 @@ variable genes: we keep for this step only the top 50% most variable genes.
 ```{r}
 variance_cutoff = 0.5
 variance_per_genes = apply(data, 1, mad)
-min_variance = stats::quantile(variance_per_genes, c(variance_cutoff))
+min_variance = quantile(variance_per_genes, c(variance_cutoff))
 variance_filtered_data = data[variance_per_genes > min_variance,]
 ```
 
 ```{r echo=FALSE, fig.width=6, fig.height=3, fig.caption="Distribution of variance"}
-graphics::hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
-	       ylab="# probes", main="")
-graphics::abline(v=min_variance, col="#AB0000", lw=2)
+hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
+     ylab="# probes", main="")
+abline(v=min_variance, col="#AB0000", lw=2)
 ```
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
@@ -212,7 +205,7 @@ centered and scaled gene expression data.
 ```{r pca, fig.width=6, fig.height=6}
 # Reorder genes on condition, time, and replicate
 
-pca_data = stats::prcomp(t(variance_filtered_data), rank=3, center=TRUE, scale=TRUE) 
+pca_data = prcomp(t(variance_filtered_data), rank=3, center=TRUE, scale=TRUE) 
 percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
 
@@ -221,24 +214,24 @@ condition; (2) its sampling time. We use different markers for each replicate. *
 We also plot the second and third components in the second row.
 
 ```{r pca_plots, fig.width=6, fig.height=6}
-graphics::par(mfrow=c(2, 2), mar=c(2.5, 2.5, 2.5, 2.5))
-graphics::plot(
+par(mfrow=c(2, 2), mar=c(2.5, 2.5, 2.5, 2.5))
+plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC1"],
     col=ann_colors$Group[meta$Group],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     xlab="PC2", ylab="PC1")
-graphics::plot(
+plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC1"],
     col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     xlab="PC2", ylab="PC1")
 
-graphics::plot(
+plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC3"],
     col=ann_colors$Group[meta$Group],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     xlab="PC2", ylab="PC3")
-graphics::plot(
+plot(
     pca_data$x[, "PC2"], pca_data$x[, "PC3"],
     col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
@@ -267,11 +260,11 @@ ord = order(
   meta$Replicate)
 
 variance_filtered_data = variance_filtered_data[, ord]
-data_corr = stats::cor(variance_filtered_data, method="pearson")
+data_corr = cor(variance_filtered_data, method="pearson")
 data_corr_meta = meta[ord, ]
 data_corr_meta$Timepoint = as.factor(data_corr_meta$Timepoint)
 
-NMF::aheatmap(
+aheatmap(
     data_corr,
     Colv=NA, Rowv=NA,
     annCol=data_corr_meta[, c("Group", "Timepoint")],
@@ -350,10 +343,10 @@ kable(head(meta))
 ```
 
 If no formula is provided, it will default to the following: 
-`formula = ~Group:splines::ns(Timepoint, df=degrees_of_fredoom) + Group + 0` 
+`formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0` 
 
 ```{r}
-splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
+splines_model = create_splines_model(meta, degrees_of_freedom=6)
 ```
 
 Here we have provided the meta data that defines... `create_splines_model`
@@ -393,7 +386,7 @@ jointly.
 
 ```{r weekly_differential_analysis}
 # Define contrast	
-weekly_de_analysis =  moanin::DE_timepoints(
+weekly_de_analysis = DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 ```
@@ -406,17 +399,17 @@ We can repeat this for each of the conditions
 
 ```{r echo=FALSE, results="hide"}
 contrasts = create_timepoints_contrasts("M", "K", splines_model)
-K_weekly_de_analysis =  moanin::DE_timepoints(
+K_weekly_de_analysis =  DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 
 contrasts = create_timepoints_contrasts("M", "C", splines_model)
-C_weekly_de_analysis =  moanin::DE_timepoints(
+C_weekly_de_analysis =  DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 
 contrasts = create_timepoints_contrasts("M", "VH", splines_model)
-VH_weekly_de_analysis =  moanin::DE_timepoints(
+VH_weekly_de_analysis =  DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 	 
@@ -483,7 +476,7 @@ is matrix or character vector)**
 # Differential expression analysis
 timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
 
-contrasts = limma::makeContrasts(
+contrasts = makeContrasts(
 	contrasts=timecourse_contrasts,
 	levels=levels(meta$Group))
 
@@ -491,10 +484,10 @@ contrasts = limma::makeContrasts(
 # (data.frame containing a timepoint and group column, the first corresponding
 # to the time-course information, the latter corresponding to the
 # treatment).
-pvalues = moanin::DE_timecourse(
+pvalues = DE_timecourse(
     data, splines_model, contrasts,
     use_voom_weights=FALSE)
-qvalues = apply(pvalues, 2, stats::p.adjust)
+qvalues = apply(pvalues, 2, p.adjust)
 
 ```
 
@@ -523,7 +516,7 @@ First, `moanin` provides as simple interface to compute the log-fold change
 for each individual timepoints.
 
 ```{r}
-log_fold_change_timepoints = moanin::estimate_log_fold_change(
+log_fold_change_timepoints = estimate_log_fold_change(
     data, splines_model, contrasts,  method="timely")
 ```
 
@@ -551,16 +544,16 @@ table of the possible ways to compute log-fold change values.
 **EAP: `epicon` is going to be weird for general use**
 
 ```{r}
-log_fold_change_epicon = moanin::estimate_log_fold_change(
+log_fold_change_epicon = estimate_log_fold_change(
     data, splines_model, contrasts,  method="epicon")
 
-log_fold_change_sum = moanin::estimate_log_fold_change(
+log_fold_change_sum = estimate_log_fold_change(
     data, splines_model, contrasts,  method="sum")
 
-log_fold_change_max = moanin::estimate_log_fold_change(
+log_fold_change_max = estimate_log_fold_change(
     data, splines_model, contrasts, method="max")
 
-log_fold_change_min = moanin::estimate_log_fold_change(
+log_fold_change_min = estimate_log_fold_change(
     data, splines_model, contrasts, method="min")
 ```
 
@@ -601,7 +594,7 @@ p-values.
 
 ```{r fig.height=6, fig.width=6}
 top_DE_genes_pval = names(sort(pvalue)[1:12])
-moanin::plot_genes(data[top_DE_genes_pval, ], splines_model,
+plot_genes(data[top_DE_genes_pval, ], splines_model,
 		   colors=ann_colors$Group, smooth=TRUE)
 ```
 
@@ -612,7 +605,7 @@ change.
 top_DE_genes_lfc = names(
     sort(abs(lfc_epicon),
 	 decreasing=TRUE)[1:12])
-moanin::plot_genes(data[top_DE_genes_lfc, ], splines_model,
+plot_genes(data[top_DE_genes_lfc, ], splines_model,
 		   colors=ann_colors$Group, smooth=TRUE)
 
 ```
@@ -644,8 +637,8 @@ estimate the centroids with more stability.
 ```{r filter_genes}
 # Then rank by fisher's p-value and take max the number of genes of interest
 # Filter out q-values for the pvalues table
-fishers_pval = moanin::pvalues_fisher_method(pvalues)
-fishers_qval = stats::p.adjust(fishers_pval)
+fishers_pval = pvalues_fisher_method(pvalues)
+fishers_qval = p.adjust(fishers_pval)
 
 genes_to_keep = row.names(
     log_fold_change_max[
@@ -676,7 +669,7 @@ The first three steps are performed jointly by the `splines_kmeans` function.
 
 ```{r clustering}
 # First fit the kmeans clusters
-kmeans_clusters = moanin::splines_kmeans(
+kmeans_clusters = splines_kmeans(
     y, splines_model, n_clusters=8,
     random_seed=42,
     n_init=20)
@@ -686,7 +679,7 @@ We then use the `plot_centroids` function to visualize the centroids obtained
 with the splines k-means model. 
 
 ```{r fig.height=6, fig.width=6}
-moanin::plot_centroids(kmeans_clusters$centroids, splines_model,
+plot_centroids(kmeans_clusters$centroids, splines_model,
 		       colors=ann_colors$Group,
 		       smooth=TRUE)
 ```
@@ -697,7 +690,7 @@ function.
 ```{r}
 # Then assign scores and labels to all the data, using a goodness-of-fit
 # scoring function.
-scores_and_labels = moanin::splines_kmeans_score_and_label(
+scores_and_labels = splines_kmeans_score_and_label(
     data, kmeans_clusters)
 labels = scores_and_labels$labels
 
@@ -735,7 +728,7 @@ both_labels = data.frame("kmeans"=kmeans_labels, "scored"=labels)
 confusion_matrix = table(both_labels)
 text = as.matrix(as.character(confusion_matrix))
 dim(text) = dim(confusion_matrix)
-NMF::aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
+aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
 	      border_color="black", txt=text, legend=FALSE, Rowv=NA,
 	      Colv=NA)
 labels = scores_and_labels$labels
@@ -787,7 +780,7 @@ submeta$Timepoint = as.factor(submeta$Timepoint)
 data_to_plot = data_to_plot[, ord]
 submeta = submeta[ord, ]
 
-res = NMF::aheatmap(
+res = aheatmap(
     data_to_plot,
     Colv=NA,
     color="YlGnBu",
@@ -799,7 +792,7 @@ res = NMF::aheatmap(
     treeheight=0, legend=FALSE)
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
-NMF::aheatmap(
+aheatmap(
     moanin:::rescale_values(data_to_plot)[res$rowInd,],
     Colv=NA,
     Rowv=NA,
@@ -856,7 +849,7 @@ wss_values = list()
 
 i = 1
 for(n_cluster in all_possible_n_clusters){
-    clustering_results = moanin::splines_kmeans(
+    clustering_results = splines_kmeans(
 	y, splines_model,
 	n_clusters=n_cluster, random_seed=42,
 	n_init=10)
@@ -891,7 +884,7 @@ cluster (cohesion) compared to other clusters (separation).
 ```{r average_silhouette_method, fig.width=6, fig.height=4}
 # function to compute average silhouette for k clusters
 average_silhouette = function(labels, y) {
-    silhouette_results = cluster::silhouette(unlist(labels[1]), dist(y))
+    silhouette_results = silhouette(unlist(labels[1]), dist(y))
     return(mean(silhouette_results[, 3]))
 }
 
@@ -956,18 +949,18 @@ Here we plot to stability matrix of the top 1000 genes for $k=5$ and $k=20$.
 
 ```{r fig.width=6, fig.height=4}
 stability_5 = read.table("results/stability_5.tsv", sep="\t")
-consensus_matrix_stability_5 = moanin::consensus_matrix(stability_5,
+consensus_matrix_stability_5 = consensus_matrix(stability_5,
 							scale=FALSE)
-NMF::aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
-	      Colv=FALSE,
-	      treeheight=0)
+aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
+	 Colv=FALSE,
+	 treeheight=0)
 
 stability_20 = read.table("results/stability_20.tsv", sep="\t")
-consensus_matrix_stability_20 = moanin::consensus_matrix(stability_20,
-							 scale=FALSE)
-NMF::aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
-	      Colv=FALSE,
-	      treeheight=0)
+consensus_matrix_stability_20 = consensus_matrix(stability_20,
+						 scale=FALSE)
+aheatmap(consensus_matrix_stability_20[1:1000, 1:1000], Rowv=FALSE,
+	 Colv=FALSE,
+	 treeheight=0)
 
 ```
 
@@ -1002,7 +995,7 @@ between all bootstrapped partition, and plot the cumulative density of the
 obtained scores.
 
 ```{r fig.width=6, fig.height=6}
-moanin::plot_model_explorer(all_labels)
+plot_model_explorer(all_labels)
 ```
 
 From this plot, we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
@@ -1018,7 +1011,7 @@ measures in that range.
 ```{r fig.width=6, fig.height=6}
 clusters = c("C6", "C7", "C8", "C9", "C10")
 selected_labels = all_labels[clusters]
-moanin::plot_model_explorer(selected_labels)
+plot_model_explorer(selected_labels)
 ```
 
 ##### Consensus clustering as a way to find $k$
@@ -1030,7 +1023,7 @@ bootstrapped clustering, the authors suggests plotting the cumulative density
 of elements of the consensus matrix. 
 
 ```{r eval=FALSE}
-moanin::plot_cdf_consensus(all_labels)
+plot_cdf_consensus(all_labels)
 ```
 
 ```{r echo=FALSE}
@@ -1084,8 +1077,8 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 
 
 ```{r results="hide"}
-ensembl = biomaRt::useMart("ensembl")
-ensembl = biomaRt::useDataset("mmusculus_gene_ensembl", mart=ensembl)
+ensembl = useMart("ensembl")
+ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
 ```
 
 ```{r enrichment_analysis, results="hide", message=FALSE}
@@ -1095,11 +1088,11 @@ gene_names = names(labels)
 genes = gene_names[labels == cluster]
 
 # convert gene names
-genes = biomaRt::getBM(attributes=c("ensembl_gene_id", "entrezgene"),
+genes = getBM(attributes=c("ensembl_gene_id", "entrezgene"),
 		filters="refseq_mrna", values=genes,
 		mart=ensembl)["entrezgene"]
 genes = as.vector(unlist(genes))
-pathways = KEGGprofile::find_enriched_pathway(
+pathways = find_enriched_pathway(
     genes, species="mmu",
     download_latest=TRUE)$stastic
 
@@ -1147,13 +1140,13 @@ term ID.
 
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
-genes = biomaRt::getBM(attributes=c("go_id", "refseq_mrna"),
+genes = getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
 	      mart=ensembl)
 
 # Create gene to GO id mapping
-gene_id_go_mapping = moanin::create_go_term_mapping(genes)
+gene_id_go_mapping = create_go_term_mapping(genes)
 ```
 
 Once the gene ID to GO mapping list is created, `moanin` provides a simple
