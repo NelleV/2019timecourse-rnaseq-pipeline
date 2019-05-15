@@ -381,15 +381,16 @@ determining differentially expressed genes,
   Global analysis, where we consider the expression pattern globally over
   time, and consider what genes have either different patterns between
   conditions or a changing pattern (i.e.~non-constant) over time. A common
-  approach first step is to fit a spline model to each gene \textbf{FIXME add refs},
+  approach first step is to fit a spline model to each gene
+  \citep{storey:significance},
   and then use that spline model to test for different kinds of differential
   expression across time.
 \end{enumerate}
 
 The per-time point analysis is using classical differential expression
 approaches, and is often the approach advocated when dealing with small
-time-course datasets, where there are only a few time points \textbf{FIXME add
-citation to edgeR/limma vignette or DESEQ2}. For long time-course datasets,
+time-course datasets, where there are only a few time points
+\citep[\citet{robinson:edgeR}, \citet{love:moderated}]{ritchie:limma} . For long time-course datasets,
 however, a separate test for each time-point results in creating many
 different tests, for example one for every time point, the results of which
 are difficult to integrate. We find in practice that the global analysis
@@ -409,8 +410,35 @@ these types of approaches, though our focus is on the global approach. In both
 situations, we first need to set up a object (a \texttt{splines\_model} object) to
 hold the meta data, as well as information for fitting the spline model.
 
-We start by creating the
-\texttt{splines\_model} object using the \texttt{create\_splines\_model} function.
+We start by creating the \texttt{splines\_model} object using the
+\texttt{create\_splines\_model} function. The \texttt{splines\_model} object contains a number
+of metadata and options used throughout this analysis: the condition and
+timepoints of each samples, the formula object used or the basis or the
+degrees of freedom of the model. The metadata data.frame object should
+contain at least two columns: one named \texttt{Group}, containing the treatement
+effect, and a second one named \texttt{Timepoint} containing the timepoint
+information.
+
+\begin{tabular}{l|r|l|r|r}
+\hline
+  &  & Group & Replicate & Timepoint\\
+\hline
+GSM1557140 & 0 & K & 1 & 0\\
+\hline
+GSM1557141 & 1 & K & 2 & 0\\
+\hline
+GSM1557142 & 2 & K & 3 & 0\\
+\hline
+GSM1557143 & 3 & K & 1 & 12\\
+\hline
+GSM1557144 & 4 & K & 2 & 12\\
+\hline
+GSM1557145 & 5 & K & 3 & 12\\
+\hline
+\end{tabular}
+
+If no formula is provided, it will default to the following:
+\texttt{formula\ =\ \textasciitilde{}Group:splines::ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -430,7 +458,8 @@ object? Create basis functions?)}.
 
 \texttt{moanin} provides a simple interface to perform a timepoint by timepoint differential
 expression analysis. This is traditionally done by the user defining the comparisons (called \texttt{contrasts} in linear models). Under the hood, simply calls \texttt{limma} \citep{ritchie:limma} on the set of
-contrasts provided. \textbf{EAP: Can we comment on using it for RNA-Seq??}
+contrasts provided. By default, it expects RNA-Seq contact counts, and will
+estimate voom weights. We tern
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse (``M'') and the mouse infected with the high dose of
@@ -441,10 +470,6 @@ function that creates them automatically for two conditions -- i.e.~find union
 of time points for two conditions\ldots{} Then we could show an example with just a
 couple done manually, and then say we can also use a little helper function in
 the \texttt{moanin} that will do it for all time points}
-
-\textbf{FIXME rename the function to something better}
-
-\textbf{EAP: And don't use `week' in function name!}
 
 \textbf{Add a helper function to make the contrasts for timely DE}
 
@@ -478,7 +503,7 @@ We can repeat this for each of the conditions
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-8-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 The distribution of number of genes found differentially expressed by
 considering each time-point independantly highlights the challenges of such
@@ -528,7 +553,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-10-1} \end{center}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -605,7 +630,7 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -623,7 +648,7 @@ computation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
 visualize gene time-course data. Here, we plot the 12 genes with the smallest
@@ -637,7 +662,7 @@ p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-16-1} \end{center}
 
 And here we visualize the genes with the largest absolute EPICON log-fold
 change.
@@ -652,7 +677,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-16-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -738,7 +763,7 @@ with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
 
 The scoring and labeling can be done via the \texttt{splines\_kmeans\_score\_and\_label}
 function.
@@ -760,13 +785,13 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labelinig step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 The scoring and label step allows to label genes that were removed during the
 filtering step, yet are good matches to the centroids found during the
 clustering.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -829,7 +854,7 @@ First, select the genes of interest.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1007,7 +1032,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1020,7 +1045,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-2} \end{center}
 
 \hypertarget{the-model-explorer-strategy}{%
 \subparagraph{The model explorer strategy}\label{the-model-explorer-strategy}}
@@ -1046,7 +1071,7 @@ obtained scores.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1065,7 +1090,7 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
 \subparagraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
