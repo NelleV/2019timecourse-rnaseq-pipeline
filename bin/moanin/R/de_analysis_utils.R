@@ -135,12 +135,24 @@ lfc_per_time = function(data, meta, contrasts){
 
 
 average_replicates = function(data, meta){
-    timepoint_group = meta$Group:meta$Timepoint
+    timepoint_group = droplevels(meta$Group:meta$Timepoint)
     all_levels = levels(timepoint_group)
-    replicate_averaged = sapply(unique(all_levels),
-				function(m){rowMeans(data[timepoint_group==m])})
+
+    # selecting certain columns sometimes returns vectors and sometimes 
+    # matrices depending on whether the user wants a single column or several
+    # columns. rowMeans requires a matrix. Thus, here's a small implementation
+    # that will work in all cases.
+    .row_means = function(data){
+	if(is.vector(data)){
+	    return(data)
+	}else{
+	    return(rowMeans(data))
+	}
+    }
+
+    replicate_averaged = sapply(all_levels,
+				function(m){.row_means(data[, timepoint_group==m])})
     return(replicate_averaged)
 }
-
 
     

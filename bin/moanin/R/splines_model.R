@@ -29,7 +29,7 @@ create_splines_model = function(meta, formula=NULL, basis=NULL,
     if(is.null(basis)){
         if(is.null(formula)){
 	    formula = (
-		~Group:splines::ns(Timepoint, df=degrees_of_freedom) + Group + 0)
+		~Group + Group:splines::ns(Timepoint, df=degrees_of_freedom) + 0)
 	}
 	basis = stats::model.matrix(formula, data=meta)
     } 
