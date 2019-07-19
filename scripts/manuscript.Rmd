@@ -76,7 +76,27 @@ knitr::opts_chunk$set(
 - Check that clustering can deal with count data.
 
 EAP:
-- Do we need installation instructions for moanin, since its not on CRAN/bioconductor? Also, how its set up now (doing make file, which compiles the documentation, etc), does that prohibit use of, e.g. `install_github` from `devtools`? I.e. not something we can demonstrate in the markdown file. 
+
+- Do we need installation instructions for moanin in this document, since its not on CRAN/bioconductor? Also, how its set up now (doing make file, which compiles the documentation, etc), probably prohibits use of, e.g. `install_github` from `devtools`. If able to call `install_github("NelleV/2019timecourse-rnaseq-pipeline", subdir="bin/moanin", dependencies=TRUE)` would be simpler (would also install the dependencies and get around problems in script)
+- I got an error in installation of packages:
+
+```
+epurdom-0:2019timecourse-rnaseq-pipeline epurdom$ Rscript scripts/install.R
+Loading required package: devtools
+Loading required package: usethis
+Loading required package: ggfortify
+Loading required package: ggplot2
+Loading required package: kableExtra
+Error in contrib.url(repos, "source") : 
+  trying to use CRAN without setting a mirror
+Calls: install.packages -> contrib.url
+In addition: Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘kableExtra’
+Execution halted
+```
+
+- `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c('edge', 'NMI'))`. But this is dependent on bioconductor/R version. 
 
 # Introduction
 
