@@ -78,7 +78,7 @@ knitr::opts_chunk$set(
 EAP:
 
 - Do we need installation instructions for moanin in this document, since its not on CRAN/bioconductor? Also, how its set up now (doing make file, which compiles the documentation, etc), probably prohibits use of, e.g. `install_github` from `devtools`. If able to call `install_github("NelleV/2019timecourse-rnaseq-pipeline", subdir="bin/moanin", dependencies=TRUE)` would be simpler (would also install the dependencies and get around problems in script)
-- I got an error in installation of packages:
+- I got an error in installation script for  packages:
 
 ```
 epurdom-0:2019timecourse-rnaseq-pipeline epurdom$ Rscript scripts/install.R
@@ -96,7 +96,7 @@ In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = T
 Execution halted
 ```
 
-- `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c('edge', 'NMI'))`. But this is dependent on bioconductor/R version. 
+- `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c('edge', 'NMI'))`. But this is dependent on bioconductor/R version. Also, now that docker, can you change the installation to just be simple one-liner (and `BiocManager::install` can also do non-bioc packages, and is much more reliable.)
 
 # Introduction
 
