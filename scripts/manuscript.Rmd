@@ -68,13 +68,15 @@ knitr::opts_chunk$set(
 
 - Add legends to the plots that don't have.
 - Currently have two functions "plot_genes", "plot_centroids", that do exactly
-  the same thing. Find a better name for both of them
+    the same thing. Find a better name for both of them
 - switch to camel case function names
 - Remove the namespace call
 - Make clear that it applies to RNASeq and how to call the different functions
-  to RNASeq
+    to RNASeq
 - Check that clustering can deal with count data.
 
+EAP:
+- Do we need installation instructions for moanin, since its not on CRAN/bioconductor? Also, how its set up now (doing make file, which compiles the documentation, etc), does that prohibit use of, e.g. `install_github` from `devtools`? I.e. not something we can demonstrate in the markdown file. 
 
 # Introduction
 
@@ -82,20 +84,18 @@ Gene expression studies provide simultaneous quantification of the level of
 mRNA from all genes in a sample. High-throughput studies of gene expression
 have a long history, starting with microarray technologies in the 1990s
 through to single-cell technologies. While many expression studies are
-designed to compare the gene expression in distinct groups, there is also a
-long history of time-course expression studies, where the the gene expression
-is compared across time by measuring mRNA levels from different samples across
-time [^1]. Such time course studies can vary from measuring a few distinct time
-points, to sampling ten to twenty time points. Many longer time series are
+designed to compare the gene expression between distinct groups, there is also a
+long history of time-course expression studies. Such studies compare the  gene expression
+across time by measuring mRNA levels from samples collected at different timepoints [^1]. Such time-course studies can vary from measuring a few distinct time
+points, to sampling ten to twenty time points. These longer time series are
 particularly interested in investigating development over time. More recently,
-single-cell studies track single cells through their development, and a single
-cell is measured at a particular moment in its developmental progression -- a
+a new variety of time course studies have come from single-cell sequencing experiments**EAP: need citation** which can sequencing single cells which are at different stages of development; in this case, the time point is the stage of the cell in the process of development -- a
 value that is not know but estimated from the data as its "pseudo-time."
 
 [^1]: Because the collection of the mRNA is often destructive, samples at
 different time points are generally from different biological samples;
 longitudinal studies, for example tracking the same subject over time, are
-certainly possible in certain settings, but not directly considered here. 
+certainly possible, but not directly considered here. 
 
 While there are many methods that have been proposed for discrete aspects of
 time course data, the entire workflow for analysis of such data remains
@@ -104,13 +104,13 @@ proposed for time course data are concerned with detecting genes that are
 changing over time (differential expression analysis), examples being `edge`
 [@storey:significance], functional component analysis based models [@wu:more],
 time-course permutation tests [@park:statistical], and multiple testing
-strategies to combine singe time point differential expression analysis
+strategies to combine single time point differential expression analysis
 [@sun:multiple]. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show *some* change. For
-example, in the mice lung tissues infected with influenza, over 50% of genes
+example, in a study of mice lung tissues infected with influenza that we consider in this workflow, over 50% of genes
 are shown to be changing over time. The task in these settings is often not to
-detect changes in genes, but to categorize into biologically interpretable
-patterns the vast number of changes discovered. 
+detect changes in genes, but to categorize them into biologically interpretable
+patterns. 
 
 We present here a workflow for such an analysis that consists of 4 main
 parts (Figure \ref{fig:workflow}):
@@ -147,6 +147,8 @@ avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
 $10^5$ PFU of each virus. An adidtional 42 mice were injected with a lower dose
 of the Vietnam avian influenza virus ($10^3$ PFU).
 
+**EAP: We need to add comment about microarray versus sequencing data**
+
 By combining gene expression time-course data with virus growth data, the
 authors show that the inflammatory response of lung tissue is gated until a
 threshold of the virus concentration is  exceeded in the lung. Once this
@@ -160,11 +162,11 @@ regulated by virus concentration.
 The first steps of analysis of gene expression data is always to do
 normalization and quality control checks of the data. In what follows, we show
 an example of this for the influenza data using generic methods; these steps
-are not in specific to time course, but could be done for any gene expression
+are not in specific to time course data, but could be done for any gene expression
 analysis. 
 
 First let's load the data. The package `moanin` contains the normalized
-data and meta of [@shoemaker:ultrasensitive].
+data and metadata of [@shoemaker:ultrasensitive].
 
 ```{r}
 # Now load in the metadata
