@@ -98,6 +98,21 @@ Execution halted
 
 - `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c('edge', 'NMI'))`. But this is dependent on bioconductor/R version. Also, now that docker, can you change the installation to just be simple one-liner (and `BiocManager::install` can also do non-bioc packages, and is much more reliable.)
 
+- I get multiple errors in compilation of file. Not sure, however, why TravisCI didn't hit these problems, so you might want to see what's going on there. Probably caching or something, so might want to occassionally remove the cache and run again, if TravisCI is saving the cache. One error I fixed, but wasn't sure about this error (changed it to `entrezgene_id` and seems to be running now...):
+
+```
+label: enrichment_analysis (with options) 
+List of 2
+ $ results: chr "hide"
+ $ message: logi FALSE
+
+Quitting from lines 1124-1138 (manuscript.Rmd) 
+Error in getBM(attributes = c("ensembl_gene_id", "entrezgene"), filters = "refseq_mrna",  : 
+  Invalid attribute(s): entrezgene 
+Please use the function 'listAttributes' to get valid attribute names
+Calls: <Anonymous> ... withCallingHandlers -> withVisible -> eval -> eval -> getBM
+```
+
 # Introduction
 
 Gene expression studies provide simultaneous quantification of the level of
@@ -764,7 +779,7 @@ labels = unlist(labels[!is.na(labels)])
 # of clusters.
 kmeans_labels = as.data.frame(labels[!is.na(labels)])
 write.table(kmeans_labels,
-	    ".results/clustering_labels.txt",
+	    "./results/clustering_labels.txt",
 	    sep="\t")
 ```
 
@@ -1110,9 +1125,9 @@ gene_names = names(labels)
 genes = gene_names[labels == cluster]
 
 # convert gene names
-genes = getBM(attributes=c("ensembl_gene_id", "entrezgene"),
+genes = getBM(attributes=c("ensembl_gene_id", "entrezgene_id"),
 		filters="refseq_mrna", values=genes,
-		mart=ensembl)["entrezgene"]
+		mart=ensembl)["entrezgene_id"]
 genes = as.vector(unlist(genes))
 pathways = find_enriched_pathway(
     genes, species="mmu",
