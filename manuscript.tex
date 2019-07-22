@@ -122,10 +122,56 @@ time-course gene expression data, clustering, differential expression, workflow
   Remove the namespace call
 \item
   Make clear that it applies to RNASeq and how to call the different functions
-  toRNASeq
+  to RNASeq
 \item
   Check that clustering can deal with count data.
 \end{itemize}
+
+EAP:
+
+\begin{itemize}
+\tightlist
+\item
+  Do we need installation instructions for moanin in this document, since its not on CRAN/bioconductor? Also, how its set up now (doing make file, which compiles the documentation, etc), probably prohibits use of, e.g. \texttt{install\_github} from \texttt{devtools}. If able to call \texttt{install\_github("NelleV/2019timecourse-rnaseq-pipeline",\ subdir="bin/moanin",\ dependencies=TRUE)} would be simpler (would also install the dependencies and get around problems in script)
+\item
+  I got an error in installation script for packages:
+\end{itemize}
+
+\begin{verbatim}
+epurdom-0:2019timecourse-rnaseq-pipeline epurdom$ Rscript scripts/install.R
+Loading required package: devtools
+Loading required package: usethis
+Loading required package: ggfortify
+Loading required package: ggplot2
+Loading required package: kableExtra
+Error in contrib.url(repos, "source") : 
+  trying to use CRAN without setting a mirror
+Calls: install.packages -> contrib.url
+In addition: Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called <e2><80><98>kableExtra<e2><80><99>
+Execution halted
+\end{verbatim}
+
+\begin{itemize}
+\item
+  \texttt{biocLite} is no longer the recommended way to install bioconductor. Instead \texttt{BiocManager::install(c("edge",\ "NMI"))}. But this is dependent on bioconductor/R version. Also, now that docker, can you change the installation to just be simple one-liner (and \texttt{BiocManager::install} can also do non-bioc packages, and is much more reliable.)
+\item
+  I get multiple errors in compilation of file. Not sure, however, why TravisCI didn't hit these problems, so you might want to see what's going on there. Probably caching or something, so might want to occassionally remove the cache and run again, if TravisCI is saving the cache. One error I fixed, but wasn't sure about this error (changed it to \texttt{entrezgene\_id} and seems to be running now\ldots{}):
+\end{itemize}
+
+\begin{verbatim}
+label: enrichment_analysis (with options) 
+List of 2
+ $ results: chr "hide"
+ $ message: logi FALSE
+
+Quitting from lines 1124-1138 (manuscript.Rmd) 
+Error in getBM(attributes = c("ensembl_gene_id", "entrezgene"), filters = "refseq_mrna",  : 
+  Invalid attribute(s): entrezgene 
+Please use the function 'listAttributes' to get valid attribute names
+Calls: <Anonymous> ... withCallingHandlers -> withVisible -> eval -> eval -> getBM
+\end{verbatim}
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -134,17 +180,15 @@ Gene expression studies provide simultaneous quantification of the level of
 mRNA from all genes in a sample. High-throughput studies of gene expression
 have a long history, starting with microarray technologies in the 1990s
 through to single-cell technologies. While many expression studies are
-designed to compare the gene expression in distinct groups, there is also a
-long history of time-course expression studies, where the the gene expression
-is compared across time by measuring mRNA levels from different samples across
-time \footnote{Because the collection of the mRNA is often destructive, samples at
+designed to compare the gene expression between distinct groups, there is also a
+long history of time-course expression studies. Such studies compare the gene expression
+across time by measuring mRNA levels from samples collected at different timepoints \footnote{Because the collection of the mRNA is often destructive, samples at
   different time points are generally from different biological samples;
   longitudinal studies, for example tracking the same subject over time, are
-  certainly possible in certain settings, but not directly considered here.}. Such time course studies can vary from measuring a few distinct time
-points, to sampling ten to twenty time points. Many longer time series are
+  certainly possible, but not directly considered here.}. Such time-course studies can vary from measuring a few distinct time
+points, to sampling ten to twenty time points. These longer time series are
 particularly interested in investigating development over time. More recently,
-single-cell studies track single cells through their development, and a single
-cell is measured at a particular moment in its developmental progression -- a
+a new variety of time course studies have come from single-cell sequencing experiments\textbf{EAP: need citation} which can sequencing single cells which are at different stages of development; in this case, the time point is the stage of the cell in the process of development -- a
 value that is not know but estimated from the data as its ``pseudo-time.''
 
 While there are many methods that have been proposed for discrete aspects of
@@ -154,16 +198,16 @@ proposed for time course data are concerned with detecting genes that are
 changing over time (differential expression analysis), examples being \texttt{edge}
 \citep{storey:significance}, functional component analysis based models \citep{wu:more},
 time-course permutation tests \citep{park:statistical}, and multiple testing
-strategies to combine singe time point differential expression analysis
+strategies to combine single time point differential expression analysis
 \citep{sun:multiple}. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show \emph{some} change. For
-example, in the mice lung tissues infected with influenza, over 50\% of genes
+example, in a study of mice lung tissues infected with influenza that we consider in this workflow, over 50\% of genes
 are shown to be changing over time. The task in these settings is often not to
-detect changes in genes, but to categorize into biologically interpretable
-patterns the vast number of changes discovered.
+detect changes in genes, but to categorize them into biologically interpretable
+patterns.
 
 We present here a workflow for such an analysis that consists of 4 main
-parts (Figure \ref{fig:workflow}):
+parts (Figure \ref{fig:schema}):
 
 \begin{itemize}
 \tightlist
@@ -208,6 +252,8 @@ avian influenza virus (A/Vietnam/1203/2004 {[}H5N1{]}. Mice were injected with
 \(10^5\) PFU of each virus. An adidtional 42 mice were injected with a lower dose
 of the Vietnam avian influenza virus (\(10^3\) PFU).
 
+\textbf{EAP: We need to add comment about microarray versus sequencing data}
+
 By combining gene expression time-course data with virus growth data, the
 authors show that the inflammatory response of lung tissue is gated until a
 threshold of the virus concentration is exceeded in the lung. Once this
@@ -221,11 +267,11 @@ regulated by virus concentration.
 The first steps of analysis of gene expression data is always to do
 normalization and quality control checks of the data. In what follows, we show
 an example of this for the influenza data using generic methods; these steps
-are not in specific to time course, but could be done for any gene expression
+are not in specific to time course data, but could be done for any gene expression
 analysis.
 
 First let's load the data. The package \texttt{moanin} contains the normalized
-data and meta of \citep{shoemaker:ultrasensitive}.
+data and metadata of \citep{shoemaker:ultrasensitive}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1213,9 +1259,9 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \NormalTok{genes =}\StringTok{ }\NormalTok{gene_names[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster]}
 
 \CommentTok{# convert gene names}
-\NormalTok{genes =}\StringTok{ }\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"ensembl_gene_id"}\NormalTok{, }\StringTok{"entrezgene"}\NormalTok{),}
+\NormalTok{genes =}\StringTok{ }\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"ensembl_gene_id"}\NormalTok{, }\StringTok{"entrezgene_id"}\NormalTok{),}
         \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{, }\DataTypeTok{values=}\NormalTok{genes,}
-        \DataTypeTok{mart=}\NormalTok{ensembl)[}\StringTok{"entrezgene"}\NormalTok{]}
+        \DataTypeTok{mart=}\NormalTok{ensembl)[}\StringTok{"entrezgene_id"}\NormalTok{]}
 \NormalTok{genes =}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(genes))}
 \NormalTok{pathways =}\StringTok{ }\KeywordTok{find_enriched_pathway}\NormalTok{(}
 \NormalTok{    genes, }\DataTypeTok{species=}\StringTok{"mmu"}\NormalTok{,}
@@ -1231,9 +1277,9 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \hline
 04060 & Cytokine-cytokine receptor interaction & 31 & 0\\
 \hline
-05164 & Influenza A & 38 & 0\\
-\hline
 04668 & TNF signaling pathway & 45 & 0\\
+\hline
+05164 & Influenza A & 38 & 0\\
 \hline
 04621 & NOD-like receptor signaling pathway & 34 & 0\\
 \hline
@@ -1301,35 +1347,35 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 \hline
   & GO ID & Description & Annotated & Significant & Expected & P-value & adj. p-value\\
 \hline
-5 & GO:0003002 & regionalization & 172 & 153 & 134.46 & 0.00024 & 0.2416\\
+5 & GO:0003002 & regionalization & 172 & 153 & 134.41 & 0.00026 & 0.2629\\
 \hline
-6 & GO:0048562 & embryonic organ morphogenesis & 154 & 137 & 120.39 & 0.00035 & 0.2936\\
+6 & GO:0048562 & embryonic organ morphogenesis & 152 & 135 & 118.78 & 0.00045 & 0.3323\\
 \hline
-7 & GO:0010970 & transport along microtubule & 81 & 74 & 63.32 & 0.00057 & 0.4098\\
+7 & GO:0010970 & transport along microtubule & 82 & 75 & 64.08 & 0.00046 & 0.3323\\
 \hline
-8 & GO:0060173 & limb development & 92 & 84 & 71.92 & 0.00070 & 0.4404\\
+8 & GO:0006805 & xenobiotic metabolic process & 49 & 47 & 38.29 & 0.00059 & 0.3729\\
 \hline
-9 & GO:0060070 & canonical Wnt signaling pathway & 147 & 130 & 114.92 & 0.00090 & 0.5033\\
+9 & GO:0060173 & limb development & 92 & 84 & 71.89 & 0.00068 & 0.3820\\
 \hline
-10 & GO:0055114 & oxidation-reduction process & 531 & 457 & 415.10 & 0.00135 & 0.6223\\
+10 & GO:0019395 & fatty acid oxidation & 53 & 51 & 41.42 & 0.00134 & 0.6194\\
 \hline
-11 & GO:0019395 & fatty acid oxidation & 53 & 51 & 41.43 & 0.00136 & 0.6223\\
+11 & GO:0055114 & oxidation-reduction process & 536 & 461 & 418.84 & 0.00139 & 0.6194\\
 \hline
-12 & GO:0006805 & xenobiotic metabolic process & 44 & 42 & 34.40 & 0.00168 & 0.7046\\
+12 & GO:0060070 & canonical Wnt signaling pathway & 149 & 131 & 116.43 & 0.00147 & 0.6194\\
 \hline
-13 & GO:0090596 & sensory organ morphogenesis & 134 & 118 & 104.75 & 0.00224 & 0.8197\\
+13 & GO:0090596 & sensory organ morphogenesis & 134 & 118 & 104.71 & 0.00219 & 0.8517\\
 \hline
-14 & GO:0010811 & positive regulation of cell-substrate ad... & 78 & 71 & 60.98 & 0.00228 & 0.8197\\
+14 & GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.79 & 0.00295 & 1.0000\\
 \hline
-15 & GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.80 & 0.00298 & 0.9999\\
+15 & GO:0010811 & positive regulation of cell-substrate ad... & 81 & 73 & 63.30 & 0.00384 & 1.0000\\
 \hline
-16 & GO:0051056 & regulation of small GTPase mediated sign... & 151 & 131 & 118.04 & 0.00349 & 1.0000\\
+16 & GO:0042738 & exogenous drug catabolic process & 22 & 22 & 17.19 & 0.00437 & 1.0000\\
 \hline
-17 & GO:0042738 & exogenous drug catabolic process & 22 & 22 & 17.20 & 0.00441 & 1.0000\\
+17 & GO:1901381 & positive regulation of potassium ion tra... & 22 & 22 & 17.19 & 0.00437 & 1.0000\\
 \hline
-18 & GO:1901381 & positive regulation of potassium ion tra... & 22 & 22 & 17.20 & 0.00441 & 1.0000\\
+18 & GO:0007368 & determination of left/right symmetry & 66 & 60 & 51.57 & 0.00536 & 1.0000\\
 \hline
-19 & GO:0007368 & determination of left/right symmetry & 67 & 61 & 52.38 & 0.00464 & 1.0000\\
+19 & GO:0060078 & regulation of postsynaptic membrane pote... & 66 & 60 & 51.57 & 0.00536 & 1.0000\\
 \hline
 \end{tabu}
 
@@ -1403,7 +1449,7 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 ## [59] desc_1.2.0              foreach_1.4.4          
 ## [61] permute_0.9-5           pkgbuild_1.0.3         
 ## [63] bibtex_0.4.2            geometry_0.4.1         
-## [65] rlang_0.3.4             pkgconfig_2.0.2        
+## [65] rlang_0.4.0             pkgconfig_2.0.2        
 ## [67] matrixStats_0.54.0      evaluate_0.13          
 ## [69] lattice_0.20-38         purrr_0.3.2            
 ## [71] bit_1.1-14              processx_3.3.1         
