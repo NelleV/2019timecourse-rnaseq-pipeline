@@ -96,7 +96,7 @@ In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = T
 Execution halted
 ```
 
-- `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c('edge', 'NMI'))`. But this is dependent on bioconductor/R version. Also, now that docker, can you change the installation to just be simple one-liner (and `BiocManager::install` can also do non-bioc packages, and is much more reliable.)
+- `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c("edge", "NMI"))`. But this is dependent on bioconductor/R version. Also, now that docker, can you change the installation to just be simple one-liner (and `BiocManager::install` can also do non-bioc packages, and is much more reliable.)
 
 - I get multiple errors in compilation of file. Not sure, however, why TravisCI didn't hit these problems, so you might want to see what's going on there. Probably caching or something, so might want to occassionally remove the cache and run again, if TravisCI is saving the cache. One error I fixed, but wasn't sure about this error (changed it to `entrezgene_id` and seems to be running now...):
 
@@ -148,7 +148,7 @@ detect changes in genes, but to categorize them into biologically interpretable
 patterns. 
 
 We present here a workflow for such an analysis that consists of 4 main
-parts (Figure \ref{fig:workflow}):
+parts (Figure \ref{fig:schema}):
 
 - Quality control and normalization;
 - Identification of genes that are differentially expressed;
