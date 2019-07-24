@@ -18,18 +18,11 @@ get_data() {
 
 run_tests() {
     # first run the actual tests
-    pushd bin/moanin
-    make test
-    popd
     pushd scripts
     make all
     popd
 }
 
-# Start by installing
-pushd bin/moanin
-make install
-popd
 
 # Now get data and run the tests and build the manuscript
 get_data

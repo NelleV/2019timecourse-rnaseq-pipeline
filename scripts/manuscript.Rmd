@@ -49,7 +49,6 @@ library(viridis)
 
 library(topGO)
 
-library(moanin)
 
 source("utils.R")
 ```
@@ -75,9 +74,23 @@ knitr::opts_chunk$set(
     to RNASeq
 - Check that clustering can deal with count data.
 
+
+```{r}
+library(devtools)
+install_github("NelleV/moanin", dependencies=FALSE)
+
+library(moanin)
+```
+
 EAP:
 
-- Do we need installation instructions for moanin in this document, since its not on CRAN/bioconductor? Also, how its set up now (doing make file, which compiles the documentation, etc), probably prohibits use of, e.g. `install_github` from `devtools`. If able to call `install_github("NelleV/2019timecourse-rnaseq-pipeline", subdir="bin/moanin", dependencies=TRUE)` would be simpler (would also install the dependencies and get around problems in script)
+- Do we need installation instructions for moanin in this document, since its
+  not on CRAN/bioconductor? Also, how its set up now (doing make file, which
+  compiles the documentation, etc), probably prohibits use of, e.g.
+  `install_github` from `devtools`. If able to call
+  `install_github("NelleV/2019timecourse-rnaseq-pipeline",
+  subdir="bin/moanin", dependencies=TRUE)` would be simpler (would also
+  install the dependencies and get around problems in script)
 - I got an error in installation script for  packages:
 
 ```
@@ -96,22 +109,18 @@ In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = T
 Execution halted
 ```
 
-- `biocLite` is no longer the recommended way to install bioconductor. Instead `BiocManager::install(c("edge", "NMI"))`. But this is dependent on bioconductor/R version. Also, now that docker, can you change the installation to just be simple one-liner (and `BiocManager::install` can also do non-bioc packages, and is much more reliable.)
+- `biocLite` is no longer the recommended way to install bioconductor. Instead
+  `BiocManager::install(c("edge", "NMI"))`. But this is dependent on
+  bioconductor/R version. Also, now that docker, can you change the
+  installation to just be simple one-liner (and `BiocManager::install` can
+  also do non-bioc packages, and is much more reliable.)
 
-- I get multiple errors in compilation of file. Not sure, however, why TravisCI didn't hit these problems, so you might want to see what's going on there. Probably caching or something, so might want to occassionally remove the cache and run again, if TravisCI is saving the cache. One error I fixed, but wasn't sure about this error (changed it to `entrezgene_id` and seems to be running now...):
-
-```
-label: enrichment_analysis (with options) 
-List of 2
- $ results: chr "hide"
- $ message: logi FALSE
-
-Quitting from lines 1124-1138 (manuscript.Rmd) 
-Error in getBM(attributes = c("ensembl_gene_id", "entrezgene"), filters = "refseq_mrna",  : 
-  Invalid attribute(s): entrezgene 
-Please use the function 'listAttributes' to get valid attribute names
-Calls: <Anonymous> ... withCallingHandlers -> withVisible -> eval -> eval -> getBM
-```
+- I get multiple errors in compilation of file. Not sure, however, why
+  TravisCI didn't hit these problems, so you might want to see what's going on
+  there. Probably caching or something, so might want to occassionally remove
+  the cache and run again, if TravisCI is saving the cache. One error I fixed,
+  but wasn't sure about this error (changed it to `entrezgene_id` and seems to
+  be running now...):
 
 # Introduction
 
