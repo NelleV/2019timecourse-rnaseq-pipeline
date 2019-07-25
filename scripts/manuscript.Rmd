@@ -115,12 +115,6 @@ Execution halted
   installation to just be simple one-liner (and `BiocManager::install` can
   also do non-bioc packages, and is much more reliable.)
 
-- I get multiple errors in compilation of file. Not sure, however, why
-  TravisCI didn't hit these problems, so you might want to see what's going on
-  there. Probably caching or something, so might want to occassionally remove
-  the cache and run again, if TravisCI is saving the cache. One error I fixed,
-  but wasn't sure about this error (changed it to `entrezgene_id` and seems to
-  be running now...):
 
 # Introduction
 
