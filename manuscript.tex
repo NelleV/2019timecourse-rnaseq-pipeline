@@ -136,9 +136,9 @@ time-course gene expression data, clustering, differential expression, workflow
 
 \begin{verbatim}
 ##   
-   checking for file '/tmp/RtmpsJhqa7/remotes352cb8e01/NelleV-moanin-205e154/DESCRIPTION' ...
+   checking for file '/tmp/RtmpLM5IuQ/remotes347f085d5d/NelleV-moanin-205e154/DESCRIPTION' ...
   
-v  checking for file '/tmp/RtmpsJhqa7/remotes352cb8e01/NelleV-moanin-205e154/DESCRIPTION'
+v  checking for file '/tmp/RtmpLM5IuQ/remotes347f085d5d/NelleV-moanin-205e154/DESCRIPTION'
 ## 
   
 -  preparing 'moanin':
@@ -154,7 +154,7 @@ v  checking DESCRIPTION meta-information
 ## -  looking to see if a 'data/datalist' file should be added
 ## 
   
--  building 'moanin_0.0.0.tar.gz' (3.7s)
+-  building 'moanin_0.0.0.tar.gz' (3.5s)
 ## 
   
    
@@ -199,19 +199,13 @@ Execution halted
 \end{verbatim}
 
 \begin{itemize}
+\tightlist
 \item
   \texttt{biocLite} is no longer the recommended way to install bioconductor. Instead
   \texttt{BiocManager::install(c("edge",\ "NMI"))}. But this is dependent on
   bioconductor/R version. Also, now that docker, can you change the
   installation to just be simple one-liner (and \texttt{BiocManager::install} can
   also do non-bioc packages, and is much more reliable.)
-\item
-  I get multiple errors in compilation of file. Not sure, however, why
-  TravisCI didn't hit these problems, so you might want to see what's going on
-  there. Probably caching or something, so might want to occassionally remove
-  the cache and run again, if TravisCI is saving the cache. One error I fixed,
-  but wasn't sure about this error (changed it to \texttt{entrezgene\_id} and seems to
-  be running now\ldots{}):
 \end{itemize}
 
 \hypertarget{introduction}{%
@@ -1330,9 +1324,9 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \hline
 05160 & Hepatitis C & 34 & 0\\
 \hline
-04620 & Toll-like receptor signaling pathway & 40 & 0\\
+04064 & NF-kappa B signaling pathway & 39 & 0\\
 \hline
-05167 & Kaposi sarcoma-associated herpesvirus infection & 29 & 0\\
+04620 & Toll-like receptor signaling pathway & 40 & 0\\
 \hline
 \end{tabu}
 
