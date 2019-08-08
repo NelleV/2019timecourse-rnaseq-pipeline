@@ -240,39 +240,45 @@ Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data. 
 
 ```{r pca, fig.width=6, fig.height=6}
-# Reorder genes on condition, time, and replicate
-
 pca_data = prcomp(t(variance_filtered_data), rank=3, center=TRUE, scale=TRUE) 
 percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
 
-We then plot the two first components, and color each sample by (1) its
-condition; (2) its sampling time. We use different markers for each replicate. **EAP: Unclear what 'markers' refers to**
-We also plot the second and third components in the second row.
+We then plot the two first PC components, and color each sample by (1) its
+condition; (2) its sampling time. We use different plotting symbols for each replicate. We also plot the second and third components in the second column.
+**EAP: The colors for timepoint appear to circle around, i.e. the first and last are very similar colors**
 
 ```{r pca_plots, fig.width=6, fig.height=6}
-par(mfrow=c(2, 2), mar=c(2.5, 2.5, 2.5, 2.5))
+par(mfrow=c(2, 2))
+par(mar=c(4.5, 4.5, 1.5, 1.5))
 plot(
-    pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+    pca_data$x[, c("PC1","PC2")],
+    col=ann_colors$Group[meta$Group],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)], bty="l")
+mtext(at=275,text="Colored by Group", line=0.5 ,font=2,adj=0.5)
+legend(x=250,y=25,legend=names(ann_colors$Group), fill=ann_colors$Group,bty="n",xpd=NA,yjust=0.5)
+par(mar=c(4.5, 5.5, 1.5, .1))
+plot(
+    pca_data$x[, c("PC3","PC2")],
     col=ann_colors$Group[meta$Group],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-    xlab="PC2", ylab="PC1")
+    ylab="", bty="l", yaxt="n")
+axis(2, labels=FALSE)
+par(mar=c(4.5, 4.5, 1.5, 1.5))
 plot(
-    pca_data$x[, "PC2"], pca_data$x[, "PC1"],
+    pca_data$x[, c("PC1","PC2")],
+    col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
+    pch=ann_markers$Replicate[as.factor(meta$Replicate)], bty="l")
+mtext(at=275,text="Colored by Timepoint",line=0.5 ,font=2,adj=0.5)
+legend(x=250,y=25,legend=names(ann_colors$Timepoint), fill=ann_colors$Timepoint,bty="n",xpd=NA,yjust=0.5)
+par(mar=c(4.5, 5.5, 1.5, .1))
+plot(
+    pca_data$x[, c("PC3","PC2")],
     col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-    xlab="PC2", ylab="PC1")
+    ylab="", bty="l", yaxt="n")
+axis(2, labels=FALSE)
 
-plot(
-    pca_data$x[, "PC2"], pca_data$x[, "PC3"],
-    col=ann_colors$Group[meta$Group],
-    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-    xlab="PC2", ylab="PC3")
-plot(
-    pca_data$x[, "PC2"], pca_data$x[, "PC3"],
-    col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
-    pch=ann_markers$Replicate[as.factor(meta$Replicate)],
-    xlab="PC2", ylab="PC3")
 
 ```
 
@@ -284,7 +290,6 @@ Vietnam, then high dose of Vietnam.
 
 
 ```{r  correlation_plot, fig.width=6, fig.height=6, fig.caption="Cross-correlation of the samples"}
-
 # Reorder the conditions such that:
 #	- Control is before any influenza treatment
 #	- Each treatment is ordered from low to high pathogeny
@@ -300,7 +305,7 @@ variance_filtered_data = variance_filtered_data[, ord]
 data_corr = cor(variance_filtered_data, method="pearson")
 data_corr_meta = meta[ord, ]
 data_corr_meta$Timepoint = as.factor(data_corr_meta$Timepoint)
-
+# use aheatmap from the NMF package for a heatmap
 aheatmap(
     data_corr,
     Colv=NA, Rowv=NA,
