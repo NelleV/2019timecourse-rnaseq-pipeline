@@ -641,7 +641,7 @@ p-values.
 top_DE_genes_pval = names(sort(pvalue)[1:10])
 plot_genes(data[top_DE_genes_pval, ], splines_model,
     colors=ann_colors$Group, smooth=TRUE,
-    mar=c(1.5,2.5,2,0.1), legendArgs=list(title="Treatment"))
+    mar=c(1.5,2.5,2,0.1))
 ```
 
 And here we visualize the genes with the largest absolute EPICON log-fold
@@ -653,7 +653,7 @@ top_DE_genes_lfc = names(
 	 decreasing=TRUE)[1:10])
 plot_genes(data[top_DE_genes_lfc, ], splines_model,
     colors=ann_colors$Group, smooth=TRUE,
-    mar=c(1.5,2.5,2,0.1), legendArgs=list(title="Treatment"))
+    mar=c(1.5,2.5,2,0.1))
 
 ```
 
@@ -728,8 +728,7 @@ with the splines k-means model.
 ```{r fig.height=6, fig.width=6}
 plot_centroids(kmeans_clusters$centroids, splines_model,
     colors=ann_colors$Group,
-    smooth=TRUE,legend=TRUE,
-    legendArgs=list(title="Treatment",cex=2))
+    smooth=TRUE)
 ```
 
 The scoring and labeling can be done via the `splines_kmeans_score_and_label`
