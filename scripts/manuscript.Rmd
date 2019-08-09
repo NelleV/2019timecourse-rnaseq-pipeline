@@ -84,13 +84,7 @@ library(moanin)
 
 EAP:
 
-- Do we need installation instructions for moanin in this document, since its
-  not on CRAN/bioconductor? Also, how its set up now (doing make file, which
-  compiles the documentation, etc), probably prohibits use of, e.g.
-  `install_github` from `devtools`. If able to call
-  `install_github("NelleV/2019timecourse-rnaseq-pipeline",
-  subdir="bin/moanin", dependencies=TRUE)` would be simpler (would also
-  install the dependencies and get around problems in script)
+- Why `dependicies=FALSE`? (same for the README for the repos). Seems easier to just say dependencies=TRUE and avoid the install.R routine. 
 - I got an error in installation script for  packages:
 
 ```
@@ -273,7 +267,7 @@ plot(
     col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)], bty="l")
 mtext(at=275,text="Colored by Timepoint",line=0.5 ,font=2,adj=0.5)
-legend(x=250,y=25,legend=names(ann_colors$Timepoint), fill=ann_colors$Timepoint,bty="n",xpd=NA,yjust=0.5)
+legend(x=250,y=-15,legend=names(ann_colors$Timepoint), fill=ann_colors$Timepoint,bty="n",xpd=NA,yjust=0.5)
 par(mar=c(4.5, 5.5, 1.5, .1))
 plot(
     pca_data$x[, c("PC3","PC2")],
@@ -281,8 +275,6 @@ plot(
     pch=ann_markers$Replicate[as.factor(meta$Replicate)],
     ylab="", bty="l", yaxt="n")
 axis(2, labels=FALSE)
-
-
 ```
 
 Then, we plot the pearson correlation across each samples. We order the
@@ -418,29 +410,40 @@ the function works with any form contrasts [@ritchie:limma].
 
 First, create the contrasts for all timepoints between the two groups of
 interest:
+
 ```{r make_timepoints_contarts}
 contrasts = create_timepoints_contrasts("M", "VL", splines_model)
 ```
 
+This creates a vector of contrasts to be tested, one for each timepoint:
+
 ```{r echo=FALSE}
-kable(contrasts)
+kable(contrasts,col.names="Contrasts")
 ```
+**EAP: Not sure if `kable` is better than just printout?**
 
 Then run the differential expression analysis on all of those timepoints
-jointly.
+jointly using the function `DE_timepoints`.
 
 ```{r weekly_differential_analysis}
 # Define contrast	
-weekly_de_analysis = DE_timepoints(
+VL_weekly_de_analysis = DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 ```
+**EAP: Sort of strange to have argument `spines_model` for function that doesn't use splines. Perhaps there is a generic name that could be used for the argument**
+
+This results in a table of the results, where each row corresponds to a gene and the columns correspond to the p-value (`pval`), log-fold change (`lfc`) and adjusted p-value (`qval`); the order of the genes in the table is the same as the input `data`. Here we show the results for the first two timepoints and the first ten genes: 
 
 ```{r echo=FALSE}
-kable(weekly_de_analysis[1:10, ])
+kable(weekly_de_analysis[1:10, 1:6 ],digits=3)
 ```
 
-We can repeat this for each of the conditions
+**EAP: For the output of this, the column names are in format `M.0-VL.0-pval`, for example. This may be hard to parse algorithmically down the road because you are using the same character for the contrast (`-`) as the separator for the `pval`. So for example, if you wanted to split the contrast name from the `pval` or `lfc` part, it wouldn't be very easy. Maybe underscore `_` would be better separator?**
+
+
+
+We will repeat this, comparing each of the treatments to the control ("M") (code not printed here, as it is a replicate of the above, see accompanying Rmarkdown document). 
 
 ```{r echo=FALSE, results="hide"}
 contrasts = create_timepoints_contrasts("M", "K", splines_model)
@@ -464,36 +467,57 @@ VH_weekly_de_analysis =  DE_timepoints(
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
+**EAP: Should `timely_barplot` be a function of `moanin`?**
+
 ```{r fig.width=6, fig.height=6, echo=FALSE}
-par(mfrow=c(2, 2))
-
-time = c(0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60, 72, 120, 168)
-
-timely_barplot = function(de_analysis, labels, qval_threshold=0.05, title=""){
+timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05, title="",...){
     qval_colnames = colnames(de_analysis)[
 	grepl("qval", colnames(de_analysis))]
+    if(is.null(labels)) labels<-sapply(strsplit(gsub("-qval","",qval_colnames),"\\."),.subset2,3)
     number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
-    names(number_de_genes_per_time) = labels[1]
-    barplot(number_de_genes_per_time, col="black", ylim=c(0, 20000),
-	    xlab="Timepoint", ylab="Number of DE genes", main=title)
+    barplot(number_de_genes_per_time, col="black", 
+            names.arg=labels,ylim=c(0, 20000),
+	    xlab="Timepoint", ylab="Number of DE genes", main=title,...)
     
 }
 
-timely_barplot(K_weekly_de_analysis, time, title="Kawasaki")
-timely_barplot(C_weekly_de_analysis, time, title="California")
-timely_barplot(weekly_de_analysis, time, title="Vietnam low-dose")
-timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose")
+par(mfrow=c(2, 2))
+timely_barplot(K_weekly_de_analysis, time, title="Kawasaki",las=3)
+timely_barplot(C_weekly_de_analysis, time, title="California",las=3)
+timely_barplot(VL_weekly_de_analysis, time, title="Vietnam low-dose",las=3)
+timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose",las=3)
 ```
 
-The distribution of number of genes found differentially expressed by
-considering each time-point independantly highlights the challenges of such
-approach. Timepoint 6H and 18H of the Kawasaki strain have fewer numbers of
-genes found differentially expressed than timepoints 3H and 9H: this is likely
-due to biological or technical variances for specific genes at specific
-timepoints. **EAP: We should add more to this**
+Such an analysis can demonstrate some general trends, with clearly more genes being differentially expressed at later time points, and the Vietnam high-dose showing perhaps an earlier onset than the low-dose.
+
+However, the distribution of the number of genes found differentially expressed by
+considering each time-point independently highlights the challenges of such
+approach. We can see that some timepoints have many less genes found significantly differentially expressed (e.g. timepoint 6H and 18H of the Kawasaki strain). While there may be biological differences at those time points for some genes, it seems unlikely that the large majority of genes differentially expressed at timepoint 3H stop being differentially expressed at 6H and then jump back to being differentially expressed at 9H. A more likely explanation is that there is are some technical or biological artifact about the samples for 6H that is creating higher variation and thus less ability to detect significance.
+
+```{r calculateCombos, echo=FALSE, results="hide"}
+#Code for counting the number of unique combinations of time points that are DE
+getTimepoint<-function(x){sapply(strsplit(gsub("-qval","",x),"\\."),.subset2,3)}
+qval_colnames = colnames(K_weekly_de_analysis)[
+grepl("qval", colnames(K_weekly_de_analysis))]
+signifCombos<-apply(K_weekly_de_analysis[, qval_colnames],1,function(x){paste(getTimepoint(qval_colnames[which(x<0.05)]),collapse=",")})
+signifCombos<-signifCombos[signifCombos!=""]
+tabCombos<-table(signifCombos)
+```
+
+Another difficulty with such an approach is making sense of the general temporal structure for any particular gene, as different genes will have different combinations of timepoints DE. For the comparison of the Kawasaki strain to the control, for example, there are `length(signifCombos)` genes found DE in some timepoints, and there are `length(tabCombos)` different combinations of timepoints for which they are DE. Some of these make sense, such as DE in timepoints 48H-168H (`tabCombos["48,60,72,120,168"]` genes), but many are very fragmentary. For example there are `tabCombos["48,60,120,168"]` genes which are DE in timepoints 48,60,120,168H, but *not* in the 72H. Many of these genes are likely to have not made the cutoff for significance in 72H, but don't show real differences in the overall trend between 48H-168H. 
+
+Here are plots of the first 10 such genes, where we can see that some might show some meaningful changes between 60 and 72H, but others clearly just have a single replicate that is different or increased variability at 72H.
+
+```{r showMissingDEGenes, echo=FALSE}
+exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
+wh<-which(splines_model$meta$Group %in% c("K","M"))
+plot_genes(data[exampleGenes,],splines_model,colors=ann_colors$Group)
+``` 
+
+**EAP: It would be nice to be able to subset in `plot_centroids/plot_genes` to only some of the groups**
 
 As a summary, classic differential expression methods are appropriate for
-unordered treatments, but fail to use the temporal structure of the data.
+unordered treatments, but fail to make use of the temporal structure of the data.
 
 
 
