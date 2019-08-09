@@ -5,7 +5,8 @@
     - Install all the dependances at once using the following command:
 	`Rscript scripts/install.R`
 
-    - Install the package in `bin/moanin` by typing `make install`
+    - Install moanin via the install_github command
+      (install_github("NelleV/moanin", dependencies=FALSE))
 
 2. Download the data:
 

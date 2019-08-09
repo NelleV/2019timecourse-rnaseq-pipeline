@@ -95,3 +95,4 @@ if(!require(BiocWorkflowTools)){
     biocLite("BiocWorkflowTools")
 }
 
+install_github("NelleV/moanin", dependencies=FALSE)

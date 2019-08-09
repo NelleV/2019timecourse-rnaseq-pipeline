@@ -1,3 +1,0 @@
-library(devtools)
-
-devtools::build()
