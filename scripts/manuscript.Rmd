@@ -481,7 +481,7 @@ timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05,
     number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
 
     barplot(number_de_genes_per_time, col="black", 
-            names.arg=labels,
+            # names.arg=labels,
 	    ylim=c(0, 20000),
 	    xlab="Timepoint", ylab="Number of DE genes", main=title, ...)  
 }
@@ -493,11 +493,21 @@ timely_barplot(weekly_de_analysis, time, title="Vietnam low-dose", las=3)
 timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose", las=3)
 ```
 
-Such an analysis can demonstrate some general trends, with clearly more genes being differentially expressed at later time points, and the Vietnam high-dose showing perhaps an earlier onset than the low-dose.
+Such an analysis can demonstrate some general trends, with clearly more genes
+being differentially expressed at later time points, and the Vietnam high-dose
+showing perhaps an earlier onset than the low-dose.
 
-However, the distribution of the number of genes found differentially expressed by
-considering each time-point independently highlights the challenges of such
-approach. We can see that some timepoints have many less genes found significantly differentially expressed (e.g. timepoint 6H and 18H of the Kawasaki strain). While there may be biological differences at those time points for some genes, it seems unlikely that the large majority of genes differentially expressed at timepoint 3H stop being differentially expressed at 6H and then jump back to being differentially expressed at 9H. A more likely explanation is that there is are some technical or biological artifact about the samples for 6H that is creating higher variation and thus less ability to detect significance.
+However, the distribution of the number of genes found differentially
+expressed by considering each time-point independently highlights the
+challenges of such approach. We can see that some timepoints have many less
+genes found significantly differentially expressed (e.g. timepoint 6H and 18H
+of the Kawasaki strain). While there may be biological differences at those
+time points for some genes, it seems unlikely that the large majority of genes
+differentially expressed at timepoint 3H stop being differentially expressed
+at 6H and then jump back to being differentially expressed at 9H. A more
+likely explanation is that there is are some technical or biological artifact
+about the samples for 6H that is creating higher variation and thus less
+ability to detect significance.
 
 ```{r calculateCombos, echo=FALSE, results="hide"}
 #Code for counting the number of unique combinations of time points that are DE
@@ -509,9 +519,21 @@ signifCombos<-signifCombos[signifCombos!=""]
 tabCombos<-table(signifCombos)
 ```
 
-Another difficulty with such an approach is making sense of the general temporal structure for any particular gene, as different genes will have different combinations of timepoints DE. For the comparison of the Kawasaki strain to the control, for example, there are `length(signifCombos)` genes found DE in some timepoints, and there are `length(tabCombos)` different combinations of timepoints for which they are DE. Some of these make sense, such as DE in timepoints 48H-168H (`tabCombos["48,60,72,120,168"]` genes), but many are very fragmentary. For example there are `tabCombos["48,60,120,168"]` genes which are DE in timepoints 48,60,120,168H, but *not* in the 72H. Many of these genes are likely to have not made the cutoff for significance in 72H, but don't show real differences in the overall trend between 48H-168H. 
+Another difficulty with such an approach is making sense of the general
+temporal structure for any particular gene, as different genes will have
+different combinations of timepoints DE. For the comparison of the Kawasaki
+strain to the control, for example, there are `length(signifCombos)` genes
+found DE in some timepoints, and there are `length(tabCombos)` different
+combinations of timepoints for which they are DE. Some of these make sense,
+such as DE in timepoints 48H-168H (`tabCombos["48,60,72,120,168"]` genes), but
+many are very fragmentary. For example there are `tabCombos["48,60,120,168"]`
+genes which are DE in timepoints 48,60,120,168H, but *not* in the 72H. Many of
+these genes are likely to have not made the cutoff for significance in 72H,
+but don't show real differences in the overall trend between 48H-168H. 
 
-Here are plots of the first 10 such genes, where we can see that some might show some meaningful changes between 60 and 72H, but others clearly just have a single replicate that is different or increased variability at 72H.
+Here are plots of the first 10 such genes, where we can see that some might
+show some meaningful changes between 60 and 72H, but others clearly just have
+a single replicate that is different or increased variability at 72H.
 
 ```{r showMissingDEGenes, echo=FALSE}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
