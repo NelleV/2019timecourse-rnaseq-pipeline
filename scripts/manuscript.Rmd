@@ -418,7 +418,7 @@ contrasts = create_timepoints_contrasts("M", "VL", splines_model)
 This creates a vector of contrasts to be tested, one for each timepoint:
 
 ```{r echo=FALSE}
-kable(contrasts,col.names="Contrasts")
+kable(contrasts, col.names="Contrasts")
 ```
 **EAP: Not sure if `kable` is better than just printout?**
 
@@ -427,7 +427,7 @@ jointly using the function `DE_timepoints`.
 
 ```{r weekly_differential_analysis}
 # Define contrast	
-VL_weekly_de_analysis = DE_timepoints(
+weekly_de_analysis = DE_timepoints(
      data, splines_model, contrasts,
      use_voom_weights=FALSE)
 ```
@@ -470,22 +470,27 @@ week between control and each of the influenza strains.
 **EAP: Should `timely_barplot` be a function of `moanin`?**
 
 ```{r fig.width=6, fig.height=6, echo=FALSE}
-timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05, title="",...){
+timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05,
+			  title="", ...){
     qval_colnames = colnames(de_analysis)[
 	grepl("qval", colnames(de_analysis))]
-    if(is.null(labels)) labels<-sapply(strsplit(gsub("-qval","",qval_colnames),"\\."),.subset2,3)
+    if(is.null(labels)){
+	labels = sapply(
+	    strsplit(gsub("-qval", "", qval_colnames), "\\."), .subset2, 3)
+    }
     number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
+
     barplot(number_de_genes_per_time, col="black", 
-            names.arg=labels,ylim=c(0, 20000),
-	    xlab="Timepoint", ylab="Number of DE genes", main=title,...)
-    
+            # names.arg=labels,
+	    ylim=c(0, 20000),
+	    xlab="Timepoint", ylab="Number of DE genes", main=title, ...)  
 }
 
 par(mfrow=c(2, 2))
-timely_barplot(K_weekly_de_analysis, time, title="Kawasaki",las=3)
-timely_barplot(C_weekly_de_analysis, time, title="California",las=3)
-timely_barplot(VL_weekly_de_analysis, time, title="Vietnam low-dose",las=3)
-timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose",las=3)
+timely_barplot(K_weekly_de_analysis, time, title="Kawasaki", las=3)
+timely_barplot(C_weekly_de_analysis, time, title="California", las=3)
+timely_barplot(VL_weekly_de_analysis, time, title="Vietnam low-dose", las=3)
+timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose", las=3)
 ```
 
 Such an analysis can demonstrate some general trends, with clearly more genes being differentially expressed at later time points, and the Vietnam high-dose showing perhaps an earlier onset than the low-dose.
