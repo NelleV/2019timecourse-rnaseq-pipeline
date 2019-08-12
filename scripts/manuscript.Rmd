@@ -481,7 +481,7 @@ timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05,
     number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
 
     barplot(number_de_genes_per_time, col="black", 
-            # names.arg=labels,
+            names.arg=labels,
 	    ylim=c(0, 20000),
 	    xlab="Timepoint", ylab="Number of DE genes", main=title, ...)  
 }
@@ -489,7 +489,7 @@ timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05,
 par(mfrow=c(2, 2))
 timely_barplot(K_weekly_de_analysis, time, title="Kawasaki", las=3)
 timely_barplot(C_weekly_de_analysis, time, title="California", las=3)
-timely_barplot(VL_weekly_de_analysis, time, title="Vietnam low-dose", las=3)
+timely_barplot(weekly_de_analysis, time, title="Vietnam low-dose", las=3)
 timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose", las=3)
 ```
 
