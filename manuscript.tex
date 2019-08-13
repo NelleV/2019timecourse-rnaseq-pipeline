@@ -134,8 +134,6 @@ EAP:
 \begin{itemize}
 \tightlist
 \item
-  Why \texttt{dependicies=FALSE}? (same for the README for the repos). Seems easier to just say dependencies=TRUE and avoid the install.R routine.
-\item
   I got an error in installation script for packages:
 \end{itemize}
 
@@ -154,16 +152,6 @@ In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = T
   there is no package called <e2><80><98>kableExtra<e2><80><99>
 Execution halted
 \end{verbatim}
-
-\begin{itemize}
-\tightlist
-\item
-  \texttt{biocLite} is no longer the recommended way to install bioconductor. Instead
-  \texttt{BiocManager::install(c("edge",\ "NMI"))}. But this is dependent on
-  bioconductor/R version. Also, now that docker, can you change the
-  installation to just be simple one-liner (and \texttt{BiocManager::install} can
-  also do non-bioc packages, and is much more reliable.)
-\end{itemize}
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -654,8 +642,6 @@ show some meaningful changes between 60 and 72H, but others clearly just have
 a single replicate that is different or increased variability at 72H.
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/showMissingDEGenes-1} \end{center}
-
-\textbf{EAP: It would be nice to be able to subset in \texttt{plot\_splines\_data/plot\_splines\_data} to only some of the groups}
 
 As a summary, classic differential expression methods are appropriate for
 unordered treatments, but fail to make use of the temporal structure of the data.
