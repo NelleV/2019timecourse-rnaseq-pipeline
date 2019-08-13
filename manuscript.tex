@@ -123,39 +123,8 @@ time-course gene expression data, clustering, differential expression, workflow
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(devtools)}
-\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{, }\DataTypeTok{dependencies=}\OtherTok{FALSE}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{, dependencies)}
 
-\begin{verbatim}
-##   
-   checking for file '/tmp/RtmpgstNOQ/remotes34231fb8c9/NelleV-moanin-8ab5610/DESCRIPTION' ...
-  
-v  checking for file '/tmp/RtmpgstNOQ/remotes34231fb8c9/NelleV-moanin-8ab5610/DESCRIPTION'
-## 
-  
--  preparing 'moanin':
-##    checking DESCRIPTION meta-information ...
-  
-v  checking DESCRIPTION meta-information
-## 
-  
--  checking for LF line-endings in source and make files and shell scripts
-## 
-  
--  checking for empty or unneeded directories
-## -  looking to see if a 'data/datalist' file should be added
-## 
-  
--  building 'moanin_0.0.0.tar.gz' (4.2s)
-## 
-  
-   
-## 
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(moanin)}
 \end{Highlighting}
 \end{Shaded}
@@ -333,7 +302,7 @@ variable genes: we keep for this step only the top 50\% most variable genes.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-6-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-7-1} \end{center}
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data.
@@ -650,7 +619,7 @@ and clutter the namespace. In order to provide reasonable visualization, they
 also often need to be tweaked specfically to match the data (here, the ylim is
 set specifically to the data}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-12-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
 
 Such an analysis can demonstrate some general trends, with clearly more genes
 being differentially expressed at later time points, and the Vietnam high-dose
@@ -737,7 +706,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -814,7 +783,7 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-17-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -832,7 +801,7 @@ computation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
 visualize gene time-course data. Here, we plot the 10 genes with the smallest
@@ -847,7 +816,7 @@ p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 And here we visualize the genes with the largest absolute EPICON log-fold
 change.
@@ -863,7 +832,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -950,7 +919,7 @@ with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
 
 The scoring and labeling can be done via the \texttt{splines\_kmeans\_score\_and\_label}
 function.
@@ -972,13 +941,13 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labelinig step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
 
 The scoring and label step allows to label genes that were removed during the
 filtering step, yet are good matches to the centroids found during the
 clustering.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} \end{center}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1041,7 +1010,7 @@ First, select the genes of interest.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1219,7 +1188,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1232,7 +1201,7 @@ Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-2} \end{center}
 
 \hypertarget{the-model-explorer-strategy}{%
 \subparagraph{The model explorer strategy}\label{the-model-explorer-strategy}}
@@ -1258,7 +1227,7 @@ obtained scores.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-32-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-33-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1277,7 +1246,7 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-33-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-34-1} \end{center}
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
 \subparagraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
@@ -1535,14 +1504,14 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 ## [45] rvest_0.3.3             gtools_3.8.1           
 ## [47] XML_3.98-1.19           zlibbioc_1.26.0        
 ## [49] MASS_7.3-51.4           scales_1.0.0           
-## [51] hms_0.4.2               yaml_2.2.0             
-## [53] curl_3.3                memoise_1.1.0          
+## [51] hms_0.4.2               curl_3.3               
+## [53] yaml_2.2.0              memoise_1.1.0          
 ## [55] gridExtra_2.3           TeachingDemos_2.10     
 ## [57] stringi_1.4.3           RSQLite_2.1.1          
 ## [59] desc_1.2.0              foreach_1.4.4          
 ## [61] permute_0.9-5           pkgbuild_1.0.3         
 ## [63] bibtex_0.4.2            geometry_0.4.1         
-## [65] rlang_0.3.4             pkgconfig_2.0.2        
+## [65] rlang_0.4.0             pkgconfig_2.0.2        
 ## [67] matrixStats_0.54.0      evaluate_0.13          
 ## [69] lattice_0.20-38         purrr_0.3.2            
 ## [71] bit_1.1-14              processx_3.3.1         
@@ -1553,9 +1522,9 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 ## [81] withr_2.1.2             abind_1.4-5            
 ## [83] KEGGREST_1.20.2         tibble_2.1.1           
 ## [85] crayon_1.3.4            progress_1.2.0         
-## [87] grid_3.6.0              vegan_2.5-4            
-## [89] blob_1.1.1              callr_3.2.0            
-## [91] git2r_0.25.2            digest_0.6.18          
+## [87] grid_3.6.0              blob_1.1.1             
+## [89] callr_3.2.0             git2r_0.25.2           
+## [91] vegan_2.5-4             digest_0.6.18          
 ## [93] webshot_0.5.1           xtable_1.8-4           
 ## [95] munsell_0.5.0           magic_1.5-9            
 ## [97] sessioninfo_1.1.1
