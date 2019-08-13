@@ -64,8 +64,6 @@ knitr::opts_chunk$set(
 
 # TODO list
 
-
-- Add legends to the plots that don't have.
 - Make clear that it applies to RNASeq and how to call the different functions
     to RNASeq
 - Check that clustering can deal with count data.
