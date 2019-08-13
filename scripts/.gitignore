@@ -1,4 +1,8 @@
 *.html
+*.log
+*.tex
 reports
+manuscript_cache
+manuscript_files
 results/stability*
 .results

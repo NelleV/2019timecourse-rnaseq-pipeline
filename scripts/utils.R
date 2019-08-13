@@ -4,7 +4,7 @@ group_colors = c(
     "C"="orange",
     "VH"="red4",
     "VL"="red2")
-time_colors = grDevices::rainbow(14)
+time_colors = grDevices::rainbow(15)[1:14]
 names(time_colors) = c(0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60, 72, 120, 168)
 
 ann_colors = list(

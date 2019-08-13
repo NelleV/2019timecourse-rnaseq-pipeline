@@ -66,10 +66,6 @@ knitr::opts_chunk$set(
 
 
 - Add legends to the plots that don't have.
-- Currently have two functions "plot_genes", "plot_centroids", that do exactly
-    the same thing. Find a better name for both of them
-- switch to camel case function names
-- Remove the namespace call
 - Make clear that it applies to RNASeq and how to call the different functions
     to RNASeq
 - Check that clustering can deal with count data.
@@ -117,11 +113,17 @@ mRNA from all genes in a sample. High-throughput studies of gene expression
 have a long history, starting with microarray technologies in the 1990s
 through to single-cell technologies. While many expression studies are
 designed to compare the gene expression between distinct groups, there is also a
-long history of time-course expression studies. Such studies compare the  gene expression
-across time by measuring mRNA levels from samples collected at different timepoints [^1]. Such time-course studies can vary from measuring a few distinct time
+long history of time-course expression studies. Such studies compare the 
+gene expression
+across time by measuring mRNA levels from samples collected at different 
+timepoints [^1]. Such time-course studies can vary from measuring a few 
+distinct time
 points, to sampling ten to twenty time points. These longer time series are
 particularly interested in investigating development over time. More recently,
-a new variety of time course studies have come from single-cell sequencing experiments**EAP: need citation** which can sequencing single cells which are at different stages of development; in this case, the time point is the stage of the cell in the process of development -- a
+a new variety of time course studies have come from single-cell sequencing experiments
+[@shalek:single-cell; @habib:div-seq; @trapnell:dynamics]
+which can sequencing single cells which are at different stages of development; in this case,
+the time point is the stage of the cell in the process of development -- a
 value that is not know but estimated from the data as its "pseudo-time."
 
 [^1]: Because the collection of the mRNA is often destructive, samples at
@@ -139,7 +141,8 @@ time-course permutation tests [@park:statistical], and multiple testing
 strategies to combine single time point differential expression analysis
 [@sun:multiple]. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show *some* change. For
-example, in a study of mice lung tissues infected with influenza that we consider in this workflow, over 50% of genes
+example, in a study of mice lung tissues infected with influenza that we
+consider in this workflow, over 50% of genes
 are shown to be changing over time. The task in these settings is often not to
 detect changes in genes, but to categorize them into biologically interpretable
 patterns. 
@@ -159,7 +162,7 @@ analysing gene expression data, some specific for time-course data, others
 broadly used by the community. We provide the various steps of the workflow as
 functions in a R package called `moanin`.
 
-```{r schema, echo=FALSE, fig.width=3, fig.cap="Workflow for analyzing time-course datasets."}
+```{r schema, echo=FALSE, fig.width=1, fig.cap="Workflow for analyzing time-course datasets."}
 
 knitr::include_graphics("images/fig1_schemas.png")
 
@@ -243,7 +246,6 @@ percent_var = round(100 * attr(pca_data, "percentVar"))
 
 We then plot the two first PC components, and color each sample by (1) its
 condition; (2) its sampling time. We use different plotting symbols for each replicate. We also plot the second and third components in the second column.
-**EAP: The colors for timepoint appear to circle around, i.e. the first and last are very similar colors**
 
 ```{r pca_plots, fig.width=6, fig.height=6}
 par(mfrow=c(2, 2))
@@ -252,8 +254,9 @@ plot(
     pca_data$x[, c("PC1","PC2")],
     col=ann_colors$Group[meta$Group],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)], bty="l")
-mtext(at=275,text="Colored by Group", line=0.5 ,font=2,adj=0.5)
-legend(x=250,y=25,legend=names(ann_colors$Group), fill=ann_colors$Group,bty="n",xpd=NA,yjust=0.5)
+mtext(at=275, text="Colored by Group", line=0.5, font=2, adj=0.5)
+legend(x=250, y=25, legend=names(ann_colors$Group),
+       fill=ann_colors$Group, bty="n", xpd=NA, yjust=0.5)
 par(mar=c(4.5, 5.5, 1.5, .1))
 plot(
     pca_data$x[, c("PC3","PC2")],
@@ -266,8 +269,9 @@ plot(
     pca_data$x[, c("PC1","PC2")],
     col=ann_colors$Timepoint[as.factor(meta$Timepoint)],
     pch=ann_markers$Replicate[as.factor(meta$Replicate)], bty="l")
-mtext(at=275,text="Colored by Timepoint",line=0.5 ,font=2,adj=0.5)
-legend(x=250,y=-15,legend=names(ann_colors$Timepoint), fill=ann_colors$Timepoint,bty="n",xpd=NA,yjust=0.5)
+mtext(at=275, text="Colored by Timepoint", line=0.5, font=2, adj=0.5)
+legend(x=250, y=-15, legend=names(ann_colors$Timepoint),
+       fill=ann_colors$Timepoint, bty="n", xpd=NA, yjust=0.5)
 par(mar=c(4.5, 5.5, 1.5, .1))
 plot(
     pca_data$x[, c("PC3","PC2")],
@@ -344,7 +348,7 @@ expression across time.
 The per-time point analysis is using classical differential expression
 approaches, and is often the approach advocated when dealing with small
 time-course datasets, where there are only a few time points 
-[@ritchie:limma, @robinson:edgeR, @love:moderated] . For long time-course datasets,
+[@ritchie:limma; @robinson:edgeR; @love:moderated] . For long time-course datasets,
 however, a separate test for each time-point results in creating many
 different tests, for example one for every time point, the results of which
 are difficult to integrate. We find in practice that the global analysis
@@ -352,14 +356,14 @@ simplifies analysis and of longer time courses data, with per-time point
 analysis reserved for particularly interesting comparisons of individual
 time-points. 
 
-We note that we could have time course data on either a single condition or
+We note that we could have time course data on either a single condition (to
+identify genes changing over time) or
 time course data on multiple conditions (such as the influenza dataset we are
 considering), which will alter slightly the types of questions we are
-interested in, but the two basic approaches remains the same. In what follows,
-we will focus on the situation where we have multiple conditions. **EAP: Any
-reason one and not the other. Maybe should change this sentence**
-
-
+interested in. 
+In what follows, we will focus on the situation
+where we have multiple conditions. **EAP: Any reason one and not the other.
+Maybe should change this sentence**
 
 **Use with `moanin`** `moanin` provides functionality for performing both of
 these types of approaches, though our focus is on the global approach. In both
@@ -433,7 +437,11 @@ weekly_de_analysis = DE_timepoints(
 ```
 **EAP: Sort of strange to have argument `spines_model` for function that doesn't use splines. Perhaps there is a generic name that could be used for the argument**
 
-This results in a table of the results, where each row corresponds to a gene and the columns correspond to the p-value (`pval`), log-fold change (`lfc`) and adjusted p-value (`qval`); the order of the genes in the table is the same as the input `data`. Here we show the results for the first two timepoints and the first ten genes: 
+This results in a table of the results, where each row corresponds to a gene
+and the columns correspond to the p-value (`pval`), log-fold change (`lfc`)
+and adjusted p-value (`qval`); the order of the genes in the table is the same
+as the input `data`. Here we show the results for the first two timepoints and
+the first ten genes: 
 
 ```{r echo=FALSE}
 kable(weekly_de_analysis[1:10, 1:6 ],digits=3)
@@ -442,8 +450,9 @@ kable(weekly_de_analysis[1:10, 1:6 ],digits=3)
 **EAP: For the output of this, the column names are in format `M.0-VL.0-pval`, for example. This may be hard to parse algorithmically down the road because you are using the same character for the contrast (`-`) as the separator for the `pval`. So for example, if you wanted to split the contrast name from the `pval` or `lfc` part, it wouldn't be very easy. Maybe underscore `_` would be better separator?**
 
 
-
-We will repeat this, comparing each of the treatments to the control ("M") (code not printed here, as it is a replicate of the above, see accompanying Rmarkdown document). 
+We will repeat this, comparing each of the treatments to the control ("M")
+(code not printed here, as it is a replicate of the above, see accompanying
+Rmarkdown document). 
 
 ```{r echo=FALSE, results="hide"}
 contrasts = create_timepoints_contrasts("M", "K", splines_model)
@@ -469,6 +478,11 @@ week between control and each of the influenza strains.
 
 **EAP: Should `timely_barplot` be a function of `moanin`?**
 
+**NV: I'd rather not include these types of functions that are hard to test
+and clutter the namespace. In order to provide reasonable visualization, they
+also often need to be tweaked specfically to match the data (here, the ylim is
+set specifically to the data**
+
 ```{r fig.width=6, fig.height=6, echo=FALSE}
 timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05,
 			  title="", ...){
@@ -481,16 +495,17 @@ timely_barplot = function(de_analysis, labels=NULL, qval_threshold=0.05,
     number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
 
     barplot(number_de_genes_per_time, col="black", 
-            # names.arg=labels,
+            names.arg=labels,
 	    ylim=c(0, 20000),
 	    xlab="Timepoint", ylab="Number of DE genes", main=title, ...)  
 }
 
 par(mfrow=c(2, 2))
-timely_barplot(K_weekly_de_analysis, time, title="Kawasaki", las=3)
-timely_barplot(C_weekly_de_analysis, time, title="California", las=3)
-timely_barplot(weekly_de_analysis, time, title="Vietnam low-dose", las=3)
-timely_barplot(VH_weekly_de_analysis, time, title="Vietnam high-dose", las=3)
+time = names(time_colors)
+timely_barplot(K_weekly_de_analysis, labels=time, title="Kawasaki", las=3)
+timely_barplot(C_weekly_de_analysis, labels=time, title="California", las=3)
+timely_barplot(weekly_de_analysis, labels=time, title="Vietnam low-dose", las=3)
+timely_barplot(VH_weekly_de_analysis, labels=time, title="Vietnam high-dose", las=3)
 ```
 
 Such an analysis can demonstrate some general trends, with clearly more genes
@@ -538,10 +553,10 @@ a single replicate that is different or increased variability at 72H.
 ```{r showMissingDEGenes, echo=FALSE}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
 wh<-which(splines_model$meta$Group %in% c("K","M"))
-plot_genes(data[exampleGenes,],splines_model,colors=ann_colors$Group)
+plot_splines_data(data[exampleGenes,], splines_model, colors=ann_colors$Group)
 ``` 
 
-**EAP: It would be nice to be able to subset in `plot_centroids/plot_genes` to only some of the groups**
+**EAP: It would be nice to be able to subset in `plot_splines_data/plot_splines_data` to only some of the groups**
 
 As a summary, classic differential expression methods are appropriate for
 unordered treatments, but fail to make use of the temporal structure of the data.
@@ -690,7 +705,7 @@ p-values.
 
 ```{r fig.height=6, fig.width=6}
 top_DE_genes_pval = names(sort(pvalue)[1:10])
-plot_genes(data[top_DE_genes_pval, ], splines_model,
+plot_splines_data(data[top_DE_genes_pval, ], splines_model,
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 ```
@@ -702,7 +717,7 @@ change.
 top_DE_genes_lfc = names(
     sort(abs(lfc_epicon),
 	 decreasing=TRUE)[1:10])
-plot_genes(data[top_DE_genes_lfc, ], splines_model,
+plot_splines_data(data[top_DE_genes_lfc, ], splines_model,
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 
@@ -773,11 +788,12 @@ kmeans_clusters = splines_kmeans(
     n_init=20)
 ```
 
-We then use the `plot_centroids` function to visualize the centroids obtained
+We then use the `plot_splines_data` function to visualize the centroids obtained
 with the splines k-means model. 
 
 ```{r fig.height=6, fig.width=6}
-plot_centroids(kmeans_clusters$centroids, splines_model,
+plot_splines_data(
+    kmeans_clusters$centroids, splines_model,
     colors=ann_colors$Group,
     smooth=TRUE)
 ```
