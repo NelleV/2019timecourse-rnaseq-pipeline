@@ -73,7 +73,7 @@ knitr::opts_chunk$set(
 
 ```{r eval=FALSE}
 library(devtools)
-install_github("NelleV/moanin", dependencies)
+install_github("NelleV/moanin")
 
 library(moanin)
 ```
