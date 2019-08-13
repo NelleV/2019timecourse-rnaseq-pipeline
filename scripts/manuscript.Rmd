@@ -71,10 +71,14 @@ knitr::opts_chunk$set(
 - Check that clustering can deal with count data.
 
 
-```{r}
+```{r eval=FALSE}
 library(devtools)
-install_github("NelleV/moanin", dependencies=FALSE)
+install_github("NelleV/moanin", dependencies)
 
+library(moanin)
+```
+
+```{r echo=FALSE}
 library(moanin)
 ```
 
