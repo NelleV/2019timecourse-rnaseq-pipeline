@@ -15,6 +15,16 @@ get_data() {
     popd
 }
 
+install_github_dependencies() {
+    # install_github keeps failing because of the Github API rate limit. So
+    # we're just going to do this by hand…
+    pushd /tmp
+    wget -P . https://github.com/NelleV/moanin/archive/master.zip
+    unzip /tmp/master.zip
+    cd moanin-master
+    make install
+    popd
+}
 
 run_tests() {
     # first run the actual tests
@@ -25,6 +35,7 @@ run_tests() {
 
 
 # Now get data and run the tests and build the manuscript
-get_data
+# get_data
+install_github_dependencies
 run_tests
 mkdir -p scripts/reports
