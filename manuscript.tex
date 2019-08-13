@@ -114,13 +114,6 @@ time-course gene expression data, clustering, differential expression, workflow
 \item
   Add legends to the plots that don't have.
 \item
-  Currently have two functions ``plot\_genes'', ``plot\_centroids'', that do exactly
-  the same thing. Find a better name for both of them
-\item
-  switch to camel case function names
-\item
-  Remove the namespace call
-\item
   Make clear that it applies to RNASeq and how to call the different functions
   to RNASeq
 \item
@@ -136,9 +129,9 @@ time-course gene expression data, clustering, differential expression, workflow
 
 \begin{verbatim}
 ##   
-   checking for file '/tmp/Rtmp730h5L/remotes334541e0f9/NelleV-moanin-867a648/DESCRIPTION' ...
+   checking for file '/tmp/RtmpgstNOQ/remotes34231fb8c9/NelleV-moanin-8ab5610/DESCRIPTION' ...
   
-v  checking for file '/tmp/Rtmp730h5L/remotes334541e0f9/NelleV-moanin-867a648/DESCRIPTION'
+v  checking for file '/tmp/RtmpgstNOQ/remotes34231fb8c9/NelleV-moanin-8ab5610/DESCRIPTION'
 ## 
   
 -  preparing 'moanin':
@@ -211,14 +204,20 @@ mRNA from all genes in a sample. High-throughput studies of gene expression
 have a long history, starting with microarray technologies in the 1990s
 through to single-cell technologies. While many expression studies are
 designed to compare the gene expression between distinct groups, there is also a
-long history of time-course expression studies. Such studies compare the gene expression
-across time by measuring mRNA levels from samples collected at different timepoints \footnote{Because the collection of the mRNA is often destructive, samples at
+long history of time-course expression studies. Such studies compare the
+gene expression
+across time by measuring mRNA levels from samples collected at different
+timepoints \footnote{Because the collection of the mRNA is often destructive, samples at
   different time points are generally from different biological samples;
   longitudinal studies, for example tracking the same subject over time, are
-  certainly possible, but not directly considered here.}. Such time-course studies can vary from measuring a few distinct time
+  certainly possible, but not directly considered here.}. Such time-course studies can vary from measuring a few
+distinct time
 points, to sampling ten to twenty time points. These longer time series are
 particularly interested in investigating development over time. More recently,
-a new variety of time course studies have come from single-cell sequencing experiments\textbf{EAP: need citation} which can sequencing single cells which are at different stages of development; in this case, the time point is the stage of the cell in the process of development -- a
+a new variety of time course studies have come from single-cell sequencing experiments
+\citep{shalek:single-cell, habib:div-seq, trapnell:dynamics}
+which can sequencing single cells which are at different stages of development; in this case,
+the time point is the stage of the cell in the process of development -- a
 value that is not know but estimated from the data as its ``pseudo-time.''
 
 While there are many methods that have been proposed for discrete aspects of
@@ -231,7 +230,8 @@ time-course permutation tests \citep{park:statistical}, and multiple testing
 strategies to combine single time point differential expression analysis
 \citep{sun:multiple}. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show \emph{some} change. For
-example, in a study of mice lung tissues infected with influenza that we consider in this workflow, over 50\% of genes
+example, in a study of mice lung tissues infected with influenza that we
+consider in this workflow, over 50\% of genes
 are shown to be changing over time. The task in these settings is often not to
 detect changes in genes, but to categorize them into biologically interpretable
 patterns.
@@ -347,7 +347,6 @@ centered and scaled gene expression data.
 
 We then plot the two first PC components, and color each sample by (1) its
 condition; (2) its sampling time. We use different plotting symbols for each replicate. We also plot the second and third components in the second column.
-\textbf{EAP: The colors for timepoint appear to circle around, i.e.~the first and last are very similar colors}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -357,8 +356,9 @@ condition; (2) its sampling time. We use different plotting symbols for each rep
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\KeywordTok{c}\NormalTok{(}\StringTok{"PC1"}\NormalTok{,}\StringTok{"PC2"}\NormalTok{)],}
     \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group[meta}\OperatorTok{$}\NormalTok{Group],}
     \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)], }\DataTypeTok{bty=}\StringTok{"l"}\NormalTok{)}
-\KeywordTok{mtext}\NormalTok{(}\DataTypeTok{at=}\DecValTok{275}\NormalTok{,}\DataTypeTok{text=}\StringTok{"Colored by Group"}\NormalTok{, }\DataTypeTok{line=}\FloatTok{0.5}\NormalTok{ ,}\DataTypeTok{font=}\DecValTok{2}\NormalTok{,}\DataTypeTok{adj=}\FloatTok{0.5}\NormalTok{)}
-\KeywordTok{legend}\NormalTok{(}\DataTypeTok{x=}\DecValTok{250}\NormalTok{,}\DataTypeTok{y=}\DecValTok{25}\NormalTok{,}\DataTypeTok{legend=}\KeywordTok{names}\NormalTok{(ann_colors}\OperatorTok{$}\NormalTok{Group), }\DataTypeTok{fill=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group,}\DataTypeTok{bty=}\StringTok{"n"}\NormalTok{,}\DataTypeTok{xpd=}\OtherTok{NA}\NormalTok{,}\DataTypeTok{yjust=}\FloatTok{0.5}\NormalTok{)}
+\KeywordTok{mtext}\NormalTok{(}\DataTypeTok{at=}\DecValTok{275}\NormalTok{, }\DataTypeTok{text=}\StringTok{"Colored by Group"}\NormalTok{, }\DataTypeTok{line=}\FloatTok{0.5}\NormalTok{, }\DataTypeTok{font=}\DecValTok{2}\NormalTok{, }\DataTypeTok{adj=}\FloatTok{0.5}\NormalTok{)}
+\KeywordTok{legend}\NormalTok{(}\DataTypeTok{x=}\DecValTok{250}\NormalTok{, }\DataTypeTok{y=}\DecValTok{25}\NormalTok{, }\DataTypeTok{legend=}\KeywordTok{names}\NormalTok{(ann_colors}\OperatorTok{$}\NormalTok{Group),}
+       \DataTypeTok{fill=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{bty=}\StringTok{"n"}\NormalTok{, }\DataTypeTok{xpd=}\OtherTok{NA}\NormalTok{, }\DataTypeTok{yjust=}\FloatTok{0.5}\NormalTok{)}
 \KeywordTok{par}\NormalTok{(}\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{4.5}\NormalTok{, }\FloatTok{5.5}\NormalTok{, }\FloatTok{1.5}\NormalTok{, }\FloatTok{.1}\NormalTok{))}
 \KeywordTok{plot}\NormalTok{(}
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\KeywordTok{c}\NormalTok{(}\StringTok{"PC3"}\NormalTok{,}\StringTok{"PC2"}\NormalTok{)],}
@@ -371,8 +371,9 @@ condition; (2) its sampling time. We use different plotting symbols for each rep
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\KeywordTok{c}\NormalTok{(}\StringTok{"PC1"}\NormalTok{,}\StringTok{"PC2"}\NormalTok{)],}
     \DataTypeTok{col=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Timepoint)],}
     \DataTypeTok{pch=}\NormalTok{ann_markers}\OperatorTok{$}\NormalTok{Replicate[}\KeywordTok{as.factor}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Replicate)], }\DataTypeTok{bty=}\StringTok{"l"}\NormalTok{)}
-\KeywordTok{mtext}\NormalTok{(}\DataTypeTok{at=}\DecValTok{275}\NormalTok{,}\DataTypeTok{text=}\StringTok{"Colored by Timepoint"}\NormalTok{,}\DataTypeTok{line=}\FloatTok{0.5}\NormalTok{ ,}\DataTypeTok{font=}\DecValTok{2}\NormalTok{,}\DataTypeTok{adj=}\FloatTok{0.5}\NormalTok{)}
-\KeywordTok{legend}\NormalTok{(}\DataTypeTok{x=}\DecValTok{250}\NormalTok{,}\DataTypeTok{y=}\OperatorTok{-}\DecValTok{15}\NormalTok{,}\DataTypeTok{legend=}\KeywordTok{names}\NormalTok{(ann_colors}\OperatorTok{$}\NormalTok{Timepoint), }\DataTypeTok{fill=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint,}\DataTypeTok{bty=}\StringTok{"n"}\NormalTok{,}\DataTypeTok{xpd=}\OtherTok{NA}\NormalTok{,}\DataTypeTok{yjust=}\FloatTok{0.5}\NormalTok{)}
+\KeywordTok{mtext}\NormalTok{(}\DataTypeTok{at=}\DecValTok{275}\NormalTok{, }\DataTypeTok{text=}\StringTok{"Colored by Timepoint"}\NormalTok{, }\DataTypeTok{line=}\FloatTok{0.5}\NormalTok{, }\DataTypeTok{font=}\DecValTok{2}\NormalTok{, }\DataTypeTok{adj=}\FloatTok{0.5}\NormalTok{)}
+\KeywordTok{legend}\NormalTok{(}\DataTypeTok{x=}\DecValTok{250}\NormalTok{, }\DataTypeTok{y=}\OperatorTok{-}\DecValTok{15}\NormalTok{, }\DataTypeTok{legend=}\KeywordTok{names}\NormalTok{(ann_colors}\OperatorTok{$}\NormalTok{Timepoint),}
+       \DataTypeTok{fill=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Timepoint, }\DataTypeTok{bty=}\StringTok{"n"}\NormalTok{, }\DataTypeTok{xpd=}\OtherTok{NA}\NormalTok{, }\DataTypeTok{yjust=}\FloatTok{0.5}\NormalTok{)}
 \KeywordTok{par}\NormalTok{(}\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{4.5}\NormalTok{, }\FloatTok{5.5}\NormalTok{, }\FloatTok{1.5}\NormalTok{, }\FloatTok{.1}\NormalTok{))}
 \KeywordTok{plot}\NormalTok{(}
 \NormalTok{    pca_data}\OperatorTok{$}\NormalTok{x[, }\KeywordTok{c}\NormalTok{(}\StringTok{"PC3"}\NormalTok{,}\StringTok{"PC2"}\NormalTok{)],}
@@ -460,7 +461,7 @@ determining differentially expressed genes,
 The per-time point analysis is using classical differential expression
 approaches, and is often the approach advocated when dealing with small
 time-course datasets, where there are only a few time points
-\citep[\citet{robinson:edgeR}, \citet{love:moderated}]{ritchie:limma} . For long time-course datasets,
+\citep{ritchie:limma, robinson:edgeR, love:moderated} . For long time-course datasets,
 however, a separate test for each time-point results in creating many
 different tests, for example one for every time point, the results of which
 are difficult to integrate. We find in practice that the global analysis
@@ -468,12 +469,14 @@ simplifies analysis and of longer time courses data, with per-time point
 analysis reserved for particularly interesting comparisons of individual
 time-points.
 
-We note that we could have time course data on either a single condition or
+We note that we could have time course data on either a single condition (to
+identify genes changing over time) or
 time course data on multiple conditions (such as the influenza dataset we are
 considering), which will alter slightly the types of questions we are
-interested in, but the two basic approaches remains the same. In what follows,
-we will focus on the situation where we have multiple conditions. \textbf{EAP: Any
-reason one and not the other. Maybe should change this sentence}
+interested in.
+In what follows, we will focus on the situation
+where we have multiple conditions. \textbf{EAP: Any reason one and not the other.
+Maybe should change this sentence}
 
 \textbf{Use with \texttt{moanin}} \texttt{moanin} provides functionality for performing both of
 these types of approaches, though our focus is on the global approach. In both
@@ -599,7 +602,11 @@ jointly using the function \texttt{DE\_timepoints}.
 
 \textbf{EAP: Sort of strange to have argument \texttt{spines\_model} for function that doesn't use splines. Perhaps there is a generic name that could be used for the argument}
 
-This results in a table of the results, where each row corresponds to a gene and the columns correspond to the p-value (\texttt{pval}), log-fold change (\texttt{lfc}) and adjusted p-value (\texttt{qval}); the order of the genes in the table is the same as the input \texttt{data}. Here we show the results for the first two timepoints and the first ten genes:
+This results in a table of the results, where each row corresponds to a gene
+and the columns correspond to the p-value (\texttt{pval}), log-fold change (\texttt{lfc})
+and adjusted p-value (\texttt{qval}); the order of the genes in the table is the same
+as the input \texttt{data}. Here we show the results for the first two timepoints and
+the first ten genes:
 
 \begin{tabular}{l|r|r|r|r|r|r}
 \hline
@@ -629,12 +636,19 @@ NM\_028622 & 0.767 & 0.876 & 1.648 & 0.946 & 0.974 & -1.865\\
 
 \textbf{EAP: For the output of this, the column names are in format \texttt{M.0-VL.0-pval}, for example. This may be hard to parse algorithmically down the road because you are using the same character for the contrast (\texttt{-}) as the separator for the \texttt{pval}. So for example, if you wanted to split the contrast name from the \texttt{pval} or \texttt{lfc} part, it wouldn't be very easy. Maybe underscore \texttt{\_} would be better separator?}
 
-We will repeat this, comparing each of the treatments to the control (``M'') (code not printed here, as it is a replicate of the above, see accompanying Rmarkdown document).
+We will repeat this, comparing each of the treatments to the control (``M'')
+(code not printed here, as it is a replicate of the above, see accompanying
+Rmarkdown document).
 
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
 \textbf{EAP: Should \texttt{timely\_barplot} be a function of \texttt{moanin}?}
+
+\textbf{NV: I'd rather not include these types of functions that are hard to test
+and clutter the namespace. In order to provide reasonable visualization, they
+also often need to be tweaked specfically to match the data (here, the ylim is
+set specifically to the data}
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-12-1} \end{center}
 
@@ -672,7 +686,7 @@ a single replicate that is different or increased variability at 72H.
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/showMissingDEGenes-1} \end{center}
 
-\textbf{EAP: It would be nice to be able to subset in \texttt{plot\_centroids/plot\_genes} to only some of the groups}
+\textbf{EAP: It would be nice to be able to subset in \texttt{plot\_splines\_data/plot\_splines\_data} to only some of the groups}
 
 As a summary, classic differential expression methods are appropriate for
 unordered treatments, but fail to make use of the temporal structure of the data.
@@ -827,7 +841,7 @@ p-values.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{top_DE_genes_pval =}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{sort}\NormalTok{(pvalue)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
-\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_pval, ], splines_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_pval, ], splines_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -843,7 +857,7 @@ change.
 \NormalTok{top_DE_genes_lfc =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
     \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_epicon),}
      \DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
-\KeywordTok{plot_genes}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -924,12 +938,13 @@ The first three steps are performed jointly by the \texttt{splines\_kmeans} func
 \end{Highlighting}
 \end{Shaded}
 
-We then use the \texttt{plot\_centroids} function to visualize the centroids obtained
+We then use the \texttt{plot\_splines\_data} function to visualize the centroids obtained
 with the splines k-means model.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{plot_centroids}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, splines_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(}
+\NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, splines_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group,}
     \DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
