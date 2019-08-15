@@ -439,13 +439,20 @@ situations, we first need to set up a object (a \texttt{splines\_model} object) 
 hold the meta data, as well as information for fitting the spline model.
 
 We start by creating the \texttt{splines\_model} object using the
-\texttt{create\_splines\_model} function. The \texttt{splines\_model} object contains a number
-of metadata and options used throughout this analysis: the condition and
-timepoints of each samples, the formula object used or the basis or the
-degrees of freedom of the model. The metadata data.frame object should
-contain at least two columns: one named \texttt{Group}, containing the treatement
-effect, and a second one named \texttt{Timepoint} containing the timepoint
-information.
+\texttt{create\_splines\_model} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{splines_model =}\StringTok{ }\KeywordTok{create_splines_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The \texttt{splines\_model} object contains a number of metadata and options used
+throughout this analysis: the condition and timepoints of each samples, the
+formula object used or the basis or the degrees of freedom of the model. The
+metadata data.frame object should contain at least two columns: one named
+\texttt{Group}, containing the treatement effect, and a second one named \texttt{Timepoint}
+containing the timepoint information.
 
 \begin{tabular}{l|r|l|r|r}
 \hline
@@ -466,20 +473,10 @@ GSM1557145 & 5 & K & 3 & 12\\
 \end{tabular}
 
 If no formula is provided, it will default to the following:
-\texttt{formula\ =\ \textasciitilde{}Group:ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}
+\texttt{formula\ =\ \textasciitilde{}Group:ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{splines_model =}\StringTok{ }\KeywordTok{create_splines_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-Here we have provided the meta data that defines\ldots{} \texttt{create\_splines\_model}
-will \ldots{}. \textbf{FIXME add information about what meta data is expected, describe
-what \texttt{create\_splines\_model} does (does it fit the splines? Just hold create an
-object? Create basis functions?)}.
-
-\textbf{EAP: General comment: you need a few more print() and head() of some objects to demonstrate what the output looks like}
+\textbf{EAP: General comment: you need a few more print() and head() of some objects
+to demonstrate what the output looks like}
 
 \hypertarget{weekly-differential-expression-analysis}{%
 \subsubsection{Weekly differential expression analysis}\label{weekly-differential-expression-analysis}}
@@ -657,29 +654,17 @@ data between different treatment conditions, using a similar mechanism of
 contrasts -- only now the contrasts are differences between the estimated
 means.
 
-\textbf{FIXME add in equations, like from the EPICON paper, to describe them mathematically}
-
-\textbf{EAP: Do we need this call to limma by the user, or can these not be done
-internally by the \texttt{timecourse\_differential\_expression\_analysis} function? We
-can still preserve the option of user defining their own, but would be nicer
-to make this simpler for the user (e.g.~an if clause that tests whether input
-is matrix or character vector)}
-
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Differential expression analysis}
 \NormalTok{timecourse_contrasts =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"M-K"}\NormalTok{, }\StringTok{"M-C"}\NormalTok{, }\StringTok{"M-VL"}\NormalTok{, }\StringTok{"M-VH"}\NormalTok{)}
-
-\NormalTok{contrasts =}\StringTok{ }\KeywordTok{makeContrasts}\NormalTok{(}
-    \DataTypeTok{contrasts=}\NormalTok{timecourse_contrasts,}
-    \DataTypeTok{levels=}\KeywordTok{levels}\NormalTok{(meta}\OperatorTok{$}\NormalTok{Group))}
 
 \CommentTok{# The function takes the data (data.frame or named matrix), the meta data}
 \CommentTok{# (data.frame containing a timepoint and group column, the first corresponding}
 \CommentTok{#<c2><a0>to the time-course information, the latter corresponding to the}
 \CommentTok{# treatment).}
 \NormalTok{pvalues =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{(}
-\NormalTok{    data, splines_model, contrasts,}
+\NormalTok{    data, splines_model, timecourse_contrasts,}
     \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, p.adjust)}
 \end{Highlighting}
@@ -707,7 +692,7 @@ for each individual timepoints.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{log_fold_change_timepoints =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
+\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -754,16 +739,16 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{log_fold_change_epicon =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"epicon"}\NormalTok{)}
+\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"epicon"}\NormalTok{)}
 
 \NormalTok{log_fold_change_sum =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
+\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
 
 \NormalTok{log_fold_change_max =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
+\NormalTok{    data, splines_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
 
 \NormalTok{log_fold_change_min =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
+\NormalTok{    data, splines_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
