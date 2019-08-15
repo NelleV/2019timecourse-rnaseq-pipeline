@@ -365,32 +365,29 @@ situations, we first need to set up a object (a `splines_model` object) to
 hold the meta data, as well as information for fitting the spline model. 
 
 We start by creating the `splines_model` object using the
-`create_splines_model` function. The `splines_model` object contains a number
-of metadata and options used throughout this analysis: the condition and
-timepoints of each samples, the formula object used or the basis or the
-degrees of freedom of the model. The metadata data.frame object should
-contain at least two columns: one named `Group`, containing the  treatement
-effect, and a second one named `Timepoint` containing the timepoint
-information.
+`create_splines_model` function. 
+
+```{r}
+splines_model = create_splines_model(meta, degrees_of_freedom=6)
+```
+
+The `splines_model` object contains a number of metadata and options used
+throughout this analysis: the condition and timepoints of each samples, the
+formula object used or the basis or the degrees of freedom of the model. The
+metadata data.frame object should contain at least two columns: one named
+`Group`, containing the  treatement effect, and a second one named `Timepoint`
+containing the timepoint information.
 
 ```{r echo=FALSE}
 kable(head(meta))
 ```
 
 If no formula is provided, it will default to the following: 
-`formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0` 
-
-```{r}
-splines_model = create_splines_model(meta, degrees_of_freedom=6)
-```
-
-Here we have provided the meta data that defines... `create_splines_model`
-will .... **FIXME add information about what meta data is expected, describe
-what `create_splines_model` does (does it fit the splines? Just hold create an
-object? Create basis functions?)**. 
+`formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0`.
 
 
-**EAP: General comment: you need a few more print() and head() of some objects to demonstrate what the output looks like**
+**EAP: General comment: you need a few more print() and head() of some objects
+to demonstrate what the output looks like**
 
 ### Weekly differential expression analysis
 
@@ -568,28 +565,16 @@ data between different treatment conditions, using a similar mechanism of
 contrasts -- only now the contrasts are differences between the estimated
 means.
 
-**FIXME add in equations, like from the EPICON paper, to describe them mathematically**
-
-**EAP: Do we need this call to limma by the user, or can these not be done
-internally by the `timecourse_differential_expression_analysis` function? We
-can still preserve the option of user defining their own, but would be nicer
-to make this simpler for the user (e.g. an if clause that tests whether input
-is matrix or character vector)**
-
 ```{r de_analysis}
 # Differential expression analysis
 timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
-
-contrasts = makeContrasts(
-	contrasts=timecourse_contrasts,
-	levels=levels(meta$Group))
 
 # The function takes the data (data.frame or named matrix), the meta data
 # (data.frame containing a timepoint and group column, the first corresponding
 # to the time-course information, the latter corresponding to the
 # treatment).
 pvalues = DE_timecourse(
-    data, splines_model, contrasts,
+    data, splines_model, timecourse_contrasts,
     use_voom_weights=FALSE)
 qvalues = apply(pvalues, 2, p.adjust)
 
@@ -621,7 +606,7 @@ for each individual timepoints.
 
 ```{r}
 log_fold_change_timepoints = estimate_log_fold_change(
-    data, splines_model, contrasts,  method="timely")
+    data, splines_model, timecourse_contrasts,  method="timely")
 ```
 
 ```{r echo=FALSE}
@@ -649,16 +634,16 @@ table of the possible ways to compute log-fold change values.
 
 ```{r}
 log_fold_change_epicon = estimate_log_fold_change(
-    data, splines_model, contrasts,  method="epicon")
+    data, splines_model, timecourse_contrasts,  method="epicon")
 
 log_fold_change_sum = estimate_log_fold_change(
-    data, splines_model, contrasts,  method="sum")
+    data, splines_model, timecourse_contrasts,  method="sum")
 
 log_fold_change_max = estimate_log_fold_change(
-    data, splines_model, contrasts, method="max")
+    data, splines_model, timecourse_contrasts, method="max")
 
 log_fold_change_min = estimate_log_fold_change(
-    data, splines_model, contrasts, method="min")
+    data, splines_model, timecourse_contrasts, method="min")
 ```
 
 
