@@ -625,16 +625,23 @@ table of the possible ways to compute log-fold change values.
 |------- | --------- |--- |
 | timely | $\text{lfc}(t)$  | Function of time |
 | sum  | $\sum_t lfc(t)$  | Sum of log fold change. |
-| abs_sum  | $\sum_t \|lfc(t)\|$  | Always positive |
-| max  | $\max_t \|lfc(t)\|$  | Always positive  |
-| min  | $\min_t \|lfc(t)\|$  | Always positive |
-| epicon  | $$  | Captures overall strength of response and overall direction |
+| abs_sum  | $\sum_t \lvert lfc(t)\lvert$  | Always positive |
+| max  | $\max_t \lvert lfc(t) \lvert$  | Always positive  |
+| min  | $\min_t \lvert lfc(t) \lvert$  | Always positive |
+| timecourse | See details below | Captures overall strength and direction  |
 
-**EAP: `epicon` is going to be weird for general use**
+To capture the overall strength and direction of the response, we leverage the
+timepoint by timepoint log-fold change $\text{lfc}(t)$, and apply the
+following formula:
+
+$$\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T lfc(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {lfc(t)} \lvert \right)$$
+
+Note that when a gene is not consistently up or down-regulated the estimation
+of the direction will not represent accurately the changes observed.
 
 ```{r}
-log_fold_change_epicon = estimate_log_fold_change(
-    data, splines_model, timecourse_contrasts,  method="epicon")
+log_fold_change_timecourse = estimate_log_fold_change(
+    data, splines_model, timecourse_contrasts,  method="timecourse")
 
 log_fold_change_sum = estimate_log_fold_change(
     data, splines_model, timecourse_contrasts,  method="sum")
@@ -649,12 +656,12 @@ log_fold_change_min = estimate_log_fold_change(
 
 ```{r echo=FALSE, fig.height=6, fig.width=6, message=FALSE}
 par(mfrow=c(2, 2))
-plot(log_fold_change_epicon[, "M-C"],
-     log_fold_change_sum[, "M-C"], pch=20, main="EPICON vs sum",
-     xlab="EPICON", ylab="sum")
-plot(log_fold_change_epicon[, "M-C"],
-     log_fold_change_max[, "M-C"], pch=20, main="EPICON vs max",
-     xlab="EPICON", ylab="max")
+plot(log_fold_change_timecourse[, "M-C"],
+     log_fold_change_sum[, "M-C"], pch=20, main="timecourse vs sum",
+     xlab="timecourse", ylab="sum")
+plot(log_fold_change_timecourse[, "M-C"],
+     log_fold_change_max[, "M-C"], pch=20, main="timecourse vs max",
+     xlab="timecourse", ylab="max")
 plot(log_fold_change_max[, "M-C"],
      log_fold_change_min[, "M-C"], pch=20, main="max vs min",
      xlab="max", ylab="min")
@@ -665,15 +672,15 @@ plot(log_fold_change_max[, "M-C"],
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
-of the control to the Kawasaki strain, using the EPICON log fold change
+of the control to the Kawasaki strain, using the timecourse log fold change
 computation.
 
 ```{r fig.height=4, fig.width=4}
 pvalue = qvalues[, "M-K"]
-lfc_epicon = log_fold_change_epicon[, "M-K"]
-names(lfc_epicon) = row.names(log_fold_change_epicon)
+lfc_timecourse = log_fold_change_timecourse[, "M-K"]
+names(lfc_timecourse) = row.names(log_fold_change_timecourse)
 
-plot(lfc_epicon, -log10(pvalue), pch=20, main="Volcano plot",
+plot(lfc_timecourse, -log10(pvalue), pch=20, main="Volcano plot",
      xlim=c(-2.5, 2))
 ```
 
@@ -688,12 +695,12 @@ plot_splines_data(data[top_DE_genes_pval, ], splines_model,
     mar=c(1.5,2.5,2,0.1))
 ```
 
-And here we visualize the genes with the largest absolute EPICON log-fold
+And here we visualize the genes with the largest absolute timecourse log-fold
 change.
 
 ```{r fig.height=6, fig.width=6}
 top_DE_genes_lfc = names(
-    sort(abs(lfc_epicon),
+    sort(abs(lfc_timecourse),
 	 decreasing=TRUE)[1:10])
 plot_splines_data(data[top_DE_genes_lfc, ], splines_model,
     colors=ann_colors$Group, smooth=TRUE,
@@ -1186,7 +1193,7 @@ genes = getBM(attributes=c("ensembl_gene_id", "entrezgene_id"),
 genes = as.vector(unlist(genes))
 pathways = find_enriched_pathway(
     genes, species="mmu",
-    download_latest=TRUE)$stastic
+    download_latest=FALSE)$stastic
 
 ```
 
