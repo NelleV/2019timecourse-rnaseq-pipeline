@@ -361,17 +361,18 @@ Maybe should change this sentence**
 
 **Use with `moanin`** `moanin` provides functionality for performing both of
 these types of approaches, though our focus is on the global approach. In both
-situations, we first need to set up a object (a `splines_model` object) to
-hold the meta data, as well as information for fitting the spline model. 
+situations, we first need to set up a object (a `moanin_model` object) to
+hold the meta data, as well as information for fitting the spline model
+(formula, number of degrees of freedom of the splines, …)
 
-We start by creating the `splines_model` object using the
-`create_splines_model` function. 
+We start by creating the `moanin_model` object using the
+`create_moanin_model` function. 
 
 ```{r}
-splines_model = create_splines_model(meta, degrees_of_freedom=6)
+moanin_model = create_moanin_model(meta, degrees_of_freedom=6)
 ```
 
-The `splines_model` object contains a number of metadata and options used
+The `moanin_model` object contains a number of metadata and options used
 throughout this analysis: the condition and timepoints of each samples, the
 formula object used or the basis or the degrees of freedom of the model. The
 metadata data.frame object should contain at least two columns: one named
@@ -407,7 +408,7 @@ First, create the contrasts for all timepoints between the two groups of
 interest:
 
 ```{r make_timepoints_contarts}
-contrasts = create_timepoints_contrasts("M", "VL", splines_model)
+contrasts = create_timepoints_contrasts("M", "VL", moanin_model)
 ```
 
 This creates a vector of contrasts to be tested, one for each timepoint:
@@ -423,11 +424,9 @@ jointly using the function `DE_timepoints`.
 ```{r weekly_differential_analysis}
 # Define contrast	
 weekly_de_analysis = DE_timepoints(
-     data, splines_model, contrasts,
+     data, moanin_model, contrasts,
      use_voom_weights=FALSE)
 ```
-**EAP: Sort of strange to have argument `spines_model` for function that doesn't use splines. Perhaps there is a generic name that could be used for the argument**
-
 This results in a table of the results, where each row corresponds to a gene
 and the columns correspond to the p-value (`pval`), log-fold change (`lfc`)
 and adjusted p-value (`qval`); the order of the genes in the table is the same
@@ -438,27 +437,24 @@ the first ten genes:
 kable(weekly_de_analysis[1:10, 1:6 ],digits=3)
 ```
 
-**EAP: For the output of this, the column names are in format `M.0-VL.0-pval`, for example. This may be hard to parse algorithmically down the road because you are using the same character for the contrast (`-`) as the separator for the `pval`. So for example, if you wanted to split the contrast name from the `pval` or `lfc` part, it wouldn't be very easy. Maybe underscore `_` would be better separator?**
-
-
 We will repeat this, comparing each of the treatments to the control ("M")
 (code not printed here, as it is a replicate of the above, see accompanying
 Rmarkdown document). 
 
 ```{r echo=FALSE, results="hide"}
-contrasts = create_timepoints_contrasts("M", "K", splines_model)
+contrasts = create_timepoints_contrasts("M", "K", moanin_model)
 K_weekly_de_analysis =  DE_timepoints(
-     data, splines_model, contrasts,
+     data, moanin_model, contrasts,
      use_voom_weights=FALSE)
 
-contrasts = create_timepoints_contrasts("M", "C", splines_model)
+contrasts = create_timepoints_contrasts("M", "C", moanin_model)
 C_weekly_de_analysis =  DE_timepoints(
-     data, splines_model, contrasts,
+     data, moanin_model, contrasts,
      use_voom_weights=FALSE)
 
-contrasts = create_timepoints_contrasts("M", "VH", splines_model)
+contrasts = create_timepoints_contrasts("M", "VH", moanin_model)
 VH_weekly_de_analysis =  DE_timepoints(
-     data, splines_model, contrasts,
+     data, moanin_model, contrasts,
      use_voom_weights=FALSE)
 	 
 ```
@@ -543,7 +539,7 @@ a single replicate that is different or increased variability at 72H.
 
 ```{r showMissingDEGenes, echo=FALSE}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
-plot_splines_data(data, splines_model, subset_data=exampleGenes,
+plot_splines_data(data, moanin_model, subset_data=exampleGenes,
 		  colors=ann_colors$Group)
 ``` 
 
@@ -574,7 +570,7 @@ timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
 # to the time-course information, the latter corresponding to the
 # treatment).
 pvalues = DE_timecourse(
-    data, splines_model, timecourse_contrasts,
+    data, moanin_model, timecourse_contrasts,
     use_voom_weights=FALSE)
 qvalues = apply(pvalues, 2, p.adjust)
 
@@ -606,7 +602,7 @@ for each individual timepoints.
 
 ```{r}
 log_fold_change_timepoints = estimate_log_fold_change(
-    data, splines_model, timecourse_contrasts,  method="timely")
+    data, moanin_model, timecourse_contrasts,  method="timely")
 ```
 
 ```{r echo=FALSE}
@@ -639,18 +635,23 @@ $$\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T lfc(t) \right) \times \left(\frac{1
 Note that when a gene is not consistently up or down-regulated the estimation
 of the direction will not represent accurately the changes observed.
 
+
+To compute the log-fold change, `moanin` provides a function taking as
+argument the data, the `moanin_model` object, the contrasts to evaluate, as
+well as the method to use to estimate the log-fold change.
+
 ```{r}
 log_fold_change_timecourse = estimate_log_fold_change(
-    data, splines_model, timecourse_contrasts,  method="timecourse")
+    data, moanin_model, timecourse_contrasts,  method="timecourse")
 
 log_fold_change_sum = estimate_log_fold_change(
-    data, splines_model, timecourse_contrasts,  method="sum")
+    data, moanin_model, timecourse_contrasts,  method="sum")
 
 log_fold_change_max = estimate_log_fold_change(
-    data, splines_model, timecourse_contrasts, method="max")
+    data, moanin_model, timecourse_contrasts, method="max")
 
 log_fold_change_min = estimate_log_fold_change(
-    data, splines_model, timecourse_contrasts, method="min")
+    data, moanin_model, timecourse_contrasts, method="min")
 ```
 
 
@@ -690,7 +691,7 @@ p-values.
 
 ```{r fig.height=6, fig.width=6}
 top_DE_genes_pval = names(sort(pvalue)[1:10])
-plot_splines_data(data[top_DE_genes_pval, ], splines_model,
+plot_splines_data(data[top_DE_genes_pval, ], moanin_model,
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 ```
@@ -702,7 +703,7 @@ change.
 top_DE_genes_lfc = names(
     sort(abs(lfc_timecourse),
 	 decreasing=TRUE)[1:10])
-plot_splines_data(data[top_DE_genes_lfc, ], splines_model,
+plot_splines_data(data[top_DE_genes_lfc, ], moanin_model,
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 
@@ -768,7 +769,7 @@ The first three steps are performed jointly by the `splines_kmeans` function.
 ```{r clustering}
 # First fit the kmeans clusters
 kmeans_clusters = splines_kmeans(
-    y, splines_model, n_clusters=8,
+    y, moanin_model, n_clusters=8,
     random_seed=42,
     n_init=20)
 ```
@@ -778,7 +779,7 @@ with the splines k-means model.
 
 ```{r fig.height=6, fig.width=6}
 plot_splines_data(
-    kmeans_clusters$centroids, splines_model,
+    kmeans_clusters$centroids, moanin_model,
     colors=ann_colors$Group,
     smooth=TRUE)
 ```
@@ -949,7 +950,7 @@ wss_values = list()
 i = 1
 for(n_cluster in all_possible_n_clusters){
     clustering_results = splines_kmeans(
-	y, splines_model,
+	y, moanin_model,
 	n_clusters=n_cluster, random_seed=42,
 	n_init=10)
     wss_values[i] = sum(clustering_results$WCSS_per_cluster)
