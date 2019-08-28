@@ -727,19 +727,26 @@ Name & Formula &\tabularnewline
 \endhead
 timely & \(\text{lfc}(t)\) & Function of time\tabularnewline
 sum & \(\sum_t lfc(t)\) & Sum of log fold change.\tabularnewline
-abs\_sum & \(\sum_t \|lfc(t)\|\) & Always positive\tabularnewline
-max & \(\max_t \|lfc(t)\|\) & Always positive\tabularnewline
-min & \(\min_t \|lfc(t)\|\) & Always positive\tabularnewline
-epicon & \$\$ & Captures overall strength of response and overall direction\tabularnewline
+abs\_sum & \(\sum_t \lvert lfc(t)\lvert\) & Always positive\tabularnewline
+max & \(\max_t \lvert lfc(t) \lvert\) & Always positive\tabularnewline
+min & \(\min_t \lvert lfc(t) \lvert\) & Always positive\tabularnewline
+timecourse & See details below & Captures overall strength and direction\tabularnewline
 \bottomrule
 \end{longtable}
 
-\textbf{EAP: \texttt{epicon} is going to be weird for general use}
+To capture the overall strength and direction of the response, we leverage the
+timepoint by timepoint log-fold change \(\text{lfc}(t)\), and apply the
+following formula:
+
+\[\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T lfc(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {lfc(t)} \lvert \right)\]
+
+Note that when a gene is not consistently up or down-regulated the estimation
+of the direction will not represent accurately the changes observed.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{log_fold_change_epicon =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"epicon"}\NormalTok{)}
+\NormalTok{log_fold_change_timecourse =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
+\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timecourse"}\NormalTok{)}
 
 \NormalTok{log_fold_change_sum =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
 \NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
@@ -756,16 +763,16 @@ epicon & \$\$ & Captures overall strength of response and overall direction\tabu
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
-of the control to the Kawasaki strain, using the EPICON log fold change
+of the control to the Kawasaki strain, using the timecourse log fold change
 computation.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{pvalue =}\StringTok{ }\NormalTok{qvalues[, }\StringTok{"M-K"}\NormalTok{]}
-\NormalTok{lfc_epicon =}\StringTok{ }\NormalTok{log_fold_change_epicon[, }\StringTok{"M-K"}\NormalTok{]}
-\KeywordTok{names}\NormalTok{(lfc_epicon) =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(log_fold_change_epicon)}
+\NormalTok{lfc_timecourse =}\StringTok{ }\NormalTok{log_fold_change_timecourse[, }\StringTok{"M-K"}\NormalTok{]}
+\KeywordTok{names}\NormalTok{(lfc_timecourse) =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(log_fold_change_timecourse)}
 
-\KeywordTok{plot}\NormalTok{(lfc_epicon, }\OperatorTok{-}\KeywordTok{log10}\NormalTok{(pvalue), }\DataTypeTok{pch=}\DecValTok{20}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Volcano plot"}\NormalTok{,}
+\KeywordTok{plot}\NormalTok{(lfc_timecourse, }\OperatorTok{-}\KeywordTok{log10}\NormalTok{(pvalue), }\DataTypeTok{pch=}\DecValTok{20}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Volcano plot"}\NormalTok{,}
      \DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -787,13 +794,13 @@ p-values.
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
-And here we visualize the genes with the largest absolute EPICON log-fold
+And here we visualize the genes with the largest absolute timecourse log-fold
 change.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{top_DE_genes_lfc =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
-    \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_epicon),}
+    \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_timecourse),}
      \DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
 \KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
@@ -1296,7 +1303,7 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \NormalTok{genes =}\StringTok{ }\KeywordTok{as.vector}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(genes))}
 \NormalTok{pathways =}\StringTok{ }\KeywordTok{find_enriched_pathway}\NormalTok{(}
 \NormalTok{    genes, }\DataTypeTok{species=}\StringTok{"mmu"}\NormalTok{,}
-    \DataTypeTok{download_latest=}\OtherTok{TRUE}\NormalTok{)}\OperatorTok{$}\NormalTok{stastic}
+    \DataTypeTok{download_latest=}\OtherTok{FALSE}\NormalTok{)}\OperatorTok{$}\NormalTok{stastic}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1304,25 +1311,25 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \hline
   & Pathway & Percentage & Adj. p-value\\
 \hline
-05169 & Epstein-Barr virus infection & 37 & 0\\
-\hline
-04060 & Cytokine-cytokine receptor interaction & 31 & 0\\
-\hline
-04668 & TNF signaling pathway & 45 & 0\\
-\hline
-05164 & Influenza A & 38 & 0\\
-\hline
-04621 & NOD-like receptor signaling pathway & 34 & 0\\
-\hline
-05162 & Measles & 37 & 0\\
-\hline
-04630 & JAK-STAT signaling pathway & 33 & 0\\
-\hline
-05160 & Hepatitis C & 34 & 0\\
-\hline
-04064 & NF-kappa B signaling pathway & 39 & 0\\
+04060 & Cytokine-cytokine receptor interaction & 34 & 0\\
 \hline
 04620 & Toll-like receptor signaling pathway & 40 & 0\\
+\hline
+04630 & Jak-STAT signaling pathway & 33 & 0\\
+\hline
+03050 & Proteasome & 53 & 0\\
+\hline
+04621 & NOD-like receptor signaling pathway & 47 & 0\\
+\hline
+04380 & Osteoclast differentiation & 34 & 0\\
+\hline
+04623 & Cytosolic DNA-sensing pathway & 45 & 0\\
+\hline
+04210 & Apoptosis & 37 & 0\\
+\hline
+04622 & RIG-I-like receptor signaling pathway & 39 & 0\\
+\hline
+05160 & Hepatitis C & 29 & 0\\
 \hline
 \end{tabu}
 
