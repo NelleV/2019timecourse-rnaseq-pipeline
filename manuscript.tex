@@ -435,19 +435,20 @@ Maybe should change this sentence}
 
 \textbf{Use with \texttt{moanin}} \texttt{moanin} provides functionality for performing both of
 these types of approaches, though our focus is on the global approach. In both
-situations, we first need to set up a object (a \texttt{splines\_model} object) to
-hold the meta data, as well as information for fitting the spline model.
+situations, we first need to set up a object (a \texttt{moanin\_model} object) to
+hold the meta data, as well as information for fitting the spline model
+(formula, number of degrees of freedom of the splines, \textless{}80\textgreater{})
 
-We start by creating the \texttt{splines\_model} object using the
-\texttt{create\_splines\_model} function.
+We start by creating the \texttt{moanin\_model} object using the
+\texttt{create\_moanin\_model} function.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{splines_model =}\StringTok{ }\KeywordTok{create_splines_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\NormalTok{moanin_model =}\StringTok{ }\KeywordTok{create_moanin_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-The \texttt{splines\_model} object contains a number of metadata and options used
+The \texttt{moanin\_model} object contains a number of metadata and options used
 throughout this analysis: the condition and timepoints of each samples, the
 formula object used or the basis or the degrees of freedom of the model. The
 metadata data.frame object should contain at least two columns: one named
@@ -498,7 +499,7 @@ interest:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{contrasts =}\StringTok{ }\KeywordTok{create_timepoints_contrasts}\NormalTok{(}\StringTok{"M"}\NormalTok{, }\StringTok{"VL"}\NormalTok{, splines_model)}
+\NormalTok{contrasts =}\StringTok{ }\KeywordTok{create_timepoints_contrasts}\NormalTok{(}\StringTok{"M"}\NormalTok{, }\StringTok{"VL"}\NormalTok{, moanin_model)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -547,12 +548,10 @@ jointly using the function \texttt{DE\_timepoints}.
 \begin{Highlighting}[]
 \CommentTok{# Define contrast   }
 \NormalTok{weekly_de_analysis =}\StringTok{ }\KeywordTok{DE_timepoints}\NormalTok{(}
-\NormalTok{     data, splines_model, contrasts,}
+\NormalTok{     data, moanin_model, contrasts,}
      \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
-
-\textbf{EAP: Sort of strange to have argument \texttt{spines\_model} for function that doesn't use splines. Perhaps there is a generic name that could be used for the argument}
 
 This results in a table of the results, where each row corresponds to a gene
 and the columns correspond to the p-value (\texttt{pval}), log-fold change (\texttt{lfc})
@@ -562,7 +561,7 @@ the first ten genes:
 
 \begin{tabular}{l|r|r|r|r|r|r}
 \hline
-  & M.0-VL.0-pval & M.0-VL.0-qval & M.0-VL.0-lfc & M.3-VL.3-pval & M.3-VL.3-qval & M.3-VL.3-lfc\\
+  & M.0-VL.0\_pval & M.0-VL.0\_qval & M.0-VL.0\_lfc & M.3-VL.3\_pval & M.3-VL.3\_qval & M.3-VL.3\_lfc\\
 \hline
 NM\_009912 & 0.273 & 0.475 & 2.202 & 0.767 & 0.876 & 1.158\\
 \hline
@@ -585,8 +584,6 @@ NM\_013782 & 0.875 & 0.938 & 0.594 & 0.000 & 0.001 & 1.180\\
 NM\_028622 & 0.767 & 0.876 & 1.648 & 0.946 & 0.974 & -1.865\\
 \hline
 \end{tabular}
-
-\textbf{EAP: For the output of this, the column names are in format \texttt{M.0-VL.0-pval}, for example. This may be hard to parse algorithmically down the road because you are using the same character for the contrast (\texttt{-}) as the separator for the \texttt{pval}. So for example, if you wanted to split the contrast name from the \texttt{pval} or \texttt{lfc} part, it wouldn't be very easy. Maybe underscore \texttt{\_} would be better separator?}
 
 We will repeat this, comparing each of the treatments to the control (``M'')
 (code not printed here, as it is a replicate of the above, see accompanying
@@ -664,7 +661,7 @@ means.
 \CommentTok{#<c2><a0>to the time-course information, the latter corresponding to the}
 \CommentTok{# treatment).}
 \NormalTok{pvalues =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts,}
+\NormalTok{    data, moanin_model, timecourse_contrasts,}
     \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, p.adjust)}
 \end{Highlighting}
@@ -692,7 +689,7 @@ for each individual timepoints.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{log_fold_change_timepoints =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
+\NormalTok{    data, moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -743,19 +740,23 @@ following formula:
 Note that when a gene is not consistently up or down-regulated the estimation
 of the direction will not represent accurately the changes observed.
 
+To compute the log-fold change, \texttt{moanin} provides a function taking as
+argument the data, the \texttt{moanin\_model} object, the contrasts to evaluate, as
+well as the method to use to estimate the log-fold change.
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{log_fold_change_timecourse =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timecourse"}\NormalTok{)}
+\NormalTok{    data, moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timecourse"}\NormalTok{)}
 
 \NormalTok{log_fold_change_sum =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
+\NormalTok{    data, moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
 
 \NormalTok{log_fold_change_max =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
+\NormalTok{    data, moanin_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
 
 \NormalTok{log_fold_change_min =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, splines_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
+\NormalTok{    data, moanin_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -786,7 +787,7 @@ p-values.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{top_DE_genes_pval =}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{sort}\NormalTok{(pvalue)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
-\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_pval, ], splines_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_pval, ], moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -802,7 +803,7 @@ change.
 \NormalTok{top_DE_genes_lfc =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
     \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_timecourse),}
      \DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
-\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_lfc, ], splines_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_lfc, ], moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -877,7 +878,7 @@ The first three steps are performed jointly by the \texttt{splines\_kmeans} func
 \begin{Highlighting}[]
 \CommentTok{# First fit the kmeans clusters}
 \NormalTok{kmeans_clusters =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(}
-\NormalTok{    y, splines_model, }\DataTypeTok{n_clusters=}\DecValTok{8}\NormalTok{,}
+\NormalTok{    y, moanin_model, }\DataTypeTok{n_clusters=}\DecValTok{8}\NormalTok{,}
     \DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
     \DataTypeTok{n_init=}\DecValTok{20}\NormalTok{)}
 \end{Highlighting}
@@ -889,7 +890,7 @@ with the splines k-means model.
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{plot_splines_data}\NormalTok{(}
-\NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, splines_model,}
+\NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group,}
     \DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
@@ -1041,7 +1042,7 @@ squares; (2) the labels assigned to all genes.
 \NormalTok{i =}\StringTok{ }\DecValTok{1}
 \ControlFlowTok{for}\NormalTok{(n_cluster }\ControlFlowTok{in}\NormalTok{ all_possible_n_clusters)\{}
 \NormalTok{    clustering_results =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(}
-\NormalTok{    y, splines_model,}
+\NormalTok{    y, moanin_model,}
     \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
     \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
 \NormalTok{    wss_values[i] =}\StringTok{ }\KeywordTok{sum}\NormalTok{(clustering_results}\OperatorTok{$}\NormalTok{WCSS_per_cluster)}
