@@ -127,30 +127,6 @@ time-course gene expression data, clustering, differential expression, workflow
 \end{Highlighting}
 \end{Shaded}
 
-EAP:
-
-\begin{itemize}
-\tightlist
-\item
-  I got an error in installation script for packages:
-\end{itemize}
-
-\begin{verbatim}
-epurdom-0:2019timecourse-rnaseq-pipeline epurdom$ Rscript scripts/install.R
-Loading required package: devtools
-Loading required package: usethis
-Loading required package: ggfortify
-Loading required package: ggplot2
-Loading required package: kableExtra
-Error in contrib.url(repos, "source") : 
-  trying to use CRAN without setting a mirror
-Calls: install.packages -> contrib.url
-In addition: Warning message:
-In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
-  there is no package called <e2><80><98>kableExtra<e2><80><99>
-Execution halted
-\end{verbatim}
-
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
@@ -424,14 +400,10 @@ simplifies analysis and of longer time courses data, with per-time point
 analysis reserved for particularly interesting comparisons of individual
 time-points.
 
-We note that we could have time course data on either a single condition (to
-identify genes changing over time) or
-time course data on multiple conditions (such as the influenza dataset we are
-considering), which will alter slightly the types of questions we are
-interested in.
-In what follows, we will focus on the situation
-where we have multiple conditions. \textbf{EAP: Any reason one and not the other.
-Maybe should change this sentence}
+Time course data can either be on a single condition (to identify genes
+changing over time) or or on multiple conditions (such as the influenza
+dataset we are considering), which will alter slightly the types of questions
+we are interested in.
 
 \textbf{Use with \texttt{moanin}} \texttt{moanin} provides functionality for performing both of
 these types of approaches, though our focus is on the global approach. In both
@@ -506,40 +478,27 @@ interest:
 This creates a vector of contrasts to be tested, one for each timepoint:
 
 \begin{tabular}{l}
-\hline
+\toprule
 Contrasts\\
-\hline
+\midrule
 M.0-VL.0\\
-\hline
 M.3-VL.3\\
-\hline
 M.6-VL.6\\
-\hline
 M.9-VL.9\\
-\hline
 M.12-VL.12\\
-\hline
+\addlinespace
 M.18-VL.18\\
-\hline
 M.24-VL.24\\
-\hline
 M.30-VL.30\\
-\hline
 M.36-VL.36\\
-\hline
 M.48-VL.48\\
-\hline
+\addlinespace
 M.60-VL.60\\
-\hline
 M.72-VL.72\\
-\hline
 M.120-VL.120\\
-\hline
 M.168-VL.168\\
-\hline
+\bottomrule
 \end{tabular}
-
-\textbf{EAP: Not sure if \texttt{kable} is better than just printout?}
 
 Then run the differential expression analysis on all of those timepoints
 jointly using the function \texttt{DE\_timepoints}.
@@ -559,30 +518,22 @@ and adjusted p-value (\texttt{qval}); the order of the genes in the table is the
 as the input \texttt{data}. Here we show the results for the first two timepoints and
 the first ten genes:
 
-\begin{tabular}{l|r|r|r|r|r|r}
-\hline
+\begin{tabular}{lrrrrrr}
+\toprule
   & M.0-VL.0\_pval & M.0-VL.0\_qval & M.0-VL.0\_lfc & M.3-VL.3\_pval & M.3-VL.3\_qval & M.3-VL.3\_lfc\\
-\hline
+\midrule
 NM\_009912 & 0.273 & 0.475 & 2.202 & 0.767 & 0.876 & 1.158\\
-\hline
 NM\_008725 & 0.851 & 0.924 & 2.028 & 0.139 & 0.302 & 1.457\\
-\hline
 NM\_007473 & 0.088 & 0.219 & 0.678 & 0.917 & 0.959 & 0.764\\
-\hline
 ENSMUST00000094955 & 0.008 & 0.037 & 1.186 & 0.935 & 0.969 & -0.633\\
-\hline
 NM\_001042489 & 0.419 & 0.621 & 1.212 & 0.761 & 0.872 & 0.599\\
-\hline
+\addlinespace
 NM\_008159 & 0.123 & 0.278 & 1.102 & 0.117 & 0.268 & 0.737\\
-\hline
 NM\_001013813 & 0.057 & 0.159 & 0.630 & 0.171 & 0.348 & 0.975\\
-\hline
 AK039774 & 0.015 & 0.059 & 0.637 & 0.062 & 0.171 & 0.971\\
-\hline
 NM\_013782 & 0.875 & 0.938 & 0.594 & 0.000 & 0.001 & 1.180\\
-\hline
 NM\_028622 & 0.767 & 0.876 & 1.648 & 0.946 & 0.974 & -1.865\\
-\hline
+\bottomrule
 \end{tabular}
 
 We will repeat this, comparing each of the treatments to the control (``M'')
@@ -693,22 +644,18 @@ for each individual timepoints.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{l|r|r|r|r|r}
-\hline
+\begin{tabular}{lrrrrr}
+\toprule
   & M-K:1 & M-K:7 & M-K:11 & M-K:14 & M-K:2\\
-\hline
+\midrule
 NM\_009912 & -0.0061424 & 0.0224948 & -0.0515947 & -0.1143973 & 0.0614619\\
-\hline
 NM\_008725 & 2.6547855 & 0.2734387 & -0.6882925 & 0.4718807 & -1.7463319\\
-\hline
 NM\_007473 & -0.1603623 & 0.1017655 & 0.5079573 & 0.0595773 & 0.4250185\\
-\hline
 ENSMUST00000094955 & 0.3505920 & 0.6463011 & 0.2564796 & 0.3599102 & 0.4177116\\
-\hline
 NM\_001042489 & 0.0889750 & 0.2321381 & -0.1891501 & 0.1786113 & 0.3320644\\
-\hline
+\addlinespace
 NM\_008159 & -0.3863770 & 0.0298395 & -0.0862755 & -0.3266351 & -0.1893062\\
-\hline
+\bottomrule
 \end{tabular}
 
 This matrix can then be used to visualize the log-fold change for each
@@ -1308,31 +1255,23 @@ it to convert the gene names from the Refseq annotation to the ensembl one.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabu} to \linewidth {>{\raggedright}X>{\raggedright}X>{\raggedleft}X>{\raggedleft}X}
-\hline
+\begin{tabular}{llrr}
+\toprule
   & Pathway & Percentage & Adj. p-value\\
-\hline
+\midrule
 04060 & Cytokine-cytokine receptor interaction & 34 & 0\\
-\hline
 04620 & Toll-like receptor signaling pathway & 40 & 0\\
-\hline
 04630 & Jak-STAT signaling pathway & 33 & 0\\
-\hline
 03050 & Proteasome & 53 & 0\\
-\hline
 04621 & NOD-like receptor signaling pathway & 47 & 0\\
-\hline
+\addlinespace
 04380 & Osteoclast differentiation & 34 & 0\\
-\hline
 04623 & Cytosolic DNA-sensing pathway & 45 & 0\\
-\hline
 04210 & Apoptosis & 37 & 0\\
-\hline
 04622 & RIG-I-like receptor signaling pathway & 39 & 0\\
-\hline
 05160 & Hepatitis C & 29 & 0\\
-\hline
-\end{tabu}
+\bottomrule
+\end{tabular}
 
 \hypertarget{finding-enriched-go-terms}{%
 \subsubsection{Finding enriched GO terms}\label{finding-enriched-go-terms}}
@@ -1382,41 +1321,29 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabu} to \linewidth {>{\raggedright}X>{\raggedright}X>{\raggedright}X>{\raggedleft}X>{\raggedleft}X>{\raggedleft}X>{\raggedright}X>{\raggedleft}X}
-\hline
+\begin{tabular}{lllrrrlr}
+\toprule
   & GO ID & Description & Annotated & Significant & Expected & P-value & adj. p-value\\
-\hline
+\midrule
 5 & GO:0003002 & regionalization & 172 & 153 & 134.41 & 0.00026 & 0.2629\\
-\hline
 6 & GO:0048562 & embryonic organ morphogenesis & 152 & 135 & 118.78 & 0.00045 & 0.3323\\
-\hline
 7 & GO:0010970 & transport along microtubule & 82 & 75 & 64.08 & 0.00046 & 0.3323\\
-\hline
 8 & GO:0006805 & xenobiotic metabolic process & 49 & 47 & 38.29 & 0.00059 & 0.3729\\
-\hline
 9 & GO:0060173 & limb development & 92 & 84 & 71.89 & 0.00068 & 0.3820\\
-\hline
+\addlinespace
 10 & GO:0019395 & fatty acid oxidation & 53 & 51 & 41.42 & 0.00134 & 0.6194\\
-\hline
 11 & GO:0055114 & oxidation-reduction process & 536 & 461 & 418.84 & 0.00139 & 0.6194\\
-\hline
 12 & GO:0060070 & canonical Wnt signaling pathway & 149 & 131 & 116.43 & 0.00147 & 0.6194\\
-\hline
 13 & GO:0090596 & sensory organ morphogenesis & 134 & 118 & 104.71 & 0.00219 & 0.8517\\
-\hline
 14 & GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.79 & 0.00295 & 1.0000\\
-\hline
+\addlinespace
 15 & GO:0010811 & positive regulation of cell-substrate ad... & 81 & 73 & 63.30 & 0.00384 & 1.0000\\
-\hline
 16 & GO:0042738 & exogenous drug catabolic process & 22 & 22 & 17.19 & 0.00437 & 1.0000\\
-\hline
 17 & GO:1901381 & positive regulation of potassium ion tra... & 22 & 22 & 17.19 & 0.00437 & 1.0000\\
-\hline
 18 & GO:0007368 & determination of left/right symmetry & 66 & 60 & 51.57 & 0.00536 & 1.0000\\
-\hline
 19 & GO:0060078 & regulation of postsynaptic membrane pote... & 66 & 60 & 51.57 & 0.00536 & 1.0000\\
-\hline
-\end{tabu}
+\bottomrule
+\end{tabular}
 
 \hypertarget{session-information}{%
 \section{Session information}\label{session-information}}
@@ -1451,8 +1378,8 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 ## [13] RCurl_1.95-4.12      bitops_1.0-6         NMF_0.21.0          
 ## [16] Biobase_2.40.0       BiocGenerics_0.26.0  cluster_2.0.9       
 ## [19] rngtools_1.3.1.1     pkgmaker_0.27        registry_0.5-1      
-## [22] ggplot2_3.1.1        biomaRt_2.36.1       BiocStyle_2.8.2     
-## [25] kableExtra_1.1.0     knitr_1.22           limma_3.36.5        
+## [22] ggplot2_3.1.1        kableExtra_1.1.0     biomaRt_2.36.1      
+## [25] BiocStyle_2.8.2      knitr_1.22           limma_3.36.5        
 ## [28] usethis_1.5.0        devtools_2.0.2       rmarkdown_1.12      
 ## 
 ## loaded via a namespace (and not attached):
@@ -1495,8 +1422,8 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 ## [73] tidyselect_0.2.5        plyr_1.8.4             
 ## [75] magrittr_1.5            bookdown_0.9           
 ## [77] R6_2.4.0                DBI_1.0.0              
-## [79] mgcv_1.8-28             pillar_1.3.1           
-## [81] withr_2.1.2             abind_1.4-5            
+## [79] pillar_1.3.1            withr_2.1.2            
+## [81] mgcv_1.8-28             abind_1.4-5            
 ## [83] KEGGREST_1.20.2         tibble_2.1.1           
 ## [85] crayon_1.3.4            progress_1.2.0         
 ## [87] grid_3.6.0              blob_1.1.1             
