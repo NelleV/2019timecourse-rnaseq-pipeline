@@ -513,7 +513,7 @@ ability to detect significance.
 
 ```{r calculateCombos, echo=FALSE, results="hide"}
 #Code for counting the number of unique combinations of time points that are DE
-getTimepoint<-function(x){sapply(strsplit(gsub("-qval","",x),"\\."),.subset2,3)}
+getTimepoint<-function(x){sapply(strsplit(gsub("_qval","",x),"\\."),.subset2,3)}
 qval_colnames = colnames(K_weekly_de_analysis)[
 grepl("qval", colnames(K_weekly_de_analysis))]
 signifCombos<-apply(K_weekly_de_analysis[, qval_colnames],1,function(x){paste(getTimepoint(qval_colnames[which(x<0.05)]),collapse=",")})
