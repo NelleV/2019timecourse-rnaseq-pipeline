@@ -163,7 +163,7 @@ threshold is exceeded, a strong inflammatory and cytokin production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
-While we showcase this pipeline on micro-array data, [@varoquaux:lifetime]
+While we showcase this pipeline on micro-array data, [@varoquaux:lifecycle]
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop *S. bicolor* to drought.
 
@@ -1242,13 +1242,29 @@ go_terms_enriched = find_enriched_go_terms(
 go_terms_enriched = go_terms_enriched[
     order(go_terms_enriched[, "resultFisher_padj"]), ]
 colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
-"Significant", "Expected", "P-value", "adj. p-value")
+"Significant", "Expected", "P-value", "Adj. p-value")
 
-kable(go_terms_enriched[1:15, ], format="latex", escape=F, digits=4, booktabs=TRUE)
+kable(go_terms_enriched[1:15, ], format="latex", escape=F,
+      digits=3, booktabs=TRUE, row.names=FALSE)
 ```
 
 
-# Session information
+# Software and data availability
+
+The source code for this workflow can be found at
+[https://github.com/NelleV/2019timecourse-rnaseq-pipeline](https://github.com/NelleV/2019timecourse-rnaseq-pipeline).
+Archived source code at the time of publication can be foud at [XXX](XXX).
+
+All packages use in the workflow are available on GitHub, CRAN, or
+Bioconductor.
+
+Data used in this workflow are available from NCBI GEO, accession
+[GSE63786](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63786).
+Normalized data can be found in `moanin`.  Normalization information is
+provided as supplementary information.
+
+Last but not least, we use `sessionInfo()` to display all packages used in
+this pipeline and their version numbers.
 
 ```{r}
 sessionInfo()
