@@ -1247,6 +1247,14 @@ colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
 kable(go_terms_enriched[1:15, ], format="latex", escape=F,
       digits=3, booktabs=TRUE, row.names=FALSE)
 ```
+# Conclusion
+
+This workflow provides a tutoral for the analysis of time-course gene
+expression data in R, illustrated through the analysis of mice lung tissue
+exposed to different influenza strain. It covers four main steps; (1) quality
+control and normalization; (2) differential expression analysis; (3)
+clustering of time-course gene expression data; (4) downstream analysis of
+clusters.
 
 
 # Software and data availability
@@ -1270,19 +1278,6 @@ this pipeline and their version numbers.
 sessionInfo()
 ```
 
-# Conclusion
-
-This workflow provides a tutoral for the analysis of time-course gene
-expression data in R, illustrated through the analysis of mice lung tissue
-exposed to different influenza strain. It covers four main steps; (1) quality
-control and normalization; (2) differential expression analysis; (3)
-clustering of time-course gene expression data; (4) downstream analysis of
-clusters.
-
-# Software and data availability
-
-The source code for this workflow can be found at [https://github.com/NelleV/2019timecourse-rnaseq-pipeline](https://github.com/NelleV/2019timecourse-rnaseq-pipeline).
-Data used in this workflow are available from NCBI GEO, accession GSE95601.
 
 # Author contributions
 
