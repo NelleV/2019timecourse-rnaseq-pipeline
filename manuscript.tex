@@ -220,7 +220,7 @@ threshold is exceeded, a strong inflammatory and cytokin production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
-While we showcase this pipeline on micro-array data, \citep{varoquaux:lifetime}
+While we showcase this pipeline on micro-array data, \citep{varoquaux:lifecycle}
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop \emph{S. bicolor} to drought.
 
@@ -1323,32 +1323,47 @@ running a GOterm enrichment on the ``Biological process'' ontology (BP).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{lllrrrlr}
+\begin{tabular}{llrrrlr}
 \toprule
-  & GO ID & Description & Annotated & Significant & Expected & P-value & adj. p-value\\
+GO ID & Description & Annotated & Significant & Expected & P-value & Adj. p-value\\
 \midrule
-5 & GO:0003002 & regionalization & 172 & 153 & 134.41 & 0.00026 & 0.2629\\
-6 & GO:0048562 & embryonic organ morphogenesis & 152 & 135 & 118.78 & 0.00045 & 0.3323\\
-7 & GO:0010970 & transport along microtubule & 82 & 75 & 64.08 & 0.00046 & 0.3323\\
-8 & GO:0006805 & xenobiotic metabolic process & 49 & 47 & 38.29 & 0.00059 & 0.3729\\
-9 & GO:0060173 & limb development & 92 & 84 & 71.89 & 0.00068 & 0.3820\\
+GO:0003002 & regionalization & 172 & 153 & 134.41 & 0.00026 & 0.263\\
+GO:0048562 & embryonic organ morphogenesis & 152 & 135 & 118.78 & 0.00045 & 0.332\\
+GO:0010970 & transport along microtubule & 82 & 75 & 64.08 & 0.00046 & 0.332\\
+GO:0006805 & xenobiotic metabolic process & 49 & 47 & 38.29 & 0.00059 & 0.373\\
+GO:0060173 & limb development & 92 & 84 & 71.89 & 0.00068 & 0.382\\
 \addlinespace
-10 & GO:0019395 & fatty acid oxidation & 53 & 51 & 41.42 & 0.00134 & 0.6194\\
-11 & GO:0055114 & oxidation-reduction process & 536 & 461 & 418.84 & 0.00139 & 0.6194\\
-12 & GO:0060070 & canonical Wnt signaling pathway & 149 & 131 & 116.43 & 0.00147 & 0.6194\\
-13 & GO:0090596 & sensory organ morphogenesis & 134 & 118 & 104.71 & 0.00219 & 0.8517\\
-14 & GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.79 & 0.00295 & 1.0000\\
+GO:0019395 & fatty acid oxidation & 53 & 51 & 41.42 & 0.00134 & 0.619\\
+GO:0055114 & oxidation-reduction process & 536 & 461 & 418.84 & 0.00139 & 0.619\\
+GO:0060070 & canonical Wnt signaling pathway & 149 & 131 & 116.43 & 0.00147 & 0.619\\
+GO:0090596 & sensory organ morphogenesis & 134 & 118 & 104.71 & 0.00219 & 0.852\\
+GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.79 & 0.00295 & 1.000\\
 \addlinespace
-15 & GO:0010811 & positive regulation of cell-substrate ad... & 81 & 73 & 63.30 & 0.00384 & 1.0000\\
-16 & GO:0042738 & exogenous drug catabolic process & 22 & 22 & 17.19 & 0.00437 & 1.0000\\
-17 & GO:1901381 & positive regulation of potassium ion tra... & 22 & 22 & 17.19 & 0.00437 & 1.0000\\
-18 & GO:0007368 & determination of left/right symmetry & 66 & 60 & 51.57 & 0.00536 & 1.0000\\
-19 & GO:0060078 & regulation of postsynaptic membrane pote... & 66 & 60 & 51.57 & 0.00536 & 1.0000\\
+GO:0010811 & positive regulation of cell-substrate ad... & 81 & 73 & 63.30 & 0.00384 & 1.000\\
+GO:0042738 & exogenous drug catabolic process & 22 & 22 & 17.19 & 0.00437 & 1.000\\
+GO:1901381 & positive regulation of potassium ion tra... & 22 & 22 & 17.19 & 0.00437 & 1.000\\
+GO:0007368 & determination of left/right symmetry & 66 & 60 & 51.57 & 0.00536 & 1.000\\
+GO:0060078 & regulation of postsynaptic membrane pote... & 66 & 60 & 51.57 & 0.00536 & 1.000\\
 \bottomrule
 \end{tabular}
 
-\hypertarget{session-information}{%
-\section{Session information}\label{session-information}}
+\hypertarget{software-and-data-availability}{%
+\section{Software and data availability}\label{software-and-data-availability}}
+
+The source code for this workflow can be found at
+\url{https://github.com/NelleV/2019timecourse-rnaseq-pipeline}.
+Archived source code at the time of publication can be foud at \url{XXX}.
+
+All packages use in the workflow are available on GitHub, CRAN, or
+Bioconductor.
+
+Data used in this workflow are available from NCBI GEO, accession
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63786}{GSE63786}.
+Normalized data can be found in \texttt{moanin}. Normalization information is
+provided as supplementary information.
+
+Last but not least, we use \texttt{sessionInfo()} to display all packages used in
+this pipeline and their version numbers.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1446,8 +1461,8 @@ control and normalization; (2) differential expression analysis; (3)
 clustering of time-course gene expression data; (4) downstream analysis of
 clusters.
 
-\hypertarget{software-and-data-availability}{%
-\section{Software and data availability}\label{software-and-data-availability}}
+\hypertarget{software-and-data-availability-1}{%
+\section{Software and data availability}\label{software-and-data-availability-1}}
 
 The source code for this workflow can be found at \url{https://github.com/NelleV/2019timecourse-rnaseq-pipeline}.
 Data used in this workflow are available from NCBI GEO, accession GSE95601.
