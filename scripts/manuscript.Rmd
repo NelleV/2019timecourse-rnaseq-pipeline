@@ -38,9 +38,9 @@ library(limma)
 library(splines)
 library(stats)
 library(knitr)
-library(kableExtra)
 library(BiocStyle)
 library(biomaRt)
+library(kableExtra)
 
 library(ggplot2)
 library(NMF)
@@ -78,26 +78,6 @@ library(moanin)
 
 ```{r echo=FALSE}
 library(moanin)
-```
-
-EAP:
-
-- I got an error in installation script for  packages:
-
-```
-epurdom-0:2019timecourse-rnaseq-pipeline epurdom$ Rscript scripts/install.R
-Loading required package: devtools
-Loading required package: usethis
-Loading required package: ggfortify
-Loading required package: ggplot2
-Loading required package: kableExtra
-Error in contrib.url(repos, "source") : 
-  trying to use CRAN without setting a mirror
-Calls: install.packages -> contrib.url
-In addition: Warning message:
-In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
-  there is no package called ‘kableExtra’
-Execution halted
 ```
 
 # Introduction
@@ -350,14 +330,10 @@ simplifies analysis and of longer time courses data, with per-time point
 analysis reserved for particularly interesting comparisons of individual
 time-points. 
 
-We note that we could have time course data on either a single condition (to
-identify genes changing over time) or
-time course data on multiple conditions (such as the influenza dataset we are
-considering), which will alter slightly the types of questions we are
-interested in. 
-In what follows, we will focus on the situation
-where we have multiple conditions. **EAP: Any reason one and not the other.
-Maybe should change this sentence**
+Time course data can either be on a single condition (to identify genes
+changing over time) or or on multiple conditions (such as the influenza
+dataset we are considering), which will alter slightly the types of questions
+we are interested in. 
 
 **Use with `moanin`** `moanin` provides functionality for performing both of
 these types of approaches, though our focus is on the global approach. In both
@@ -386,7 +362,6 @@ kable(head(meta))
 If no formula is provided, it will default to the following: 
 `formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0`.
 
-
 **EAP: General comment: you need a few more print() and head() of some objects
 to demonstrate what the output looks like**
 
@@ -414,10 +389,8 @@ contrasts = create_timepoints_contrasts("M", "VL", moanin_model)
 This creates a vector of contrasts to be tested, one for each timepoint:
 
 ```{r echo=FALSE}
-kable(contrasts, col.names="Contrasts")
+kable(contrasts, "latex", col.names="Contrasts", booktabs=TRUE)
 ```
-**EAP: Not sure if `kable` is better than just printout?**
-
 Then run the differential expression analysis on all of those timepoints
 jointly using the function `DE_timepoints`.
 
@@ -434,7 +407,8 @@ as the input `data`. Here we show the results for the first two timepoints and
 the first ten genes: 
 
 ```{r echo=FALSE}
-kable(weekly_de_analysis[1:10, 1:6 ],digits=3)
+kable(weekly_de_analysis[1:10, 1:6 ], "latex", digits=3, booktabs=TRUE)
+
 ```
 
 We will repeat this, comparing each of the treatments to the control ("M")
@@ -608,7 +582,8 @@ log_fold_change_timepoints = estimate_log_fold_change(
 ```{r echo=FALSE}
 kable(
     head(log_fold_change_timepoints[, colnames(log_fold_change_timepoints)[1:5]]),
-    format = "latex")
+    format="latex",
+    booktabs=TRUE)
 ```
 
 This matrix can then be used to visualize the log-fold change for each
@@ -1212,8 +1187,7 @@ pathways = subset(
 
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways[1:10, ], "latex", escape=F, digits=4) %>%
-    kable_styling("striped", full_width=TRUE) 
+kable(pathways[1:10, ], format="latex", escape=F, digits=4, booktabs=TRUE)
 ```
 
 
@@ -1268,8 +1242,7 @@ go_terms_enriched = go_terms_enriched[
 colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
 "Significant", "Expected", "P-value", "adj. p-value")
 
-kable(go_terms_enriched[1:15, ], "latex", escape=F, digits=4)  %>%
-    kable_styling("striped", full_width=TRUE) 
+kable(go_terms_enriched[1:15, ], format="latex", escape=F, digits=4, booktabs=TRUE)
 ```
 
 
