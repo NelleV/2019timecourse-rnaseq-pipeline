@@ -810,6 +810,7 @@ labels = scores_and_labels$labels
 
 # Let's keep only the list of genes that have a label.
 labels = unlist(labels[!is.na(labels)])
+cluster2Score = names(labels[labels==2])
 ```
 
 After running `scores_and_labels` we now have `r length(labels)` genes that are assigned to a cluster. 
@@ -855,7 +856,6 @@ labels = unlist(labels[!is.na(labels)])
 Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in% cluster2Score)` of them remained assigned to cluster 2. We can again look at a few genes in cluster 2, only now pick the best scoring genes 
 
 ```{r fig.height=6, fig.width=6}
-cluster2Score = names(labels[labels==2])
 #order them by their score
 cluster2Score=cluster2Score[order(scores_and_labels$scores[cluster2Score,2], decreasing = TRUE)]
 dataToPlot=rbind(data[cluster2Score[1:4], ],"Centroid"=kmeans_clusters$centroids[2,])
@@ -1353,7 +1353,7 @@ clusters.
 
 The source code for this workflow can be found at
 [https://github.com/NelleV/2019timecourse-rnaseq-pipeline](https://github.com/NelleV/2019timecourse-rnaseq-pipeline).
-Archived source code at the time of publication can be foud at [XXX](XXX).
+Archived source code at the time of publication can be found at [XXX](XXX).
 
 All packages use in the workflow are available on GitHub, CRAN, or
 Bioconductor.
