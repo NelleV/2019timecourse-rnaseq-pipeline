@@ -1177,6 +1177,9 @@ clusters = c("C6", "C7", "C8", "C9", "C10")
 selected_labels = all_labels[clusters]
 plot_model_explorer(selected_labels)
 ```
+
+This analysis doesn't necessarily pick a particular $k$, but can help decide between $k$ within a desired range, for example, or to avoid $k$ that degrade the stability.
+
 **EAP: `plot_model_explorer` is relatively slow, because it does all those pairwise calculations. And then to do it for smaller subset, redo all the calculations. Can't the output be saved, or the calculations be a different step from the plotting?**
 
 #### Consensus clustering as a way to find $k$
@@ -1225,7 +1228,7 @@ to ease interpretation. Classic enrichment analysis step can then be performed
 in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
 term enrichment analysis, motif enrichment analysis, etc.
 
-First, let us clean up the gene obtained and only select the genes we are
+First, let us clean up the genes we work with and only select the genes we are
 going to use in the enrichment analysis. One can either use the whole set of
 genes, only the set of differentially expressed genes in each cluster, or a
 subset of genes that fit well to a cluster (based on some criterion).
