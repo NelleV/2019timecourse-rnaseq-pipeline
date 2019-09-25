@@ -118,6 +118,8 @@ time-course gene expression data, clustering, differential expression, workflow
   Check that clustering can deal with count data.
 \end{itemize}
 
+\emph{EAP}: What is your plan for the installation instructions Nelle? Shouldn't it be moved where we introduce the package, and give instructions about how to install it there.
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(devtools)}
@@ -126,6 +128,8 @@ time-course gene expression data, clustering, differential expression, workflow
 \KeywordTok{library}\NormalTok{(moanin)}
 \end{Highlighting}
 \end{Shaded}
+
+\textbf{EAP: It seems like a problem to have the colors defined in a utils.R. Makes it hard It's not echo'd by markdown and so readers won't know where they come from. (I didn't).}
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -245,6 +249,28 @@ data and metadata of \citep{shoemaker:ultrasensitive}.
 \end{Highlighting}
 \end{Shaded}
 
+The meta data contains information about the treatment group, the replicate, and the timepoint for each observation:
+
+\begin{tabular}{l|r|l|r|r}
+\hline
+  &  & Group & Replicate & Timepoint\\
+\hline
+GSM1557140 & 0 & K & 1 & 0\\
+\hline
+GSM1557141 & 1 & K & 2 & 0\\
+\hline
+GSM1557142 & 2 & K & 3 & 0\\
+\hline
+GSM1557143 & 3 & K & 1 & 12\\
+\hline
+GSM1557144 & 4 & K & 2 & 12\\
+\hline
+GSM1557145 & 5 & K & 3 & 12\\
+\hline
+\end{tabular}
+
+\emph{EAP}: I moved this here, because we use meta a lot in the eda.
+
 \hypertarget{exploratory-analysis-and-quality-control}{%
 \subsubsection{Exploratory analysis and quality control}\label{exploratory-analysis-and-quality-control}}
 
@@ -255,7 +281,7 @@ expect a strong biological signal, while replicate samples should be strongly
 clustered or correlated with one another.
 
 Before performing any additional exploratory analysis, let us only keep highly
-variable genes: we keep for this step only the top 50\% most variable genes.
+variable genes: for this step, we keep only the top 50\% most variable genes.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -266,7 +292,7 @@ variable genes: we keep for this step only the top 50\% most variable genes.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-7-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data.
@@ -413,18 +439,10 @@ situations, we first need to set up a object (a \texttt{moanin\_model} object) t
 hold the meta data, as well as information for fitting the spline model
 (formula, number of degrees of freedom of the splines, \textless{}80\textgreater{})
 
+\textbf{EAP}: this makes it sound like you create a class, but in fact it's just a list. Wouldn't it be helpful to make it a class?
+
 We start by creating the \texttt{moanin\_model} object using the
-\texttt{create\_moanin\_model} function.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{moanin_model =}\StringTok{ }\KeywordTok{create_moanin_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-The \texttt{moanin\_model} object contains a number of metadata and options used
-throughout this analysis: the condition and timepoints of each samples, the
-formula object used or the basis or the degrees of freedom of the model. The
+\texttt{create\_moanin\_model} function. We need to provide two things to the function: a data.frame with the meta data, and the number of degrees of freedom. The
 metadata data.frame object should contain at least two columns: one named
 \texttt{Group}, containing the treatement effect, and a second one named \texttt{Timepoint}
 containing the timepoint information.
@@ -447,7 +465,20 @@ GSM1557145 & 5 & K & 3 & 12\\
 \hline
 \end{tabular}
 
-If no formula is provided, it will default to the following:
+We create a \texttt{moanin\_model} for our data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{moanin_model =}\StringTok{ }\KeywordTok{create_moanin_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The \texttt{moanin\_model} object contains a number of metadata and options used
+throughout this analysis: the condition and timepoints of each samples, the
+formula object used or the basis or the degrees of freedom of the model.
+\textbf{EAP:} You make it sound like or, but in fact the object has all of these elements, no?
+
+If no formula is provided, it will default to the following, which provides for a different spline fit for every group (as defined by the \texttt{Group} variable in the \texttt{meta} data.frame):
 \texttt{formula\ =\ \textasciitilde{}Group:ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}.
 
 \textbf{EAP: General comment: you need a few more print() and head() of some objects
@@ -457,11 +488,8 @@ to demonstrate what the output looks like}
 \subsubsection{Weekly differential expression analysis}\label{weekly-differential-expression-analysis}}
 
 \texttt{moanin} provides a simple interface to perform a timepoint by timepoint
-differential expression analysis. This is traditionally done by the user
-defining the comparisons (called \texttt{contrasts} in linear models). Under the
-hood, simply calls \texttt{limma} \citep{ritchie:limma} on the set of contrasts provided.
-By default, it expects RNA-Seq contact counts, and will estimate voom weights.
-We tern
+differential expression analysis. Comparison between groups is traditionally done by
+defining the group comparisons (called \texttt{contrasts} in linear models) as a linear combination of the coefficients of the model. Comparing groups within each timepoint can create many contrasts, and thus \texttt{moanin} provides functionality to create these contrasts in an automatic way, and then calls \texttt{limma} \citep{ritchie:limma} on the set of contrasts provided. By default, \texttt{moanin} expects RNA-Seq contact counts, and will estimate voom weights.
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse (``M'') and the mouse infected with the high dose of
@@ -473,11 +501,12 @@ interest:
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# Define contrasts  }
 \NormalTok{contrasts =}\StringTok{ }\KeywordTok{create_timepoints_contrasts}\NormalTok{(}\StringTok{"M"}\NormalTok{, }\StringTok{"VL"}\NormalTok{, moanin_model)}
 \end{Highlighting}
 \end{Shaded}
 
-This creates a vector of contrasts to be tested, one for each timepoint:
+This creates a vector of contrasts to be tested, one for each timepoint, in the format required by \texttt{limma}:
 
 \begin{tabular}{l}
 \toprule
@@ -502,22 +531,21 @@ M.168-VL.168\\
 \bottomrule
 \end{tabular}
 
-Then run the differential expression analysis on all of those timepoints
+Then \texttt{moanin} will run the differential expression analysis on all of those timepoints
 jointly using the function \texttt{DE\_timepoints}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Define contrast   }
 \NormalTok{weekly_de_analysis =}\StringTok{ }\KeywordTok{DE_timepoints}\NormalTok{(}
 \NormalTok{     data, moanin_model, contrasts,}
      \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-This results in a table of the results, where each row corresponds to a gene
+The output is a table of results, where each row corresponds to a gene
 and the columns correspond to the p-value (\texttt{pval}), log-fold change (\texttt{lfc})
-and adjusted p-value (\texttt{qval}); the order of the genes in the table is the same
-as the input \texttt{data}. Here we show the results for the first two timepoints and
+and adjusted p-value (\texttt{qval}) of the sets of contrasts; the order of the genes in the table is the same
+as the input \texttt{data}. Here we show the results for the first timepoint (i.e.~first three columns of the output) and
 the first ten genes:
 
 \begin{tabular}{lrrrrrr}
@@ -538,7 +566,9 @@ NM\_028622 & 0.767 & 0.876 & 1.648 & 0.946 & 0.974 & -1.865\\
 \bottomrule
 \end{tabular}
 
-We will repeat this, comparing each of the treatments to the control (``M'')
+Additional timepoints are in the additional columns of the output.
+
+We will repeat this, comparing each of the remaining three treatments to the control (``M'')
 (code not printed here, as it is a replicate of the above, see accompanying
 Rmarkdown document).
 
@@ -552,7 +582,9 @@ and clutter the namespace. In order to provide reasonable visualization, they
 also often need to be tweaked specfically to match the data (here, the ylim is
 set specifically to the data}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
+\textbf{EAP: Okay, I'll leave that to you. Most of those tweaked things can just be in a \ldots{} argument and plotting functions that do annoying things are popular. I've at least rewritten it so users can more easily change those features in calls to the function rather than mucking about in the code}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
 
 Such an analysis can demonstrate some general trends, with clearly more genes
 being differentially expressed at later time points, and the Vietnam high-dose
@@ -602,7 +634,7 @@ expressed genes.
 \texttt{moanin} extends this idea by providing functionality to compare time course
 data between different treatment conditions, using a similar mechanism of
 contrasts -- only now the contrasts are differences between the estimated
-means.
+mean functions. This is done with the function \texttt{DE\_timecourse}, which takes as similar input that of \texttt{DE\_timepoints}, only now will test the entire mean function (and therefore does not require a step of expanding the contrasts into contrasts for individual timepoints).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -620,12 +652,14 @@ means.
 \end{Highlighting}
 \end{Shaded}
 
+\textbf{EAP: is there a reason that the qvalues aren't provided with the output like in \texttt{DE\_timepoints}? Doesn't that risk the user not taking that step and working with the unadjusted p-values?}
+
 The number of genes found differentially expressed ranges from around 12000 to
 29000 depending on the strain and dosage of influenza virus given to the mice.
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -709,7 +743,7 @@ well as the method to use to estimate the log-fold change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -727,10 +761,10 @@ computation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
-visualize gene time-course data. Here, we plot the 10 genes with the smallest
+visualize gene time-course data in different conditions. Here, we plot the 10 genes with the smallest
 p-values.
 
 \begin{Shaded}
@@ -742,7 +776,7 @@ p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
 
 And here we visualize the genes with the largest absolute timecourse log-fold
 change.
@@ -758,7 +792,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -773,8 +807,8 @@ interpretation one would attempt: with 70\% of the genome found differentially
 expressed, all pathways are affected by the treatment. Hence the next step of
 the workflow to cluster gene expression according to their dynamical response
 to the treatment. Before clustering the genes, we first reduce the set of
-genes of interest to genes that are (1) significantly found differentially
-expressed; (2) ``highly'' differentially expressed. To do this, we first
+genes of interest to genes that are (1) found significantly differentially
+expressed; (2) a large-fold change between conditions. To do this, we first
 aggregate all p-values obtained during the time-course differential expresison
 step in a single p-value using Fisher's method \citep{fisher:statistical}. Then we
 select all the genes which have a Fisher adjusted p-value below 0.05 and a log
@@ -807,21 +841,18 @@ We thus propose the following adaptation of k-means:
 \tightlist
 \item
   \textbf{Splines estimation}: for each gene, fit the splines function with the basis
-  of your choice.
+  of your choice (provided in the \texttt{moanin\_model} object).
 \item
   \textbf{Rescaling splines}: for each gene, rescale the estimated splines function
-  such that the values are bounded between 0 and 1.
+  such that the values are bounded between 0 and 1 and thus comparable between genes.
 \item
-  \textbf{K-means}: apply k-means on the rescaled fitted splines to estimate the
-  centroids.
+  \textbf{K-means}: apply k-means on the rescaled fitted values of the splines to estimate the
+  cluster centroids.
 \item
-  \textbf{Assign scores and labels to all genes}: then assign a score and a label
-  to all gene based on a goodness-of-fit measure on the raw data. By default,
-  the \texttt{splines\_kmeans\_score\_and\_label} function only labels the best 50\% of
-  genes.
+  \textbf{Assign scores and labels to all genes}: Our \texttt{splines\_kmeans\_score\_and\_label} function assigns a score to all gene-cluster pairs based on a goodness-of-fit measure of the gene to the cluster centroid. We then ``assign'' each gene to a cluster based on its score.
 \end{itemize}
 
-The first three steps are performed jointly by the \texttt{splines\_kmeans} function.
+The first three steps are performed internally by the \texttt{splines\_kmeans} function. For now, we will set the number of clusters to be \(8\), though we will return to the question of picking the best number of clusters below.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -833,7 +864,7 @@ The first three steps are performed jointly by the \texttt{splines\_kmeans} func
 \end{Highlighting}
 \end{Shaded}
 
-We then use the \texttt{plot\_splines\_data} function to visualize the centroids obtained
+We then use the \texttt{plot\_splines\_data} function to visualize the centroids of each cluster obtained
 with the splines k-means model.
 
 \begin{Shaded}
@@ -845,10 +876,33 @@ with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
 
-The scoring and labeling can be done via the \texttt{splines\_kmeans\_score\_and\_label}
-function.
+These centroids are on a 0-1 scale, because of our rescaling of the spline fits, and do not represent the actual gene expression level. We can plot a few of the actual genes in a cluster to see the difference:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cluster2Genes =}\StringTok{ }\KeywordTok{names}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{clusters[kmeans_clusters}\OperatorTok{$}\NormalTok{clusters}\OperatorTok{==}\DecValTok{2}\NormalTok{])}
+\NormalTok{dataToPlot=}\KeywordTok{rbind}\NormalTok{(y[cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[}\DecValTok{2}\NormalTok{,])}
+\KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
+    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+
+The spline plots are fitted per gene in the above plot, and illustrate that the genes assigned to a cluster have differing degrees to which their data fits that of the cluster centroid, and indeed fits that of their individual spline fits.
+
+\hypertarget{assigning-genes-to-clusters}{%
+\subsubsection{Assigning genes to clusters}\label{assigning-genes-to-clusters}}
+
+Since we arbitrarily chose a subset of genes based on our filter, we would like all genes to have a chance of assignment to a cluster, as well as a score for whether it is a good assignment. The scoring and label step allows us to assign genes to clusters that were removed during the
+filtering step, yet are good matches to the centroids found during the
+clustering.
+
+The scoring and labeling is done via the \texttt{splines\_kmeans\_score\_and\_label}
+function. This function calculates the goodness of fit of the gene to the cluster centroid. By default, the function labels only the 50\% of genes with the best scores, with the remaining genes getting \texttt{NA} as their assignment.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -860,34 +914,54 @@ function.
 
 \CommentTok{# Let's keep only the list of genes that have a label.}
 \NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
+\NormalTok{cluster2Score =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\DecValTok{2}\NormalTok{])}
 \end{Highlighting}
 \end{Shaded}
 
+After running \texttt{scores\_and\_labels} we now have 19772 genes that are assigned to a cluster.
+
 Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
-scoring and labelinig step.
+scoring and labeling step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
 
-The scoring and label step allows to label genes that were removed during the
-filtering step, yet are good matches to the centroids found during the
-clustering.
+Of the original 3950 genes used in the clustering, 3467 are still assigned to a cluster based on their goodness of fit score. We can compare whether they are still assigned to the same clusters based on a confusion matrix shown below. The kmeans cluster assignments are shown on the rows, and the goodness-of-fit assignments in the columns, with the number in each cell indicating the number of genes in the intersection of the two clusters.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+
+Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a few genes in cluster 2, only now pick the best scoring genes
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#order them by their score}
+\NormalTok{cluster2Score=cluster2Score[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[cluster2Score,}\DecValTok{2}\NormalTok{], }\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)]}
+\NormalTok{dataToPlot=}\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[}\DecValTok{2}\NormalTok{,])}
+\KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
+    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
+
+\textbf{EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
 
 Now, let us look more in detail some specific clusters. Cluster 8 seems
 particularly interesting: it captures genes with strong differences between
-the differant influenza treatments and the control, while the control remains
+the different influenza treatments and the control, while the control remains
 relatively flat.
+
+We've already shown how we can plot a few example genes, however, it can be hard to make sense of individual genes given the amount of noise, as well as being hard to draw conclusions based on a few genes.
 
 Heatmaps are useful to investigate the range of expression patterns for
 specific genes. Here, we are going to plot heatmaps of the normalized gene
 expression patterns and the rescaled gene expression patterns side by side.
 
-First, select the genes of interest.
+First, we select the genes of interest, namely those in cluster 8, based on our goodness-of-fit assignment.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -895,6 +969,8 @@ First, select the genes of interest.
 \NormalTok{genes_to_plot =}\StringTok{  }\KeywordTok{names}\NormalTok{(labels[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_to_plot])}
 \end{Highlighting}
 \end{Shaded}
+
+Now we will create the heatmaps of these genes (4332 genes).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -936,7 +1012,7 @@ First, select the genes of interest.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -980,11 +1056,15 @@ identify the number of clusters:
 
 First, let us run the clustering for all possible clusters of interest. We
 will, for each clustering experiment, conserve (1) with within cluster sum of
-squares; (2) the labels assigned to all genes.
+squares; (2) the labels assigned to all genes. \textbf{EAP: I don't understand what you are trying to say in this last sentence. I think there's a typo}
+
+\textbf{EAP: Also, I don't know what you mean by ``clustering experiment'' -- do you mean a clustering of the data with a particular K? Ditto for ``all possible clusters of interest'' -- do you mean all choices of K, so 5,9,11,15 in the below.}
+
+Below we run the clustering for \(k\) equal to \(2-20\). The \texttt{splines\_kmeans} function returns the WCSS for each cluster, which we sum to get the total WCSS.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{all_possible_n_clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{9}\NormalTok{, }\DecValTok{11}\NormalTok{, }\DecValTok{15}\NormalTok{)}
+\NormalTok{all_possible_n_clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{20}\NormalTok{)}
 \NormalTok{all_clustering =}\StringTok{ }\KeywordTok{list}\NormalTok{()}
 \NormalTok{wss_values =}\StringTok{ }\KeywordTok{list}\NormalTok{()}
 
@@ -1005,10 +1085,12 @@ squares; (2) the labels assigned to all genes.
 \paragraph{Elbow method}\label{elbow-method}}
 
 The Elbow method to choose the number of clusters relies on visualization aid
-to choose the number of cluster. The method relies on plotting the within
-cluster sum of squares as a function of the number of clusters. At some point,
-the WCSS will stop dropping, giving an angle in the graph. The number of
+to choose the number of clusters. The method relies on plotting the within
+cluster sum of squares (WCSS) as a function of the number of clusters. At some point,
+the WCSS will start decreasing more slowly, giving an angle or ``elbow'' in the graph. The number of
 cluster is chosen at this ``Elbow point.''
+
+We plot the WCSS for \(k=2-20\) here. We see that as expected the WCSS continues to drop, but there is no clear drop in the decrease, except for very small values of \(k\) (3-4 clusters). However, 3-4 seems a very small number of gene clusters to find, given the complexity
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1020,6 +1102,8 @@ cluster is chosen at this ``Elbow point.''
 \end{Shaded}
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/elbow_method-1} \end{center}
+
+\textbf{EAP: I've increased this to be k=2-20, because you can't actually interpret these plots without a dense number of k; also you do 2-20 for stability}
 
 \hypertarget{average-silhouette-method}{%
 \paragraph{Average silhouette method}\label{average-silhouette-method}}
@@ -1080,7 +1164,7 @@ close to 1.
 To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
-Using the bootstrapping strategy:
+Using the bootstrapping strategy we sample with replacement a sample of the same size as our original clustering (i.e.~3950 genes):
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1091,61 +1175,102 @@ Using the bootstrapping strategy:
 \end{Highlighting}
 \end{Shaded}
 
-Using the subsampling strategy, keeping 80\% of the genes:
+Using the subsampling strategy, we take a unique subset of the genes, keeping 80\% of the genes:
+
+\textbf{EAP: \texttt{subsample\_proportion} was set to 1 in the code, but shouldn't it be 0.8? I changed it to 0.8. But it seems like you don't actually run this code, but read existing runs, so maybe was right there?}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{subsample_proportion =}\StringTok{ }\DecValTok{1}
+\NormalTok{subsample_proportion =}\StringTok{ }\FloatTok{0.8}
 \NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion, }\DataTypeTok{replace=}\OtherTok{FALSE}\NormalTok{)}
 \NormalTok{subsampled_y =}\StringTok{ }\NormalTok{y[indices, ]}
 \end{Highlighting}
 \end{Shaded}
 
-Here we plot to stability matrix of the top 1000 genes for \(k=5\) and \(k=20\).
+\textbf{EAP: So this is very confusing to understand, because you read the results from a file (\texttt{stability\_5.tsv}), but I don't know what this file contains, nor how they were calculated. And I don't know what a stability matrix is -- you've only talked about a consensus matrix. There should be the code here for a single k, but not evaluated, and say that for convenience we provide the results of running this code as a file for users to play with. I've tried to fix up the text to be what I think it should be}
+
+We will run \textbf{EAP: subsampling???} method on the top 1000 genes \textbf{EAP: what is top??}, and do it \(B=20\) times for each of \(k=2-20\). We show the code below, but because of the time it takes we have evaluate these values separately and provided the results for users to explore more quickly.
+
+For now, we bring in the results for \(k=5\) and \(k=20\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_5.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
+\NormalTok{stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_20.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{EAP: It's very confusing that the headings here are C1, \ldots{} C20. It makes it seem like cluster 1, \ldots{} cluster 20, when I think (?) it is really 20 resampling results. Would be good to change that to, e.g.~B1,\ldots{},B20 or something.}
+
+For each gene, we have an assignment to a cluster over the 20 resampling runs. For example, for \(k=5\):
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+  & C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 & C9 & C10 & C11 & C12 & C13 & C14 & C15 & C16 & C17 & C18 & C19 & C20\\
+\hline
+AA204140 & 5 & 5 & 5 & 5 & 5 & 1 & 3 & 2 & 1 & 3 & 1 & 3 & 4 & 3 & 5 & 4 & 2 & 4 & 1 & 4\\
+\hline
+AB008911 & 5 & 5 & 1 & 4 & 1 & 2 & 3 & 3 & 2 & 3 & 3 & 3 & 4 & 4 & 5 & 5 & 2 & 4 & 1 & 4\\
+\hline
+AB010313 & 3 & 3 & 1 & 4 & 1 & 2 & 4 & 3 & 2 & 5 & 3 & 1 & 5 & 4 & 2 & 5 & 3 & 3 & 4 & 2\\
+\hline
+AB010342 & 5 & 3 & 1 & 5 & 1 & 1 & 3 & 3 & 1 & 3 & 3 & 3 & 4 & 3 & 5 & 4 & 2 & 3 & 4 & 4\\
+\hline
+AB011473 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 4 & 4 & 1 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
+\hline
+AB099518 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 4 & 4 & 1 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
+\hline
+\end{tabular}
+
+Now we will use the function \texttt{consensus\_matrix} in the \texttt{moanin} package to calculate proportion of times each pair of samples was clustered together across the 20 resampling runs, and plot the heatmap of those consensus matrices for \(k=5\) and \(k=20\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \NormalTok{consensus_matrix_stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{5}\NormalTok{,}
                             \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
 \KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{5}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
      \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
-     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{main=}\StringTok{"K=5"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"results/stability_20.tsv"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{)}
 \NormalTok{consensus_matrix_stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{20}\NormalTok{,}
                          \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
 \KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{20}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
      \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
-     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{main=}\StringTok{"K=20"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-2} \end{center}
+
+We can see that the choice of \(K=5\) seems much more stable across resampling runs than that of \(K=20\).
 
 \hypertarget{the-model-explorer-strategy}{%
-\subparagraph{The model explorer strategy}\label{the-model-explorer-strategy}}
+\paragraph{The model explorer strategy}\label{the-model-explorer-strategy}}
 
 The model explorer algorithm \citep{ben-hur:stability} proposes to estimate the
 number of clusters exploiting the observation that if the number of clusters
-is correct, the clustering results are stable to bootstrapping. The
+is correct, the clustering results are stable to bootstrap resampling, as described above. The
 distribution of similaries between bootstrapped results for each \(k\) can thus
 be compared for different values of \(k\) and guide the user in the choice of
 number of clusters.
 
-The model explorer strategy works as follows. First, choose a similarity
-measure between two partitions or clusters \(S(C_1, C_2)\). Examples are the
-normalized mutual information or Fowlkes-Mallows. Then perform \(n\) bootstrap
+The model explorer strategy works as follows. For a single choice of \(k\), first perform \(n\) bootstrap
 experiments to estimate the cluster centroids, followed by a step of assigning
-a label to all data points. Finally, compute the pairwise similarity measure
-between all bootstrapped partition, and plot the cumulative density of the
+a label to all data points. Then, choose a similarity
+measure between two partitions or clusters \(S(C_1, C_2)\). \textbf{EAP: This is confusing as to whether this is a measure of similarity across different bootstrap resamples (i.e.~different sets of clusters) or across two different clusters in the same resample. Perhaps also because of confusion of headings of different resamples between labeled C1, C2, but those aren't cluster 1/2 (see comment above)} Examples are the
+normalized mutual information or Fowlkes-Mallows. Finally, compute the pairwise similarity measure
+between all bootstrapped partitions (i.e.~B choose 2 pairs). Repeat this procedure for different \(k\) and plot per \(k\) the cumulative density of the
 obtained scores.
+
+We have already run the bootstrap resampling for values \(k=2-20\) and saved the results. We will read that data in, and use it to calculate the pairwise similarity scores.
+
+The function \texttt{plot\_model\_explorer}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1153,7 +1278,7 @@ obtained scores.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-33-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-38-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1172,15 +1297,19 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-34-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-39-1} \end{center}
+
+This analysis doesn't necessarily pick a particular \(k\), but can help decide between \(k\) within a desired range, for example, or to avoid \(k\) that degrade the stability.
+
+\textbf{EAP: \texttt{plot\_model\_explorer} is relatively slow, because it does all those pairwise calculations. And then to do it for smaller subset, redo all the calculations. Can't the output be saved, or the calculations be a different step from the plotting?}
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
-\subparagraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
+\paragraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
 
 The consensus clustering \citep{monti:consensus} relies on a similar idea but
 instead of looking at the cumulative density of similarity measures of
 bootstrapped clustering, the authors suggests plotting the cumulative density
-of elements of the consensus matrix.
+of elements of the consensus matrix. We provide a function \texttt{plot\_cdf\_consensus} in \texttt{moanin} to do this
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1201,6 +1330,8 @@ the AUC as a function of the number of cluster.
 
 \begin{center}\includegraphics[width=6.67in]{images/clustering_delta_AUC_consensus} \end{center}
 
+\textbf{EAP: We should again provide the code that goes with these images}
+
 The consensus clustering method suggest that the most stable is \(k=2\), which
 separates over-expressed genes from under-expressed genes. While it is indeed
 a very stable clustering, it does not capture the range of gene expression
@@ -1215,7 +1346,7 @@ to ease interpretation. Classic enrichment analysis step can then be performed
 in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
 term enrichment analysis, motif enrichment analysis, etc.
 
-First, let us clean up the gene obtained and only select the genes we are
+First, let us clean up the genes we work with and only select the genes we are
 going to use in the enrichment analysis. One can either use the whole set of
 genes, only the set of differentially expressed genes in each cluster, or a
 subset of genes that fit well to a cluster (based on some criterion).
@@ -1362,7 +1493,7 @@ clusters.
 
 The source code for this workflow can be found at
 \url{https://github.com/NelleV/2019timecourse-rnaseq-pipeline}.
-Archived source code at the time of publication can be foud at \url{XXX}.
+Archived source code at the time of publication can be found at \url{XXX}.
 
 All packages use in the workflow are available on GitHub, CRAN, or
 Bioconductor.
