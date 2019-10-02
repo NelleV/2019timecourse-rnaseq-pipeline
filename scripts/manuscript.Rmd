@@ -49,8 +49,6 @@ library(viridis)
 
 library(topGO)
 
-
-source("utils.R")
 ```
 
 ```{r echo=FALSE, include=FALSE}
@@ -81,7 +79,6 @@ library(moanin)
 library(moanin)
 ```
 
-**EAP: It seems like a problem to have the colors defined in a utils.R. Makes it hard It's not echo'd by markdown and so readers won't know where they come from. (I didn't).**
 
 # Introduction
 
@@ -189,13 +186,38 @@ meta = shoemaker2015$meta
 data = shoemaker2015$data
 ```
 
-The meta data contains information about the treatment group, the replicate, and the timepoint for each observation:
+The meta data contains information about the treatment group, the replicate,
+and the timepoint for each observation:
 
 ```{r echo=FALSE}
 kable(head(meta))
 ```
 
-*EAP*: I moved this here, because we use meta a lot in the eda. 
+Before we dive into the exploratory analysis and quality control, let us
+define color schemes for our data that we will use across the whole analysis.
+We define coloschemes for groups, timepoints as named vectors.
+
+```{r}
+group_colors = c(
+    "M"="dodgerblue4",
+    "K"="gold",
+    "C"="orange",
+    "VH"="red4",
+    "VL"="red2")
+time_colors = grDevices::rainbow(15)[1:14]
+names(time_colors) = c(0, 3, 6, 9, 12, 18, 24, 30, 36, 48, 60, 72, 120, 168)
+
+# Combine all color schemes into one named lists.
+ann_colors = list(
+    Timepoint=time_colors,
+    Group=group_colors
+    )
+
+replicate_markers = c(15, 17, 19)
+names(replicate_markers) = c(1, 2, 3)
+ann_markers = list(
+    Replicate=replicate_markers)
+```
 
 ### Exploratory analysis and quality control
 
