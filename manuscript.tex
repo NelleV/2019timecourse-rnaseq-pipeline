@@ -464,8 +464,6 @@ situations, we first need to set up a object (a \texttt{moanin\_model} object) t
 hold the meta data, as well as information for fitting the spline model
 (formula, number of degrees of freedom of the splines, \textless{}80\textgreater{})
 
-\textbf{EAP}: this makes it sound like you create a class, but in fact it's just a list. Wouldn't it be helpful to make it a class?
-
 We start by creating the \texttt{moanin\_model} object using the
 \texttt{create\_moanin\_model} function. We need to provide two things to the function: a data.frame with the meta data, and the number of degrees of freedom. The
 metadata data.frame object should contain at least two columns: one named
@@ -568,11 +566,12 @@ jointly using the function \texttt{DE\_timepoints}.
 \end{Highlighting}
 \end{Shaded}
 
-The output is a table of results, where each row corresponds to a gene
-and the columns correspond to the p-value (\texttt{pval}), log-fold change (\texttt{lfc})
-and adjusted p-value (\texttt{qval}) of the sets of contrasts; the order of the genes in the table is the same
-as the input \texttt{data}. Here we show the results for the first timepoint (i.e.~first three columns of the output) and
-the first ten genes:
+The output is a table of results, where each row corresponds to a gene and the
+columns correspond to the p-value (\texttt{pval}), log-fold change (\texttt{lfc}) and
+adjusted p-value (\texttt{qval}) of the sets of contrasts; the order of the genes in
+the table is the same as the input \texttt{data}. Here we show the results for the
+first timepoint (i.e.~first three columns of the output) and the first ten
+genes:
 
 \begin{tabular}{lrrrrrr}
 \toprule
@@ -594,9 +593,9 @@ NM\_028622 & 0.767 & 0.876 & 1.648 & 0.946 & 0.974 & -1.865\\
 
 Additional timepoints are in the additional columns of the output.
 
-We will repeat this, comparing each of the remaining three treatments to the control (``M'')
-(code not printed here, as it is a replicate of the above, see accompanying
-Rmarkdown document).
+We will repeat this, comparing each of the remaining three treatments to the
+control (``M'') (code not printed here, as it is a replicate of the above, see
+accompanying Rmarkdown document).
 
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
