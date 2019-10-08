@@ -33,8 +33,8 @@ if(!require(roxygen2)){
     install.packages("roxygen2")
 }
 
-if(!require(ClusteR)){
-    install.packages("ClusteR")
+if(!require(ClusterR)){
+    install.packages("ClusterR")
 }
 
 if(!require(splines)){
@@ -45,42 +45,45 @@ if(!require(NMF)){
     install.packages("NMF")
 }
 
-source("https://bioconductor.org/biocLite.R")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("topGO")
 
 if(!require(limma)){
-    biocLite("limma")
+    BiocManager::install("limma")
 }
 
 if(!require(edgeR)){
-    biocLite("edgeR")
+    BiocManager::install("edgeR")
 }
 
 if(!require(edge)){
-    biocLite("edge")
+    BiocManager::install("edge")
 }
 
 if(!require(EDASeq)){
-    biocLite("EDASeq")
+    BiocManager::install("EDASeq")
 }
 
 if(!require(topGO)){
-    biocLite("topGO")
+    BiocManager::install("topGO")
 }
 
 if(!require(Biobase)){
-    biocLite("Biobase")
+    BiocManager::install("Biobase")
 }
 
 if(!require(MASS)){
-    biocLite("MASS")
+    BiocManager::install("MASS")
 }
 
 if(!require("biomaRt")){
-    biocLite("biomaRt")
+    BiocManager::install("biomaRt")
 }
 
 if(!require(KEGGprofile)){
-    biocLite("KEGGprofile")
+    BiocManager::install("KEGGprofile")
 }
 
 if(!require("NMI")){
@@ -92,7 +95,7 @@ if(!require(zoo)){
 }
 
 if(!require(BiocWorkflowTools)){
-    biocLite("BiocWorkflowTools")
+    BiocManager::install("BiocWorkflowTools")
 }
 
 install_github("NelleV/moanin", dependencies=FALSE)
