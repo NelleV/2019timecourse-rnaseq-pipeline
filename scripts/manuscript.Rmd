@@ -396,10 +396,11 @@ moanin_model = create_moanin_model(meta, degrees_of_freedom=6)
 
 The `moanin_model` object contains a number of metadata and options used
 throughout this analysis: the condition and timepoints of each samples, the
-formula object used or the basis or the degrees of freedom of the model. 
-**EAP:** You make it sound like or, but in fact the object has all of these elements, no?
+formula object used, the basis, and the degrees of freedom of the model. 
 
-If no formula is provided, it will default to the following, which provides for a different spline fit for every group (as defined by the `Group` variable in the `meta` data.frame): 
+If no formula is provided, it will default to the following, which provides
+for a different spline fit for every group (as defined by the `Group` variable
+in the `meta` data.frame): 
 `formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0`.
 
 **EAP: General comment: you need a few more print() and head() of some objects
@@ -474,18 +475,9 @@ VH_weekly_de_analysis =  DE_timepoints(
 	 
 ```
 
-
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
-**EAP: Should `timely_barplot` be a function of `moanin`?**
-
-**NV: I'd rather not include these types of functions that are hard to test
-and clutter the namespace. In order to provide reasonable visualization, they
-also often need to be tweaked specfically to match the data (here, the ylim is
-set specifically to the data**
-
-**EAP: Okay, I'll leave that to you. Most of those tweaked things can just be in a ... argument and plotting functions that do annoying things are popular. I've at least rewritten it so users can more easily change those features in calls to the function rather than mucking about in the code**
 
 ```{r fig.width=6, fig.height=6, echo=FALSE}
 timely_barplot = function(de_analysis, 
@@ -878,9 +870,9 @@ labels = unlist(labels[!is.na(labels)])
 Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in% cluster2Score)` of them remained assigned to cluster 2. We can again look at a few genes in cluster 2, only now pick the best scoring genes 
 
 ```{r fig.height=6, fig.width=6}
-#order them by their score
-cluster2Score=cluster2Score[order(scores_and_labels$scores[cluster2Score,2], decreasing = TRUE)]
-dataToPlot=rbind(data[cluster2Score[1:4], ],"Centroid"=kmeans_clusters$centroids[2,])
+# order them by their score
+cluster2Score = cluster2Score[order(scores_and_labels$scores[cluster2Score, 8], decreasing = TRUE)]
+dataToPlot = rbind(data[cluster2Score[1:4], ],"Centroid"=kmeans_clusters$centroids[8, ])
 plot_splines_data(dataToPlot, moanin_model,
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
@@ -897,6 +889,12 @@ write.table(kmeans_labels,
 
 **EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make**
 
+**Nelle: in my experience, the large the cluster is, the noisier the centroid
+estimation is. I've switched to cluster 8, as this is the cluster we focus our
+interpretation, and the top scoring genes seem to be to be closely related to
+the centroid estimates**
+
+
 ### Looking at specific clusters in details.
 
 Now, let us look more in detail some specific clusters. Cluster 8 seems
@@ -904,13 +902,16 @@ particularly interesting: it captures genes with strong differences between
 the different influenza treatments and the control, while the control remains
 relatively flat.
 
-We've already shown how we can plot a few example genes, however, it can be hard to make sense of individual genes given the amount of noise, as well as being hard to draw conclusions based on a few genes.
+We've already shown how we can plot a few example genes, however, it can be
+hard to make sense of individual genes given the amount of noise, as well as
+being hard to draw conclusions based on a few genes.
 
 Heatmaps are useful to investigate the range of expression patterns for
 specific genes. Here, we are going to plot heatmaps of the normalized gene
 expression patterns and the rescaled gene expression patterns side by side.
 
-First, we select the genes of interest, namely those in cluster 8, based on our goodness-of-fit assignment. 
+First, we select the genes of interest, namely those in cluster 8, based on
+our goodness-of-fit assignment. 
 
 ```{r}
 cluster_to_plot = 8
@@ -992,12 +993,12 @@ identify the number of clusters:
   measures.
 
 First, let us run the clustering for all possible clusters of interest. We
-will, for each clustering experiment, conserve (1) with within cluster sum of
-squares; (2) the labels assigned to all genes. **EAP: I don't understand what you are trying to say in this last sentence. I think there's a typo**
+will, for each clustering, conserve (1) with within cluster sum of
+squares; (2) the clustering assignement (or label) for each gene. 
 
-**EAP: Also, I don't know what you mean by "clustering experiment" -- do you mean a clustering of the data with a particular K? Ditto for "all possible clusters of interest" -- do you mean all choices of K, so 5,9,11,15 in the below.**
-
-Below we run the clustering for $k$ equal to $2-20$. The `splines_kmeans` function returns the WCSS for each cluster, which we sum to get the total WCSS.
+Below we run the clustering for $k$ equal to $2-20$. The `splines_kmeans`
+function returns the WCSS for each cluster, which we sum to get the total
+WCSS.
 
 ```{r running_clustering_on_all_k}
 all_possible_n_clusters = c(2:20)
@@ -1020,11 +1021,14 @@ for(n_cluster in all_possible_n_clusters){
 
 The Elbow method to choose the number of clusters relies on visualization aid
 to choose the number of clusters. The method relies on plotting the within
-cluster sum of squares (WCSS) as a function of the number of clusters. At some point,
-the WCSS will start decreasing more slowly, giving an angle or "elbow" in the graph.  The number of
-cluster is chosen at this "Elbow point."
+cluster sum of squares (WCSS) as a function of the number of clusters. At some
+point, the WCSS will start decreasing more slowly, giving an angle or "elbow"
+in the graph.  The number of cluster is chosen at this "Elbow point."
 
-We plot the WCSS for $k=2-20$ here. We see that as expected the WCSS continues to drop, but there is no clear drop in the decrease, except for very small values of $k$ (3-4 clusters). However, 3-4 seems a very small number of gene clusters to find, given the complexity 
+We plot the WCSS for $k=2-20$ here. We see that as expected the WCSS continues
+to drop, but there is no clear drop in the decrease, except for very small
+values of $k$ (3-4 clusters). However, 3-4 seems a very small number of gene
+clusters to find, given the complexity 
 
 ```{r elbow_method, fig.width=6, fig.height=4}
 plot(all_possible_n_clusters, wss_values,
@@ -1033,8 +1037,6 @@ plot(all_possible_n_clusters, wss_values,
      ylab="Total within-clusters sum of squares")
 
 ```
-
-**EAP: I've increased this to be k=2-20, because you can't actually interpret these plots without a dense number of k; also you do 2-20 for stability**
 
 #### Average silhouette method
 
@@ -1089,7 +1091,8 @@ close to 1.
 To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
-Using the bootstrapping strategy we sample with replacement a sample of the same size as our original clustering (i.e. `r dim(y)[1]` genes):
+Using the bootstrapping strategy we sample with replacement a sample of the
+same size as our original clustering (i.e. `r dim(y)[1]` genes):
 
 ```{r}
 n_genes = dim(y)[1]
@@ -1100,7 +1103,13 @@ bootstrapped_y = y[indices, ]
 
 Using the subsampling strategy, we take a unique subset of the genes, keeping 80% of the genes:
 
-**EAP: `subsample_proportion` was set to 1 in the code, but shouldn't it be 0.8? I changed it to 0.8. But it seems like you don't actually run this code, but read existing runs, so maybe was right there?**
+**EAP: `subsample_proportion` was set to 1 in the code, but shouldn't it be
+0.8? I changed it to 0.8. But it seems like you don't actually run this code,
+but read existing runs, so maybe was right there?**
+
+**Nelle: that was a mistake in the code. I don't actually run subsampling
+experiments: only the bootstrap, and it's done in a separate file as it is too
+time consuming to run in an Rmd file**
 
 ```{r}
 subsample_proportion = 0.8
@@ -1111,7 +1120,41 @@ subsampled_y = y[indices, ]
 **EAP: So this is very confusing to understand, because you read the results from a file (`stability_5.tsv`), but I don't know what this file contains, nor how they were calculated. And I don't know what a stability matrix is -- you've only talked about a consensus matrix. There should be the code here for a single k, but not evaluated, and say that for convenience we provide the results of running this code as a file for users to play with. I've tried to fix up the text to be what I think it should be**
 
 
-We will run **EAP: subsampling???** method on the top 1000 genes **EAP: what is top??**, and do it $B=20$ times for each of $k=2-20$. We show the code below, but because of the time it takes we have evaluate these values separately and provided the results for users to explore more quickly. 
+We run bootstrap method on all genes differentially expressed and with a
+log-fold-change higher than 2 (computed with the `lfc_max` method), and do it
+$B=20$ times for each of $k=2-20$. We show the code below, but because of the
+time it takes we have evaluate these values separately and provided the
+results for users to explore more quickly.
+
+```{r bootstrapped_clustering, eval=FALSE}
+pvalues = de_analysis[, pval_col_to_keep]
+
+splines_model = moanin::create_moanin_model(meta, degrees_of_freedom=6)
+fishers_pval = moanin:::pvalues_fisher_method(pvalues)
+fishers_qval = stats::p.adjust(fishers_pval)
+
+# Keep only the genes found differentially expressed after combining the
+# p-values using Fisher's method and with a log fold change greater than 2
+genes_to_keep = row.names(
+    lfc_max[(rowSums(lfc_max > 2) > 0) & (fishers_qval < 0.05), ])
+y = as.matrix(data[genes_to_keep, ])
+
+# You may want to set the random seed of the experiment so that the results
+# don't vary if you rerun the experiment.
+# set.seed(random_seed)
+n_genes = dim(y)[1] * sample_proportion
+indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
+
+random_subsample_y = y[indices, ]
+kmeans_clusters = moanin::splines_kmeans(
+    random_subsample_y, splines_model, n_clusters=n_clusters,
+    random_seed=random_seed,
+    n_init=20)
+
+# Perform prediction on the whole set of data.
+kmeans_clusters = moanin:::splines_kmeans_prediction(
+    y, kmeans_clusters)
+```
 
 For now, we bring in the results for $k=5$ and $k=20$. 
 
@@ -1119,17 +1162,21 @@ For now, we bring in the results for $k=5$ and $k=20$.
 stability_5 = read.table("results/stability_5.tsv", sep="\t")
 stability_20 = read.table("results/stability_20.tsv", sep="\t")
 ```
-**EAP: It's very confusing that the headings here are C1, ... C20. It makes it seem like cluster 1, ... cluster 20, when I think (?) it is really 20 resampling results. Would be good to change that to, e.g. B1,...,B20 or something.**
 
-For each gene, we have an assignment to a cluster over the 20 resampling runs. For example, for $k=5$: 
+Each column correspond to a bootstrap sample, each row to a gene, and each
+entry to the label found for that particular clustering. Thus, for each gene,
+we have an assignment to a cluster over the 20 resampling runs. For example,
+for $k=5$: 
 
 ```{r,echo=FALSE}
 kable(head(stability_5))
 ```
 
 
-
-Now we will use the function `consensus_matrix` in the `moanin` package to calculate proportion of times each pair of samples was clustered together across the 20 resampling runs, and plot the heatmap of those consensus matrices for $k=5$ and $k=20$. 
+Now we will use the function `consensus_matrix` in the `moanin` package to
+calculate proportion of times each pair of samples was clustered together
+across the 20 resampling runs, and plot the heatmap of those consensus
+matrices for $k=5$ and $k=20$. 
 
 ```{r fig.width=6, fig.height=4}
 consensus_matrix_stability_5 = consensus_matrix(stability_5,
@@ -1153,20 +1200,23 @@ We can see that the choice of $K=5$ seems much more stable across resampling run
 
 The model explorer algorithm [@ben-hur:stability] proposes to estimate the
 number of clusters exploiting the observation that if the number of clusters
-is correct, the clustering results are stable to bootstrap resampling, as described above.  The
-distribution of similaries between bootstrapped results for each $k$ can thus
-be compared for different values of $k$ and guide the user in the choice of
-number of clusters.
+is correct, the clustering results are stable to bootstrap resampling, as
+described above.  The distribution of similaries between bootstrapped results
+for each $k$ can thus be compared for different values of $k$ and guide the
+user in the choice of number of clusters.
 
-The model explorer strategy works as follows. For a single choice of $k$, first perform $n$ bootstrap
-experiments to estimate the cluster centroids, followed by a step of assigning
-a label to all data points. Then, choose a similarity
-measure between two partitions or clusters $S(C_1, C_2)$. **EAP: This is confusing as to whether this is a measure of similarity across different bootstrap resamples (i.e. different sets of clusters) or across two different clusters in the same resample. Perhaps also because of confusion of headings of different resamples between labeled C1, C2, but those aren't cluster 1/2 (see comment above)** Examples are the
-normalized mutual information or Fowlkes-Mallows. Finally, compute the pairwise similarity measure
-between all bootstrapped partitions (i.e. B choose 2 pairs). Repeat this procedure for different $k$ and plot per $k$ the cumulative density of the
-obtained scores.
+The model explorer strategy works as follows. For a single choice of $k$,
+first perform $n$ bootstrap experiments to estimate the cluster centroids,
+followed by a step of assigning a label to all data points. Then, choose a
+similarity measure between two partitions or clusters $S(B_1, B_2)$.  Examples
+are the normalized mutual information or Fowlkes-Mallows. Finally, compute the
+pairwise similarity measure between all bootstrapped partitions (i.e. B choose
+2 pairs). Repeat this procedure for different $k$ and plot per $k$ the
+cumulative density of the obtained scores.
 
-We have already run the bootstrap resampling for values $k=2-20$ and saved the results. We will read that data in, and use it to calculate the pairwise similarity scores. 
+We have already run the bootstrap resampling for values $k=2-20$ and saved the
+results. We will read that data in, and use it to calculate the pairwise
+similarity scores. 
 
 ```{r echo=FALSE, results="hide"}
 n_clusters = 2:20
@@ -1174,11 +1224,13 @@ all_labels = list()
 for(i in n_clusters){
     filename = paste0("results/stability_", i, ".tsv")
     stability = read.table(filename, sep="\t")
-    all_labels[[paste0("C", i)]] = stability
+    all_labels[[paste0("B", i)]] = stability
 }
 ```
 
-The function `plot_model_explorer`
+The function `plot_model_explorer` takes in input a list of the bootstrapped
+results for all labels.
+
 
 ```{r fig.width=6, fig.height=6}
 plot_model_explorer(all_labels)
@@ -1195,7 +1247,7 @@ measures in that range.
 
 
 ```{r fig.width=6, fig.height=6}
-clusters = c("C6", "C7", "C8", "C9", "C10")
+clusters = c("B6", "B7", "B8", "B9", "B10")
 selected_labels = all_labels[clusters]
 plot_model_explorer(selected_labels)
 ```
@@ -1210,7 +1262,8 @@ This analysis doesn't necessarily pick a particular $k$, but can help decide bet
 The  consensus clustering [@monti:consensus] relies on a similar idea but
 instead of looking at the cumulative density of similarity measures of
 bootstrapped clustering, the authors suggests plotting the cumulative density
-of elements of the consensus matrix. We provide a function `plot_cdf_consensus` in `moanin` to do this
+of elements of the consensus matrix. We provide a function
+`plot_cdf_consensus` in `moanin` to do this
 
 ```{r eval=FALSE}
 plot_cdf_consensus(all_labels)
@@ -1227,14 +1280,23 @@ matrix. The consensus clustering strategy thus suggest at looking at either
 the AUC as a function of the number of the clusters or the "improvement" in
 the AUC as a function of the number of cluster.
 
+```{r eval=FALSE}
+auc_scores = moanin:::get_auc_similarity_scores(all_labels)
+plot(n_clusters, auc_scores, col="black", type="b", pch=16)
+```
+
 ```{r echo=FALSE}
 knitr::include_graphics("images/clustering_AUC_consensus.png")
+```
+
+```{r eval=FALSE}
+delta_auc = diff(auc_scores)/auc_scores[1:(length(auc_scores)-1)]
+plot(3:20, delta_auc, col="black", type="b")
 ```
 
 ```{r echo=FALSE}
 knitr::include_graphics("images/clustering_delta_AUC_consensus.png")
 ```
-**EAP: We should again provide the code that goes with these images**
 
 The consensus clustering method suggest that the most stable is $k=2$, which
 separates over-expressed genes from under-expressed genes. While it is indeed

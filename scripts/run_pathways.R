@@ -15,15 +15,12 @@ is_count = FALSE
 take_log = FALSE
 filter_expression = FALSE
 
-# Differential expression analysis
-timecourse_contrasts = c("C-K", "C-M")
-
 # Clustering
 filter_genes = TRUE
-n_genes_to_keep = 5000
 n_clusters = 20
 percentage_genes_to_label = 0.5
 # Set data files and options
+
 data("shoemaker2015")
 data = shoemaker2015$data
 meta = shoemaker2015$meta
@@ -54,9 +51,9 @@ for(cluster in clusters){
     genes = gene_names[labels == cluster]
 
     # convert gene names
-    genes = getBM(attributes=c("ensembl_gene_id", "entrezgene"),
+    genes = getBM(attributes=c("ensembl_gene_id", "entrezgene_id"),
 		  filters="refseq_mrna", values=genes,
-		  mart=ensembl)["entrezgene"]
+		  mart=ensembl)["entrezgene_id"]
     genes = as.vector(unlist(genes))
     pathways = KEGGprofile::find_enriched_pathway(
 	genes, species="mmu",

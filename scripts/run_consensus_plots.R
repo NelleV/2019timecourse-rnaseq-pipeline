@@ -5,7 +5,7 @@ all_labels = list()
 for(i in n_clusters){
     filename = paste0("results/stability_", i, ".tsv")
     stability = read.table(filename, sep="\t")
-    all_labels[[paste0("C", i)]] = stability
+    all_labels[[paste0("B", i)]] = stability
 }
 
 png("images/clustering_CDF_consensus.png")

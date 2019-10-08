@@ -21,7 +21,7 @@ for(folder in folders){
     }
     colnames(all_labels) = lapply(
 	1:dim(all_labels)[2],
-	function(x){paste0("C", x)})
+	function(x){paste0("B", x)})
     outname = paste0("results/", folder, ".tsv")
     write.table(all_labels, outname, sep="\t")
 }
