@@ -500,10 +500,11 @@ We create a \texttt{moanin\_model} for our data:
 
 The \texttt{moanin\_model} object contains a number of metadata and options used
 throughout this analysis: the condition and timepoints of each samples, the
-formula object used or the basis or the degrees of freedom of the model.
-\textbf{EAP:} You make it sound like or, but in fact the object has all of these elements, no?
+formula object used, the basis, and the degrees of freedom of the model.
 
-If no formula is provided, it will default to the following, which provides for a different spline fit for every group (as defined by the \texttt{Group} variable in the \texttt{meta} data.frame):
+If no formula is provided, it will default to the following, which provides
+for a different spline fit for every group (as defined by the \texttt{Group} variable
+in the \texttt{meta} data.frame):
 \texttt{formula\ =\ \textasciitilde{}Group:ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}.
 
 \textbf{EAP: General comment: you need a few more print() and head() of some objects
@@ -599,15 +600,6 @@ Rmarkdown document).
 
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
-
-\textbf{EAP: Should \texttt{timely\_barplot} be a function of \texttt{moanin}?}
-
-\textbf{NV: I'd rather not include these types of functions that are hard to test
-and clutter the namespace. In order to provide reasonable visualization, they
-also often need to be tweaked specfically to match the data (here, the ylim is
-set specifically to the data}
-
-\textbf{EAP: Okay, I'll leave that to you. Most of those tweaked things can just be in a \ldots{} argument and plotting functions that do annoying things are popular. I've at least rewritten it so users can more easily change those features in calls to the function rather than mucking about in the code}
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
 
@@ -959,9 +951,9 @@ Of the four genes we plotted before, 3 of them remained assigned to cluster 2. W
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{#order them by their score}
-\NormalTok{cluster2Score=cluster2Score[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[cluster2Score,}\DecValTok{2}\NormalTok{], }\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)]}
-\NormalTok{dataToPlot=}\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[}\DecValTok{2}\NormalTok{,])}
+\CommentTok{# order them by their score}
+\NormalTok{cluster2Score =}\StringTok{ }\NormalTok{cluster2Score[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[cluster2Score, }\DecValTok{8}\NormalTok{], }\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)]}
+\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[}\DecValTok{8}\NormalTok{, ])}
 \KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
@@ -972,6 +964,11 @@ Of the four genes we plotted before, 3 of them remained assigned to cluster 2. W
 
 \textbf{EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make}
 
+\textbf{Nelle: in my experience, the large the cluster is, the noisier the centroid
+estimation is. I've switched to cluster 8, as this is the cluster we focus our
+interpretation, and the top scoring genes seem to be to be closely related to
+the centroid estimates}
+
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
 
@@ -980,13 +977,16 @@ particularly interesting: it captures genes with strong differences between
 the different influenza treatments and the control, while the control remains
 relatively flat.
 
-We've already shown how we can plot a few example genes, however, it can be hard to make sense of individual genes given the amount of noise, as well as being hard to draw conclusions based on a few genes.
+We've already shown how we can plot a few example genes, however, it can be
+hard to make sense of individual genes given the amount of noise, as well as
+being hard to draw conclusions based on a few genes.
 
 Heatmaps are useful to investigate the range of expression patterns for
 specific genes. Here, we are going to plot heatmaps of the normalized gene
 expression patterns and the rescaled gene expression patterns side by side.
 
-First, we select the genes of interest, namely those in cluster 8, based on our goodness-of-fit assignment.
+First, we select the genes of interest, namely those in cluster 8, based on
+our goodness-of-fit assignment.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1080,12 +1080,12 @@ identify the number of clusters:
 \end{itemize}
 
 First, let us run the clustering for all possible clusters of interest. We
-will, for each clustering experiment, conserve (1) with within cluster sum of
-squares; (2) the labels assigned to all genes. \textbf{EAP: I don't understand what you are trying to say in this last sentence. I think there's a typo}
+will, for each clustering, conserve (1) with within cluster sum of
+squares; (2) the clustering assignement (or label) for each gene.
 
-\textbf{EAP: Also, I don't know what you mean by ``clustering experiment'' -- do you mean a clustering of the data with a particular K? Ditto for ``all possible clusters of interest'' -- do you mean all choices of K, so 5,9,11,15 in the below.}
-
-Below we run the clustering for \(k\) equal to \(2-20\). The \texttt{splines\_kmeans} function returns the WCSS for each cluster, which we sum to get the total WCSS.
+Below we run the clustering for \(k\) equal to \(2-20\). The \texttt{splines\_kmeans}
+function returns the WCSS for each cluster, which we sum to get the total
+WCSS.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1111,11 +1111,14 @@ Below we run the clustering for \(k\) equal to \(2-20\). The \texttt{splines\_km
 
 The Elbow method to choose the number of clusters relies on visualization aid
 to choose the number of clusters. The method relies on plotting the within
-cluster sum of squares (WCSS) as a function of the number of clusters. At some point,
-the WCSS will start decreasing more slowly, giving an angle or ``elbow'' in the graph. The number of
-cluster is chosen at this ``Elbow point.''
+cluster sum of squares (WCSS) as a function of the number of clusters. At some
+point, the WCSS will start decreasing more slowly, giving an angle or ``elbow''
+in the graph. The number of cluster is chosen at this ``Elbow point.''
 
-We plot the WCSS for \(k=2-20\) here. We see that as expected the WCSS continues to drop, but there is no clear drop in the decrease, except for very small values of \(k\) (3-4 clusters). However, 3-4 seems a very small number of gene clusters to find, given the complexity
+We plot the WCSS for \(k=2-20\) here. We see that as expected the WCSS continues
+to drop, but there is no clear drop in the decrease, except for very small
+values of \(k\) (3-4 clusters). However, 3-4 seems a very small number of gene
+clusters to find, given the complexity
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1127,8 +1130,6 @@ We plot the WCSS for \(k=2-20\) here. We see that as expected the WCSS continues
 \end{Shaded}
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/elbow_method-1} \end{center}
-
-\textbf{EAP: I've increased this to be k=2-20, because you can't actually interpret these plots without a dense number of k; also you do 2-20 for stability}
 
 \hypertarget{average-silhouette-method}{%
 \paragraph{Average silhouette method}\label{average-silhouette-method}}
@@ -1189,7 +1190,8 @@ close to 1.
 To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
-Using the bootstrapping strategy we sample with replacement a sample of the same size as our original clustering (i.e.~3950 genes):
+Using the bootstrapping strategy we sample with replacement a sample of the
+same size as our original clustering (i.e.~3950 genes):
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1202,7 +1204,13 @@ Using the bootstrapping strategy we sample with replacement a sample of the same
 
 Using the subsampling strategy, we take a unique subset of the genes, keeping 80\% of the genes:
 
-\textbf{EAP: \texttt{subsample\_proportion} was set to 1 in the code, but shouldn't it be 0.8? I changed it to 0.8. But it seems like you don't actually run this code, but read existing runs, so maybe was right there?}
+\textbf{EAP: \texttt{subsample\_proportion} was set to 1 in the code, but shouldn't it be
+0.8? I changed it to 0.8. But it seems like you don't actually run this code,
+but read existing runs, so maybe was right there?}
+
+\textbf{Nelle: that was a mistake in the code. I don't actually run subsampling
+experiments: only the bootstrap, and it's done in a separate file as it is too
+time consuming to run in an Rmd file}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1214,7 +1222,43 @@ Using the subsampling strategy, we take a unique subset of the genes, keeping 80
 
 \textbf{EAP: So this is very confusing to understand, because you read the results from a file (\texttt{stability\_5.tsv}), but I don't know what this file contains, nor how they were calculated. And I don't know what a stability matrix is -- you've only talked about a consensus matrix. There should be the code here for a single k, but not evaluated, and say that for convenience we provide the results of running this code as a file for users to play with. I've tried to fix up the text to be what I think it should be}
 
-We will run \textbf{EAP: subsampling???} method on the top 1000 genes \textbf{EAP: what is top??}, and do it \(B=20\) times for each of \(k=2-20\). We show the code below, but because of the time it takes we have evaluate these values separately and provided the results for users to explore more quickly.
+We run bootstrap method on all genes differentially expressed and with a
+log-fold-change higher than 2 (computed with the \texttt{lfc\_max} method), and do it
+\(B=20\) times for each of \(k=2-20\). We show the code below, but because of the
+time it takes we have evaluate these values separately and provided the
+results for users to explore more quickly.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pvalues =}\StringTok{ }\NormalTok{de_analysis[, pval_col_to_keep]}
+
+\NormalTok{splines_model =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{create_moanin_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\NormalTok{fishers_pval =}\StringTok{ }\NormalTok{moanin}\OperatorTok{:::}\KeywordTok{pvalues_fisher_method}\NormalTok{(pvalues)}
+\NormalTok{fishers_qval =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{p.adjust}\NormalTok{(fishers_pval)}
+
+\CommentTok{# Keep only the genes found differentially expressed after combining the}
+\CommentTok{# p-values using Fisher's method and with a log fold change greater than 2}
+\NormalTok{genes_to_keep =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(}
+\NormalTok{    lfc_max[(}\KeywordTok{rowSums}\NormalTok{(lfc_max }\OperatorTok{>}\StringTok{ }\DecValTok{2}\NormalTok{) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{&}\StringTok{ }\NormalTok{(fishers_qval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05}\NormalTok{), ])}
+\NormalTok{y =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(data[genes_to_keep, ])}
+
+\CommentTok{# You may want to set the random seed of the experiment so that the results}
+\CommentTok{# don't vary if you rerun the experiment.}
+\CommentTok{# set.seed(random_seed)}
+\NormalTok{n_genes =}\StringTok{ }\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\NormalTok{sample_proportion}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes, }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{)}
+
+\NormalTok{random_subsample_y =}\StringTok{ }\NormalTok{y[indices, ]}
+\NormalTok{kmeans_clusters =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans}\NormalTok{(}
+\NormalTok{    random_subsample_y, splines_model, }\DataTypeTok{n_clusters=}\NormalTok{n_clusters,}
+    \DataTypeTok{random_seed=}\NormalTok{random_seed,}
+    \DataTypeTok{n_init=}\DecValTok{20}\NormalTok{)}
+
+\CommentTok{# Perform prediction on the whole set of data.}
+\NormalTok{kmeans_clusters =}\StringTok{ }\NormalTok{moanin}\OperatorTok{:::}\KeywordTok{splines_kmeans_prediction}\NormalTok{(}
+\NormalTok{    y, kmeans_clusters)}
+\end{Highlighting}
+\end{Shaded}
 
 For now, we bring in the results for \(k=5\) and \(k=20\).
 
@@ -1225,29 +1269,33 @@ For now, we bring in the results for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\textbf{EAP: It's very confusing that the headings here are C1, \ldots{} C20. It makes it seem like cluster 1, \ldots{} cluster 20, when I think (?) it is really 20 resampling results. Would be good to change that to, e.g.~B1,\ldots{},B20 or something.}
-
-For each gene, we have an assignment to a cluster over the 20 resampling runs. For example, for \(k=5\):
+Each column correspond to a bootstrap sample, each row to a gene, and each
+entry to the label found for that particular clustering. Thus, for each gene,
+we have an assignment to a cluster over the 20 resampling runs. For example,
+for \(k=5\):
 
 \begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
-  & C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 & C9 & C10 & C11 & C12 & C13 & C14 & C15 & C16 & C17 & C18 & C19 & C20\\
+  & B1 & B2 & B3 & B4 & B5 & B6 & B7 & B8 & B9 & B10 & B11 & B12 & B13 & B14 & B15 & B16 & B17 & B18 & B19 & B20\\
 \hline
-AA204140 & 5 & 5 & 5 & 5 & 5 & 1 & 3 & 2 & 1 & 3 & 1 & 3 & 4 & 3 & 5 & 4 & 2 & 4 & 1 & 4\\
+A\_51\_P114236 & 4 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 1 & 4 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
 \hline
-AB008911 & 5 & 5 & 1 & 4 & 1 & 2 & 3 & 3 & 2 & 3 & 3 & 3 & 4 & 4 & 5 & 5 & 2 & 4 & 1 & 4\\
+A\_51\_P172409 & 1 & 5 & 5 & 5 & 5 & 5 & 1 & 3 & 2 & 1 & 3 & 4 & 3 & 3 & 5 & 4 & 2 & 4 & 1 & 4\\
 \hline
-AB010313 & 3 & 3 & 1 & 4 & 1 & 2 & 4 & 3 & 2 & 5 & 3 & 1 & 5 & 4 & 2 & 5 & 3 & 3 & 4 & 2\\
+A\_51\_P188401 & 1 & 5 & 5 & 4 & 5 & 5 & 5 & 3 & 2 & 4 & 4 & 4 & 2 & 3 & 5 & 4 & 2 & 4 & 3 & 4\\
 \hline
-AB010342 & 5 & 3 & 1 & 5 & 1 & 1 & 3 & 3 & 1 & 3 & 3 & 3 & 4 & 3 & 5 & 4 & 2 & 3 & 4 & 4\\
+A\_51\_P191274 & 4 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 1 & 4 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
 \hline
-AB011473 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 4 & 4 & 1 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
+A\_51\_P226791 & 1 & 4 & 2 & 4 & 3 & 4 & 2 & 1 & 3 & 3 & 4 & 2 & 5 & 2 & 3 & 5 & 2 & 2 & 5 & 3\\
 \hline
-AB099518 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 4 & 4 & 1 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
+A\_51\_P277048 & 1 & 1 & 4 & 5 & 5 & 2 & 5 & 5 & 2 & 4 & 3 & 4 & 2 & 5 & 4 & 3 & 4 & 4 & 3 & 5\\
 \hline
 \end{tabular}
 
-Now we will use the function \texttt{consensus\_matrix} in the \texttt{moanin} package to calculate proportion of times each pair of samples was clustered together across the 20 resampling runs, and plot the heatmap of those consensus matrices for \(k=5\) and \(k=20\).
+Now we will use the function \texttt{consensus\_matrix} in the \texttt{moanin} package to
+calculate proportion of times each pair of samples was clustered together
+across the 20 resampling runs, and plot the heatmap of those consensus
+matrices for \(k=5\) and \(k=20\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1280,22 +1328,26 @@ We can see that the choice of \(K=5\) seems much more stable across resampling r
 
 The model explorer algorithm \citep{ben-hur:stability} proposes to estimate the
 number of clusters exploiting the observation that if the number of clusters
-is correct, the clustering results are stable to bootstrap resampling, as described above. The
-distribution of similaries between bootstrapped results for each \(k\) can thus
-be compared for different values of \(k\) and guide the user in the choice of
-number of clusters.
+is correct, the clustering results are stable to bootstrap resampling, as
+described above. The distribution of similaries between bootstrapped results
+for each \(k\) can thus be compared for different values of \(k\) and guide the
+user in the choice of number of clusters.
 
-The model explorer strategy works as follows. For a single choice of \(k\), first perform \(n\) bootstrap
-experiments to estimate the cluster centroids, followed by a step of assigning
-a label to all data points. Then, choose a similarity
-measure between two partitions or clusters \(S(C_1, C_2)\). \textbf{EAP: This is confusing as to whether this is a measure of similarity across different bootstrap resamples (i.e.~different sets of clusters) or across two different clusters in the same resample. Perhaps also because of confusion of headings of different resamples between labeled C1, C2, but those aren't cluster 1/2 (see comment above)} Examples are the
-normalized mutual information or Fowlkes-Mallows. Finally, compute the pairwise similarity measure
-between all bootstrapped partitions (i.e.~B choose 2 pairs). Repeat this procedure for different \(k\) and plot per \(k\) the cumulative density of the
-obtained scores.
+The model explorer strategy works as follows. For a single choice of \(k\),
+first perform \(n\) bootstrap experiments to estimate the cluster centroids,
+followed by a step of assigning a label to all data points. Then, choose a
+similarity measure between two partitions or clusters \(S(B_1, B_2)\). Examples
+are the normalized mutual information or Fowlkes-Mallows. Finally, compute the
+pairwise similarity measure between all bootstrapped partitions (i.e.~B choose
+2 pairs). Repeat this procedure for different \(k\) and plot per \(k\) the
+cumulative density of the obtained scores.
 
-We have already run the bootstrap resampling for values \(k=2-20\) and saved the results. We will read that data in, and use it to calculate the pairwise similarity scores.
+We have already run the bootstrap resampling for values \(k=2-20\) and saved the
+results. We will read that data in, and use it to calculate the pairwise
+similarity scores.
 
-The function \texttt{plot\_model\_explorer}
+The function \texttt{plot\_model\_explorer} takes in input a list of the bootstrapped
+results for all labels.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1316,7 +1368,7 @@ measures in that range.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"C6"}\NormalTok{, }\StringTok{"C7"}\NormalTok{, }\StringTok{"C8"}\NormalTok{, }\StringTok{"C9"}\NormalTok{, }\StringTok{"C10"}\NormalTok{)}
+\NormalTok{clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"B6"}\NormalTok{, }\StringTok{"B7"}\NormalTok{, }\StringTok{"B8"}\NormalTok{, }\StringTok{"B9"}\NormalTok{, }\StringTok{"B10"}\NormalTok{)}
 \NormalTok{selected_labels =}\StringTok{ }\NormalTok{all_labels[clusters]}
 \KeywordTok{plot_model_explorer}\NormalTok{(selected_labels)}
 \end{Highlighting}
@@ -1334,7 +1386,8 @@ This analysis doesn't necessarily pick a particular \(k\), but can help decide b
 The consensus clustering \citep{monti:consensus} relies on a similar idea but
 instead of looking at the cumulative density of similarity measures of
 bootstrapped clustering, the authors suggests plotting the cumulative density
-of elements of the consensus matrix. We provide a function \texttt{plot\_cdf\_consensus} in \texttt{moanin} to do this
+of elements of the consensus matrix. We provide a function
+\texttt{plot\_cdf\_consensus} in \texttt{moanin} to do this
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1351,11 +1404,23 @@ matrix. The consensus clustering strategy thus suggest at looking at either
 the AUC as a function of the number of the clusters or the ``improvement'' in
 the AUC as a function of the number of cluster.
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{auc_scores =}\StringTok{ }\NormalTok{moanin}\OperatorTok{:::}\KeywordTok{get_auc_similarity_scores}\NormalTok{(all_labels)}
+\KeywordTok{plot}\NormalTok{(n_clusters, auc_scores, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"b"}\NormalTok{, }\DataTypeTok{pch=}\DecValTok{16}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
 \begin{center}\includegraphics[width=6.67in]{images/clustering_AUC_consensus} \end{center}
 
-\begin{center}\includegraphics[width=6.67in]{images/clustering_delta_AUC_consensus} \end{center}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{delta_auc =}\StringTok{ }\KeywordTok{diff}\NormalTok{(auc_scores)}\OperatorTok{/}\NormalTok{auc_scores[}\DecValTok{1}\OperatorTok{:}\NormalTok{(}\KeywordTok{length}\NormalTok{(auc_scores)}\OperatorTok{-}\DecValTok{1}\NormalTok{)]}
+\KeywordTok{plot}\NormalTok{(}\DecValTok{3}\OperatorTok{:}\DecValTok{20}\NormalTok{, delta_auc, }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{type=}\StringTok{"b"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
-\textbf{EAP: We should again provide the code that goes with these images}
+\begin{center}\includegraphics[width=6.67in]{images/clustering_delta_AUC_consensus} \end{center}
 
 The consensus clustering method suggest that the most stable is \(k=2\), which
 separates over-expressed genes from under-expressed genes. While it is indeed
