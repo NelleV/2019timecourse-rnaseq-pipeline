@@ -10,7 +10,6 @@ random_seed = strtoi(args[2])
 # Other options
 filter_genes = TRUE
 sample_proportion = 1
-n_genes_to_keep = 10000
 keep_all_significant = FALSE
 
 outname = paste0(
@@ -21,9 +20,8 @@ outname = paste0(
 # Clustering and everything 
 data("shoemaker2015")
 
+data = shoemaker2015$meta
 meta = shoemaker2015$meta
-
-data = read.table(".results/quantile_normalized.txt") 
 
 # Right now, the package doesn't contain the normalized data
 de_analysis = read.table(".results/pvalues.txt", sep="\t", check.names=FALSE)
