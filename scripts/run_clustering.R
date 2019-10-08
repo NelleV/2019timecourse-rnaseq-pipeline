@@ -21,7 +21,6 @@ outname = paste0(
 # Clustering and everything 
 data("shoemaker2015")
 
-data = shoemaker2015$data[1:100,]
 meta = shoemaker2015$meta
 
 data = read.table(".results/quantile_normalized.txt") 
@@ -38,8 +37,8 @@ pval_col_to_keep = colnames(de_analysis)[
     grepl("-pval", colnames(de_analysis))]
 pvalues = de_analysis[, pval_col_to_keep]
 
-splines_model = moanin::create_splines_model(meta, degrees_of_freedom=6)
-fishers_pval = moanin:::fisher_method(pvalues)
+splines_model = moanin::create_moanin_model(meta, degrees_of_freedom=6)
+fishers_pval = moanin:::pvalues_fisher_method(pvalues)
 fishers_qval = stats::p.adjust(fishers_pval)
 
 genes_to_keep = row.names(
