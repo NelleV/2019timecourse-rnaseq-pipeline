@@ -661,14 +661,17 @@ mean functions. This is done with the function \texttt{DE\_timecourse}, which ta
 \CommentTok{# (data.frame containing a timepoint and group column, the first corresponding}
 \CommentTok{#<c2><a0>to the time-course information, the latter corresponding to the}
 \CommentTok{# treatment).}
-\NormalTok{pvalues =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{(}
+\NormalTok{DE_results =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{(}
 \NormalTok{    data, moanin_model, timecourse_contrasts,}
     \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
-\NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, p.adjust)}
+\NormalTok{pval_columns =}\StringTok{ }\KeywordTok{colnames}\NormalTok{(DE_results)[}
+    \KeywordTok{grepl}\NormalTok{(}\StringTok{"pval"}\NormalTok{, }\KeywordTok{colnames}\NormalTok{(DE_results))]}
+\NormalTok{qval_columns =}\StringTok{ }\KeywordTok{colnames}\NormalTok{(DE_results)[}
+    \KeywordTok{grepl}\NormalTok{(}\StringTok{"qval"}\NormalTok{, }\KeywordTok{colnames}\NormalTok{(DE_results))]}
+\NormalTok{pvalues =}\StringTok{ }\NormalTok{DE_results[, pval_columns]}
+\NormalTok{qvalues =}\StringTok{ }\NormalTok{DE_results[, qval_columns]}
 \end{Highlighting}
 \end{Shaded}
-
-\textbf{EAP: is there a reason that the qvalues aren't provided with the output like in \texttt{DE\_timepoints}? Doesn't that risk the user not taking that step and working with the unadjusted p-values?}
 
 The number of genes found differentially expressed ranges from around 12000 to
 29000 depending on the strain and dosage of influenza virus given to the mice.
@@ -768,7 +771,8 @@ computation.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{pvalue =}\StringTok{ }\NormalTok{qvalues[, }\StringTok{"M-K"}\NormalTok{]}
+\NormalTok{pvalue =}\StringTok{ }\NormalTok{DE_results[, }\StringTok{"M-K_pval"}\NormalTok{]}
+\KeywordTok{names}\NormalTok{(pvalue) =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(DE_results)}
 \NormalTok{lfc_timecourse =}\StringTok{ }\NormalTok{log_fold_change_timecourse[, }\StringTok{"M-K"}\NormalTok{]}
 \KeywordTok{names}\NormalTok{(lfc_timecourse) =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(log_fold_change_timecourse)}
 
@@ -780,8 +784,8 @@ computation.
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
-visualize gene time-course data in different conditions. Here, we plot the 10 genes with the smallest
-p-values.
+visualize gene time-course data in different conditions. Here, we plot the 10
+genes with the smallest p-values.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -837,6 +841,7 @@ estimate the centroids with more stability.
 \CommentTok{# Then rank by fisher's p-value and take max the number of genes of interest}
 \CommentTok{# Filter out q-values for the pvalues table}
 \NormalTok{fishers_pval =}\StringTok{ }\KeywordTok{pvalues_fisher_method}\NormalTok{(pvalues)}
+\NormalTok{qvalues =}\StringTok{ }\KeywordTok{apply}\NormalTok{(pvalues, }\DecValTok{2}\NormalTok{, p.adjust)}
 \NormalTok{fishers_qval =}\StringTok{ }\KeywordTok{p.adjust}\NormalTok{(fishers_pval)}
 
 \NormalTok{genes_to_keep =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(}
@@ -1202,14 +1207,6 @@ same size as our original clustering (i.e.~3950 genes):
 \end{Shaded}
 
 Using the subsampling strategy, we take a unique subset of the genes, keeping 80\% of the genes:
-
-\textbf{EAP: \texttt{subsample\_proportion} was set to 1 in the code, but shouldn't it be
-0.8? I changed it to 0.8. But it seems like you don't actually run this code,
-but read existing runs, so maybe was right there?}
-
-\textbf{Nelle: that was a mistake in the code. I don't actually run subsampling
-experiments: only the bootstrap, and it's done in a separate file as it is too
-time consuming to run in an Rmd file}
 
 \begin{Shaded}
 \begin{Highlighting}[]
