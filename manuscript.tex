@@ -903,8 +903,10 @@ These centroids are on a 0-1 scale, because of our rescaling of the spline fits,
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cluster2Genes =}\StringTok{ }\KeywordTok{names}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{clusters[kmeans_clusters}\OperatorTok{$}\NormalTok{clusters}\OperatorTok{==}\DecValTok{2}\NormalTok{])}
-\NormalTok{dataToPlot=}\KeywordTok{rbind}\NormalTok{(y[cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[}\DecValTok{2}\NormalTok{,])}
+\NormalTok{cluster_of_interest =}\StringTok{ }\DecValTok{2}
+\NormalTok{cluster2Genes =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
+\NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{clusters[kmeans_clusters}\OperatorTok{$}\NormalTok{clusters}\OperatorTok{==}\NormalTok{cluster_of_interest])}
+\NormalTok{dataToPlot=}\KeywordTok{rbind}\NormalTok{(y[cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,])}
 \KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
@@ -923,7 +925,9 @@ filtering step, yet are good matches to the centroids found during the
 clustering.
 
 The scoring and labeling is done via the \texttt{splines\_kmeans\_score\_and\_label}
-function. This function calculates the goodness of fit of the gene to the cluster centroid. By default, the function labels only the 50\% of genes with the best scores, with the remaining genes getting \texttt{NA} as their assignment.
+function. This function calculates the goodness of fit of the gene to the
+cluster centroid. By default, the function labels only the 50\% of genes with
+the best scores, with the remaining genes getting \texttt{NA} as their assignment.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -935,11 +939,12 @@ function. This function calculates the goodness of fit of the gene to the cluste
 
 \CommentTok{# Let's keep only the list of genes that have a label.}
 \NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
-\NormalTok{cluster2Score =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\DecValTok{2}\NormalTok{])}
+\NormalTok{cluster2Score =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\NormalTok{cluster_of_interest])}
 \end{Highlighting}
 \end{Shaded}
 
-After running \texttt{scores\_and\_labels} we now have 19772 genes that are assigned to a cluster.
+After running \texttt{scores\_and\_labels} we now have 19772 genes that
+are assigned to a cluster.
 
 Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
@@ -947,17 +952,25 @@ scoring and labeling step.
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
 
-Of the original 3950 genes used in the clustering, 3467 are still assigned to a cluster based on their goodness of fit score. We can compare whether they are still assigned to the same clusters based on a confusion matrix shown below. The kmeans cluster assignments are shown on the rows, and the goodness-of-fit assignments in the columns, with the number in each cell indicating the number of genes in the intersection of the two clusters.
+Of the original 3950 genes used in the
+clustering, 3467 are still assigned to a cluster based on their goodness of
+fit score. We can compare whether they are still assigned to the same clusters
+based on a confusion matrix shown below. The kmeans cluster assignments are
+shown on the rows, and the goodness-of-fit assignments in the columns, with
+the number in each cell indicating the number of genes in the intersection of
+the two clusters.
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
 
-Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a few genes in cluster 2, only now pick the best scoring genes
+Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a
+few genes in cluster 2, only now pick the best scoring genes
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# order them by their score}
-\NormalTok{cluster2Score =}\StringTok{ }\NormalTok{cluster2Score[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[cluster2Score, }\DecValTok{8}\NormalTok{], }\DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)]}
-\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[}\DecValTok{8}\NormalTok{, ])}
+\NormalTok{cluster2Score =}\StringTok{ }\NormalTok{cluster2Score[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[cluster2Score, cluster_of_interest],}
+                    \DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)]}
+\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
 \KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
@@ -966,12 +979,7 @@ Of the four genes we plotted before, 3 of them remained assigned to cluster 2. W
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
 
-\textbf{EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make}
-
-\textbf{Nelle: in my experience, the large the cluster is, the noisier the centroid
-estimation is. I've switched to cluster 8, as this is the cluster we focus our
-interpretation, and the top scoring genes seem to be to be closely related to
-the centroid estimates}
+\textbf{EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make}-
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1194,7 +1202,7 @@ close to 1.
 To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
-Using the bootstrapping strategy we sample with replacement a sample of the
+Using the bootstrapping strategy, we sample with replacement a sample of the
 same size as our original clustering (i.e.~3950 genes):
 
 \begin{Shaded}
@@ -1215,8 +1223,6 @@ Using the subsampling strategy, we take a unique subset of the genes, keeping 80
 \NormalTok{subsampled_y =}\StringTok{ }\NormalTok{y[indices, ]}
 \end{Highlighting}
 \end{Shaded}
-
-\textbf{EAP: So this is very confusing to understand, because you read the results from a file (\texttt{stability\_5.tsv}), but I don't know what this file contains, nor how they were calculated. And I don't know what a stability matrix is -- you've only talked about a consensus matrix. There should be the code here for a single k, but not evaluated, and say that for convenience we provide the results of running this code as a file for users to play with. I've tried to fix up the text to be what I think it should be}
 
 We run bootstrap method on all genes differentially expressed and with a
 log-fold-change higher than 2 (computed with the \texttt{lfc\_max} method), and do it
