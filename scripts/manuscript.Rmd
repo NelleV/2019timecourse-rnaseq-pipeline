@@ -481,7 +481,8 @@ week between control and each of the influenza strains.
 ```{r fig.width=6, fig.height=6, echo=FALSE}
 timely_barplot = function(de_analysis, 
     labels=NULL, qval_threshold=0.05,
-    xlab="Timepoint", ylab="Number of DE genes", main="",ylim=c(0, 20000), col="black", ...){
+    xlab="Timepoint", ylab="Number of DE genes", main="", ylim=c(0, 20000), col="black", ...){
+
     qval_colnames = colnames(de_analysis)[
 	grepl("qval", colnames(de_analysis))]
     if(is.null(labels)){
@@ -799,8 +800,10 @@ plot_splines_data(
 These centroids are on a 0-1 scale, because of our rescaling of the spline fits, and do not represent the actual gene expression level. We can plot a few of the actual genes in a cluster to see the difference:
 
 ```{r fig.height=6, fig.width=6}
-cluster2Genes = names(kmeans_clusters$clusters[kmeans_clusters$clusters==2])
-dataToPlot=rbind(y[cluster2Genes[3:6], ],"Centroid"=kmeans_clusters$centroids[2,])
+cluster_of_interest = 2
+cluster2Genes = names(
+    kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
+dataToPlot=rbind(y[cluster2Genes[3:6], ],"Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
 plot_splines_data(dataToPlot, moanin_model,
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
@@ -815,7 +818,9 @@ filtering step, yet are good matches to the centroids found during the
 clustering.
 
 The scoring and labeling is done via the `splines_kmeans_score_and_label`
-function. This function calculates the goodness of fit of the gene to the cluster centroid. By default, the function labels only the 50% of genes with the best scores, with the remaining genes getting `NA` as their assignment.
+function. This function calculates the goodness of fit of the gene to the
+cluster centroid. By default, the function labels only the 50% of genes with
+the best scores, with the remaining genes getting `NA` as their assignment.
 
 ```{r}
 # Then assign scores and labels to all the data, using a goodness-of-fit
@@ -826,10 +831,11 @@ labels = scores_and_labels$labels
 
 # Let's keep only the list of genes that have a label.
 labels = unlist(labels[!is.na(labels)])
-cluster2Score = names(labels[labels==2])
+cluster2Score = names(labels[labels==cluster_of_interest])
 ```
 
-After running `scores_and_labels` we now have `r length(labels)` genes that are assigned to a cluster. 
+After running `scores_and_labels` we now have `r length(labels)` genes that
+are assigned to a cluster. 
 
 Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
@@ -843,7 +849,14 @@ barplot(table(kmeans_clusters$clusters),
 barplot(table(labels), col="black", main="labeling from scores_and_labels function")
 ```
 
-Of the original `r length(kmeans_clusters$clusters)` genes used in the clustering, `r length(intersect(names(kmeans_clusters$clusters), names(labels)))` are still assigned to a cluster based on their goodness of fit score. We can compare whether they are still assigned to the same clusters based on a confusion matrix shown below. The kmeans cluster assignments are shown on the rows, and the goodness-of-fit assignments in the columns, with the number in each cell indicating the number of genes in the intersection of the two clusters. 
+Of the original `r length(kmeans_clusters$clusters)` genes used in the
+clustering, `r length(intersect(names(kmeans_clusters$clusters),
+names(labels)))` are still assigned to a cluster based on their goodness of
+fit score. We can compare whether they are still assigned to the same clusters
+based on a confusion matrix shown below. The kmeans cluster assignments are
+shown on the rows, and the goodness-of-fit assignments in the columns, with
+the number in each cell indicating the number of genes in the intersection of
+the two clusters. 
 
 ```{r echo=FALSE, fig.height=6, fig.width=6, fig.caption="Confusion matrix between the two sets of labels"}
 genes_scored = names(labels)
@@ -869,16 +882,22 @@ labels = unlist(labels[!is.na(labels)])
 
 ```
 
-Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in% cluster2Score)` of them remained assigned to cluster 2. We can again look at a few genes in cluster 2, only now pick the best scoring genes 
+Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in%
+cluster2Score)` of them remained assigned to cluster `r cluster_of_interest`. We can again look at a
+few genes in cluster `r cluster_of_interest`, only now pick the best scoring genes 
 
 ```{r fig.height=6, fig.width=6}
 # order them by their score
-cluster2Score = cluster2Score[order(scores_and_labels$scores[cluster2Score, 8], decreasing = TRUE)]
-dataToPlot = rbind(data[cluster2Score[1:4], ],"Centroid"=kmeans_clusters$centroids[8, ])
+cluster2Score = cluster2Score[order(scores_and_labels$scores[cluster2Score, cluster_of_interest],
+				    decreasing = TRUE)]
+dataToPlot = rbind(data[cluster2Score[1:4], ],"Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(dataToPlot, moanin_model,
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
 ```
+
+**EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make**-
+
 
 ```{r results="hide", echo=FALSE}
 # Save the clustering for the GO term and pathway enrichment on the whole set
@@ -888,14 +907,6 @@ write.table(kmeans_labels,
 	    "./results/clustering_labels.txt",
 	    sep="\t")
 ```
-
-**EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make**
-
-**Nelle: in my experience, the large the cluster is, the noisier the centroid
-estimation is. I've switched to cluster 8, as this is the cluster we focus our
-interpretation, and the top scoring genes seem to be to be closely related to
-the centroid estimates**
-
 
 ### Looking at specific clusters in details.
 
@@ -1093,7 +1104,7 @@ close to 1.
 To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
-Using the bootstrapping strategy we sample with replacement a sample of the
+Using the bootstrapping strategy, we sample with replacement a sample of the
 same size as our original clustering (i.e. `r dim(y)[1]` genes):
 
 ```{r}
@@ -1110,9 +1121,6 @@ subsample_proportion = 0.8
 indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=FALSE)
 subsampled_y = y[indices, ]
 ```
-
-**EAP: So this is very confusing to understand, because you read the results from a file (`stability_5.tsv`), but I don't know what this file contains, nor how they were calculated. And I don't know what a stability matrix is -- you've only talked about a consensus matrix. There should be the code here for a single k, but not evaluated, and say that for convenience we provide the results of running this code as a file for users to play with. I've tried to fix up the text to be what I think it should be**
-
 
 We run bootstrap method on all genes differentially expressed and with a
 log-fold-change higher than 2 (computed with the `lfc_max` method), and do it
