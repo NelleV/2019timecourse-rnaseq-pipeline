@@ -867,21 +867,7 @@ clusters.**
 ```{r visualize_scores_all_figure, fig.height=6, fix.width=6}
 # Get the best score for each gene
 scores = apply(scores_and_labels$scores, 1, min)
-hist(scores, breaks=(1:50/50)            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
-, col="black", main="Distribution of scores")
+hist(scores, breaks=(1:50/50), col="black", main="Distribution of scores")
 ```
 
 **Compared to the EPICON project, a lot of genes seem to have very very poor
@@ -894,12 +880,14 @@ correlation between the gene and the centroid.**
 par(mfrow=c(4, 5))
 scores = apply(scores_and_labels$scores, 1, min)
 labels = apply(scores_and_labels$scores, 1, which.min)
+n_clusters = dim(kmeans_clusters$centroids)[1]
 for(cluster_id in 1:n_clusters){
     hist(scores[labels == cluster_id],
 	 breaks=(1:50/50), xlim=c(0, 1),
 	 col="black", main=paste("C", cluster_id, sep=""))
 }
 
+labels = scores_and_labels$labels
 labels = unlist(labels[!is.na(labels)])
 
 ```
