@@ -60,6 +60,8 @@ knitr::opts_chunk$set(
 ```
 
 
+The manuscript was last compile on `r Sys.time()`.
+
 # TODO list
 
 - Make clear that it applies to RNASeq and how to call the different functions
@@ -865,7 +867,21 @@ clusters.**
 ```{r visualize_scores_all_figure, fig.height=6, fix.width=6}
 # Get the best score for each gene
 scores = apply(scores_and_labels$scores, 1, min)
-hist(scores, breaks=(1:50/50), col="black", main="Distribution of scores")
+hist(scores, breaks=(1:50/50)            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+            188745       low 6-RSEC.s singlece  R    9:50:32      1 scf-sm11
+, col="black", main="Distribution of scores")
 ```
 
 **Compared to the EPICON project, a lot of genes seem to have very very poor
