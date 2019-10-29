@@ -14,10 +14,10 @@ abstract: >
     challenging statistical and computational questions, requiring the
     development of novel methods and software.  Using as case study
     time-course transcriptomics data from mice exposed to different strains of
-    influenza, this workflows provides a step-by-step tutorial of the
+    influenza, this workflow provides a step-by-step tutorial of the
     methodology used to analyse time-course data: (1) normalization of the
-    micro-array dataset; (2) differential expression analysis using functional
-    data analysis; (3) clustering fo time-course data; (4) interpreting
+    micro-array data set; (2) differential expression analysis using functional
+    data analysis; (3) clustering of time-course data; (4) interpreting
     clusters with GO term and KEGG pathway enrichment analysis.
 
 keywords: >
@@ -96,7 +96,7 @@ points, to sampling ten to twenty time points. These longer time series are
 particularly interested in investigating development over time. More recently,
 a new variety of time course studies have come from single-cell sequencing experiments
 [@shalek:single-cell; @habib:div-seq; @trapnell:dynamics]
-which can sequencing single cells which are at different stages of development; in this case,
+which can sequence single cells at different stages of development; in this case,
 the time point is the stage of the cell in the process of development -- a
 value that is not know but estimated from the data as its "pseudo-time."
 
@@ -113,7 +113,7 @@ changing over time (differential expression analysis), examples being `edge`
 [@storey:significance], functional component analysis based models [@wu:more],
 time-course permutation tests [@park:statistical], and multiple testing
 strategies to combine single time point differential expression analysis
-[@sun:multiple]. However, with long time course datasets, particularly in
+[@sun:multiple]. However, with long time course data sets, particularly in
 developmental systems, a massive number of genes will show *some* change. For
 example, in a study of mice lung tissues infected with influenza that we
 consider in this workflow, over 50% of genes
@@ -195,7 +195,9 @@ kable(head(meta))
 
 Before we dive into the exploratory analysis and quality control, let us
 define color schemes for our data that we will use across the whole analysis.
-We define coloschemes for groups, timepoints as named vectors.
+We define color schemes for groups and time points as named vectors. We also
+define a series of markers (or plotting symbols) to distinguish replicate
+samples in scatter plots.
 
 ```{r}
 group_colors = c(
@@ -234,6 +236,7 @@ variable genes: for this step, we keep only the top 50% most variable genes.
 
 ```{r}
 variance_cutoff = 0.5
+# Filter genes by median absolute deviation (mad)
 variance_per_genes = apply(data, 1, mad)
 min_variance = quantile(variance_per_genes, c(variance_cutoff))
 variance_filtered_data = data[variance_per_genes > min_variance,]
@@ -327,7 +330,7 @@ aheatmap(
 We can already see interesting patterns emerging from the correlation plot.
 First, the cross-correlation amongst samples taking from the control mice is
 higher than the cross correlation amongst the rest of the treatments. Second,
-the influenza-infected mice midly react until time point 36. Third, the less
+the influenza-infected mice mildly react until time point 36. Third, the less
 pathogenic the strain is, the closer the samples are to the control condition.
 Fourth, the Vietnam samples at time point 120 and 168 are the one that are the
 most different from control samples.
@@ -356,18 +359,17 @@ expression across time.
 
 The per-time point analysis is using classical differential expression
 approaches, and is often the approach advocated when dealing with small
-time-course datasets, where there are only a few time points 
-[@ritchie:limma; @robinson:edgeR; @love:moderated] . For long time-course datasets,
-however, a separate test for each time-point results in creating many
-different tests, for example one for every time point, the results of which
-are difficult to integrate. We find in practice that the global analysis
-simplifies analysis and of longer time courses data, with per-time point
-analysis reserved for particularly interesting comparisons of individual
-time-points. 
+time-course datasets, where there are only a few time points [@ritchie:limma;
+@robinson:edgeR; @love:moderated] . For long time-course datasets, however, a
+separate test for each time-point results in creating many different tests,
+for example one for every time point, the results of which are difficult to
+integrate. We find in practice that the global analysis simplifies analysis
+and interpretation of longer time courses data, with per-time point analysis
+reserved for particularly interesting comparisons of individual time-points. 
 
 Time course data can either be on a single condition (to identify genes
-changing over time) or or on multiple conditions (such as the influenza
-dataset we are considering), which will alter slightly the types of questions
+changing over time) or on multiple conditions (such as the influenza
+data set we are considering), which will alter slightly the types of questions
 we are interested in. 
 
 **Use with `moanin`** `moanin` provides functionality for performing both of
@@ -376,11 +378,12 @@ situations, we first need to set up a object (a `moanin_model` object) to
 hold the meta data, as well as information for fitting the spline model
 (formula, number of degrees of freedom of the splines, …)
 
-We start by creating the `moanin_model` object using the
-`create_moanin_model` function. We need to provide two things to the function: a data.frame with the meta data, and the number of degrees of freedom. The
-metadata data.frame object should contain at least two columns: one named
-`Group`, containing the  treatement effect, and a second one named `Timepoint`
-containing the timepoint information.
+We start by creating the `moanin_model` object using the `create_moanin_model`
+function. We need to provide two things to the function: a `data.frame` with
+the metadata, and the number of degrees of freedom of the splines used in the
+functional modeling. The metadata `data.frame` object should contain at least
+two columns: one named `Group`, containing the  treatement effect, and a
+second one named `Timepoint` containing the timepoint information.
 
 ```{r echo=FALSE}
 kable(head(meta))
@@ -407,8 +410,13 @@ to demonstrate what the output looks like**
 ### Weekly differential expression analysis
 
 `moanin` provides a simple interface to perform a timepoint by timepoint
-differential expression analysis. Comparison between groups is traditionally done by 
-defining the group comparisons (called `contrasts` in linear models) as a linear combination of the coefficients of the model.  Comparing groups within each timepoint can create many contrasts, and thus `moanin` provides functionality to create these contrasts in an automatic way, and then calls `limma` [@ritchie:limma] on the set of contrasts provided. By default, `moanin` expects RNA-Seq contact counts, and will estimate voom weights.
+differential expression analysis. Comparison between groups is traditionally
+done by defining the group comparisons (called `contrasts` in linear models)
+as a linear combination of the coefficients of the model.  Comparing groups
+within each timepoint can create many contrasts, and thus `moanin` provides
+functionality to create these contrasts in an automatic way, and then calls
+`limma` [@ritchie:limma] on the set of contrasts provided. By default,
+`moanin` expects RNA-Seq contact counts, and will estimate voom weights.
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse ("M") and the mouse infected with the high dose of
@@ -567,8 +575,11 @@ expressed genes.
 
 `moanin` extends this idea by providing functionality to compare time course
 data between different treatment conditions, using a similar mechanism of
-contrasts -- only now the contrasts are differences between the estimated
-mean functions. This is done with the function `DE_timecourse`, which takes as similar input that of `DE_timepoints`, only now will test the entire mean function (and therefore does not require a step of expanding the contrasts into contrasts for individual timepoints). 
+contrasts -- only now the contrasts are differences between the estimated mean
+functions. This is done with the function `DE_timecourse`, which takes as
+similar input that of `DE_timepoints`, only now will test the entire mean
+function (and therefore does not require a step of expanding the contrasts
+into contrasts for individual timepoints). 
 
 ```{r de_analysis}
 # Differential expression analysis
@@ -774,10 +785,16 @@ We thus propose the following adaptation of k-means:
   such that the values are bounded between 0 and 1 and thus comparable between genes.
 - **K-means**: apply k-means on the rescaled fitted values of the splines to estimate the
   cluster centroids.
-- **Assign scores and labels to all genes**: Our `splines_kmeans_score_and_label` function assigns a score to all gene-cluster pairs based on a goodness-of-fit measure of the gene to the cluster centroid. We then "assign" each gene to a cluster based on its score. 
+- **Assign scores and labels to all genes**: Our
+  `splines_kmeans_score_and_label` function assigns a score to all
+  gene-cluster pairs based on a goodness-of-fit measure of the gene to the
+  cluster centroid. We then "assign" each gene to a cluster based on its
+  score. 
 
 
-The first three steps are performed internally by the `splines_kmeans` function. For now, we will set the number of clusters to be $8$, though we will return to the question of picking the best number of clusters below. 
+The first three steps are performed internally by the `splines_kmeans`
+function. For now, we will set the number of clusters to be $8$, though we
+will return to the question of picking the best number of clusters below. 
 
 ```{r clustering}
 # First fit the kmeans clusters
@@ -787,8 +804,8 @@ kmeans_clusters = splines_kmeans(
     n_init=20)
 ```
 
-We then use the `plot_splines_data` function to visualize the centroids of each cluster obtained
-with the splines k-means model. 
+We then use the `plot_splines_data` function to visualize the centroids of
+each cluster obtained with the splines k-means model. 
 
 ```{r fig.height=6, fig.width=6}
 plot_splines_data(
@@ -797,7 +814,9 @@ plot_splines_data(
     smooth=TRUE)
 ```
 
-These centroids are on a 0-1 scale, because of our rescaling of the spline fits, and do not represent the actual gene expression level. We can plot a few of the actual genes in a cluster to see the difference:
+These centroids are on a 0-1 scale, because of our rescaling of the spline
+fits, and do not represent the actual gene expression level. We can plot a few
+of the actual genes in a cluster to see the difference:
 
 ```{r fig.height=6, fig.width=6}
 cluster_of_interest = 2
@@ -809,13 +828,18 @@ plot_splines_data(dataToPlot, moanin_model,
     mar=c(1.5,2.5,2,0.1))
 ```
 
-The spline plots are fitted per gene in the above plot, and illustrate that the genes assigned to a cluster have differing degrees to which their data fits that of the cluster centroid, and indeed fits that of their individual spline fits. 
+The spline plots are fitted per gene in the above plot, and illustrate that
+the genes assigned to a cluster have differing degrees to which their data
+fits that of the cluster centroid, and indeed fits that of their individual
+spline fits. 
 
 ### Assigning genes to clusters
 
-Since we arbitrarily chose a subset of genes based on our filter, we would like all genes to have a chance of assignment to a cluster, as well as a score for whether it is a good assignment.  The scoring and label step allows us to assign genes to clusters that were removed during the
-filtering step, yet are good matches to the centroids found during the
-clustering.
+Since we arbitrarily chose a subset of genes based on our filter, we would
+like all genes to have a chance of assignment to a cluster, as well as a score
+for whether it is a good assignment.  The scoring and label step allows us to
+assign genes to clusters that were removed during the filtering step, yet are
+good matches to the centroids found during the clustering.
 
 The scoring and labeling is done via the `splines_kmeans_score_and_label`
 function. This function calculates the goodness of fit of the gene to the
@@ -832,6 +856,36 @@ labels = scores_and_labels$labels
 # Let's keep only the list of genes that have a label.
 labels = unlist(labels[!is.na(labels)])
 cluster2Score = names(labels[labels==cluster_of_interest])
+```
+
+**Nelle: This is currently for debugging purposes. The distribution of scores
+seems very strange to me, with a lot of genes that don't match at all to any
+clusters.**
+
+```{r visualize_scores_all_figure, fig.height=6, fix.width=6}
+# Get the best score for each gene
+scores = apply(scores_and_labels$scores, 1, min)
+hist(scores, breaks=(1:50/50), col="black", main="Distribution of scores")
+```
+
+**Compared to the EPICON project, a lot of genes seem to have very very poor
+scores. The threshod on the EPICON project on the score was around 0.55, while
+here, it is close to 0.87. The scores range from 0 to 1, with 1 being no
+correlation between the gene and the centroid.**
+
+```{r visualize_scores, fig.height=6, fix.width=6}
+# Get the best score for each gene
+par(mfrow=c(4, 5))
+scores = apply(scores_and_labels$scores, 1, min)
+labels = apply(scores_and_labels$scores, 1, which.min)
+for(cluster_id in 1:n_clusters){
+    hist(scores[labels == cluster_id],
+	 breaks=(1:50/50), xlim=c(0, 1),
+	 col="black", main=paste("C", cluster_id, sep=""))
+}
+
+labels = unlist(labels[!is.na(labels)])
+
 ```
 
 After running `scores_and_labels` we now have `r length(labels)` genes that
@@ -1182,7 +1236,7 @@ matrices for $k=5$ and $k=20$.
 
 ```{r fig.width=6, fig.height=4}
 consensus_matrix_stability_5 = consensus_matrix(stability_5,
-							scale=FALSE)
+						scale=FALSE)
 aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
 	 Colv=FALSE,
 	 treeheight=0, main="K=5")
