@@ -97,7 +97,7 @@
 \thispagestyle{front}
 
 \begin{abstract}
-The phenotypic diversity of cells is governed by a complex equilibrium between their genetic identity and their environmental interactions: Understanding the dynamics of gene expression is a fundamental question of biology.However, analysing time-course transcriptomic data raises unique challenging statistical and computational questions, requiring the development of novel methods and software. Using as case study time-course transcriptomics data from mice exposed to different strains of influenza, this workflows provides a step-by-step tutorial of the methodology used to analyse time-course data: (1) normalization of the micro-array dataset; (2) differential expression analysis using functional data analysis; (3) clustering fo time-course data; (4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
+The phenotypic diversity of cells is governed by a complex equilibrium between their genetic identity and their environmental interactions: Understanding the dynamics of gene expression is a fundamental question of biology.However, analysing time-course transcriptomic data raises unique challenging statistical and computational questions, requiring the development of novel methods and software. Using as case study time-course transcriptomics data from mice exposed to different strains of influenza, this workflow provides a step-by-step tutorial of the methodology used to analyse time-course data: (1) normalization of the micro-array data set; (2) differential expression analysis using functional data analysis; (3) clustering of time-course data; (4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
 \end{abstract}
 
 \section*{Keywords}
@@ -107,7 +107,9 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-\#TODO list
+The manuscript was last compile on 2019-10-29 23:39:12.
+
+\#\textless{}U+00A0\textgreater{}TODO list
 
 \begin{itemize}
 \tightlist
@@ -149,7 +151,7 @@ points, to sampling ten to twenty time points. These longer time series are
 particularly interested in investigating development over time. More recently,
 a new variety of time course studies have come from single-cell sequencing experiments
 \citep{shalek:single-cell, habib:div-seq, trapnell:dynamics}
-which can sequencing single cells which are at different stages of development; in this case,
+which can sequence single cells at different stages of development; in this case,
 the time point is the stage of the cell in the process of development -- a
 value that is not know but estimated from the data as its ``pseudo-time.''
 
@@ -161,7 +163,7 @@ changing over time (differential expression analysis), examples being \texttt{ed
 \citep{storey:significance}, functional component analysis based models \citep{wu:more},
 time-course permutation tests \citep{park:statistical}, and multiple testing
 strategies to combine single time point differential expression analysis
-\citep{sun:multiple}. However, with long time course datasets, particularly in
+\citep{sun:multiple}. However, with long time course data sets, particularly in
 developmental systems, a massive number of genes will show \emph{some} change. For
 example, in a study of mice lung tissues infected with influenza that we
 consider in this workflow, over 50\% of genes
@@ -270,7 +272,9 @@ GSM1557145 & 5 & K & 3 & 12\\
 
 Before we dive into the exploratory analysis and quality control, let us
 define color schemes for our data that we will use across the whole analysis.
-We define coloschemes for groups, timepoints as named vectors.
+We define color schemes for groups and time points as named vectors. We also
+define a series of markers (or plotting symbols) to distinguish replicate
+samples in scatter plots.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -311,6 +315,7 @@ variable genes: for this step, we keep only the top 50\% most variable genes.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{variance_cutoff =}\StringTok{ }\FloatTok{0.5}
+\CommentTok{# Filter genes by median absolute deviation (mad)}
 \NormalTok{variance_per_genes =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data, }\DecValTok{1}\NormalTok{, mad)}
 \NormalTok{min_variance =}\StringTok{ }\KeywordTok{quantile}\NormalTok{(variance_per_genes, }\KeywordTok{c}\NormalTok{(variance_cutoff))}
 \NormalTok{variance_filtered_data =}\StringTok{ }\NormalTok{data[variance_per_genes }\OperatorTok{>}\StringTok{ }\NormalTok{min_variance,]}
@@ -410,7 +415,7 @@ Vietnam, then high dose of Vietnam.
 We can already see interesting patterns emerging from the correlation plot.
 First, the cross-correlation amongst samples taking from the control mice is
 higher than the cross correlation amongst the rest of the treatments. Second,
-the influenza-infected mice midly react until time point 36. Third, the less
+the influenza-infected mice mildly react until time point 36. Third, the less
 pathogenic the strain is, the closer the samples are to the control condition.
 Fourth, the Vietnam samples at time point 120 and 168 are the one that are the
 most different from control samples.
@@ -444,18 +449,16 @@ determining differentially expressed genes,
 
 The per-time point analysis is using classical differential expression
 approaches, and is often the approach advocated when dealing with small
-time-course datasets, where there are only a few time points
-\citep{ritchie:limma, robinson:edgeR, love:moderated} . For long time-course datasets,
-however, a separate test for each time-point results in creating many
-different tests, for example one for every time point, the results of which
-are difficult to integrate. We find in practice that the global analysis
-simplifies analysis and of longer time courses data, with per-time point
-analysis reserved for particularly interesting comparisons of individual
-time-points.
+time-course datasets, where there are only a few time points \citep{ritchie:limma, robinson:edgeR, love:moderated} . For long time-course datasets, however, a
+separate test for each time-point results in creating many different tests,
+for example one for every time point, the results of which are difficult to
+integrate. We find in practice that the global analysis simplifies analysis
+and interpretation of longer time courses data, with per-time point analysis
+reserved for particularly interesting comparisons of individual time-points.
 
 Time course data can either be on a single condition (to identify genes
-changing over time) or or on multiple conditions (such as the influenza
-dataset we are considering), which will alter slightly the types of questions
+changing over time) or on multiple conditions (such as the influenza
+data set we are considering), which will alter slightly the types of questions
 we are interested in.
 
 \textbf{Use with \texttt{moanin}} \texttt{moanin} provides functionality for performing both of
@@ -464,11 +467,12 @@ situations, we first need to set up a object (a \texttt{moanin\_model} object) t
 hold the meta data, as well as information for fitting the spline model
 (formula, number of degrees of freedom of the splines, \textless{}80\textgreater{})
 
-We start by creating the \texttt{moanin\_model} object using the
-\texttt{create\_moanin\_model} function. We need to provide two things to the function: a data.frame with the meta data, and the number of degrees of freedom. The
-metadata data.frame object should contain at least two columns: one named
-\texttt{Group}, containing the treatement effect, and a second one named \texttt{Timepoint}
-containing the timepoint information.
+We start by creating the \texttt{moanin\_model} object using the \texttt{create\_moanin\_model}
+function. We need to provide two things to the function: a \texttt{data.frame} with
+the metadata, and the number of degrees of freedom of the splines used in the
+functional modeling. The metadata \texttt{data.frame} object should contain at least
+two columns: one named \texttt{Group}, containing the treatement effect, and a
+second one named \texttt{Timepoint} containing the timepoint information.
 
 \begin{tabular}{l|r|l|r|r}
 \hline
@@ -512,8 +516,13 @@ to demonstrate what the output looks like}
 \subsubsection{Weekly differential expression analysis}\label{weekly-differential-expression-analysis}}
 
 \texttt{moanin} provides a simple interface to perform a timepoint by timepoint
-differential expression analysis. Comparison between groups is traditionally done by
-defining the group comparisons (called \texttt{contrasts} in linear models) as a linear combination of the coefficients of the model. Comparing groups within each timepoint can create many contrasts, and thus \texttt{moanin} provides functionality to create these contrasts in an automatic way, and then calls \texttt{limma} \citep{ritchie:limma} on the set of contrasts provided. By default, \texttt{moanin} expects RNA-Seq contact counts, and will estimate voom weights.
+differential expression analysis. Comparison between groups is traditionally
+done by defining the group comparisons (called \texttt{contrasts} in linear models)
+as a linear combination of the coefficients of the model. Comparing groups
+within each timepoint can create many contrasts, and thus \texttt{moanin} provides
+functionality to create these contrasts in an automatic way, and then calls
+\texttt{limma} \citep{ritchie:limma} on the set of contrasts provided. By default,
+\texttt{moanin} expects RNA-Seq contact counts, and will estimate voom weights.
 
 Here, we show an example where we define our contrasts to be the difference
 between the control mouse (``M'') and the mouse infected with the high dose of
@@ -649,8 +658,11 @@ expressed genes.
 
 \texttt{moanin} extends this idea by providing functionality to compare time course
 data between different treatment conditions, using a similar mechanism of
-contrasts -- only now the contrasts are differences between the estimated
-mean functions. This is done with the function \texttt{DE\_timecourse}, which takes as similar input that of \texttt{DE\_timepoints}, only now will test the entire mean function (and therefore does not require a step of expanding the contrasts into contrasts for individual timepoints).
+contrasts -- only now the contrasts are differences between the estimated mean
+functions. This is done with the function \texttt{DE\_timecourse}, which takes as
+similar input that of \texttt{DE\_timepoints}, only now will test the entire mean
+function (and therefore does not require a step of expanding the contrasts
+into contrasts for individual timepoints).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -870,10 +882,16 @@ We thus propose the following adaptation of k-means:
   \textbf{K-means}: apply k-means on the rescaled fitted values of the splines to estimate the
   cluster centroids.
 \item
-  \textbf{Assign scores and labels to all genes}: Our \texttt{splines\_kmeans\_score\_and\_label} function assigns a score to all gene-cluster pairs based on a goodness-of-fit measure of the gene to the cluster centroid. We then ``assign'' each gene to a cluster based on its score.
+  \textbf{Assign scores and labels to all genes}: Our
+  \texttt{splines\_kmeans\_score\_and\_label} function assigns a score to all
+  gene-cluster pairs based on a goodness-of-fit measure of the gene to the
+  cluster centroid. We then ``assign'' each gene to a cluster based on its
+  score.
 \end{itemize}
 
-The first three steps are performed internally by the \texttt{splines\_kmeans} function. For now, we will set the number of clusters to be \(8\), though we will return to the question of picking the best number of clusters below.
+The first three steps are performed internally by the \texttt{splines\_kmeans}
+function. For now, we will set the number of clusters to be \(8\), though we
+will return to the question of picking the best number of clusters below.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -885,8 +903,8 @@ The first three steps are performed internally by the \texttt{splines\_kmeans} f
 \end{Highlighting}
 \end{Shaded}
 
-We then use the \texttt{plot\_splines\_data} function to visualize the centroids of each cluster obtained
-with the splines k-means model.
+We then use the \texttt{plot\_splines\_data} function to visualize the centroids of
+each cluster obtained with the splines k-means model.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -899,7 +917,9 @@ with the splines k-means model.
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
 
-These centroids are on a 0-1 scale, because of our rescaling of the spline fits, and do not represent the actual gene expression level. We can plot a few of the actual genes in a cluster to see the difference:
+These centroids are on a 0-1 scale, because of our rescaling of the spline
+fits, and do not represent the actual gene expression level. We can plot a few
+of the actual genes in a cluster to see the difference:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -915,14 +935,19 @@ These centroids are on a 0-1 scale, because of our rescaling of the spline fits,
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} \end{center}
 
-The spline plots are fitted per gene in the above plot, and illustrate that the genes assigned to a cluster have differing degrees to which their data fits that of the cluster centroid, and indeed fits that of their individual spline fits.
+The spline plots are fitted per gene in the above plot, and illustrate that
+the genes assigned to a cluster have differing degrees to which their data
+fits that of the cluster centroid, and indeed fits that of their individual
+spline fits.
 
 \hypertarget{assigning-genes-to-clusters}{%
 \subsubsection{Assigning genes to clusters}\label{assigning-genes-to-clusters}}
 
-Since we arbitrarily chose a subset of genes based on our filter, we would like all genes to have a chance of assignment to a cluster, as well as a score for whether it is a good assignment. The scoring and label step allows us to assign genes to clusters that were removed during the
-filtering step, yet are good matches to the centroids found during the
-clustering.
+Since we arbitrarily chose a subset of genes based on our filter, we would
+like all genes to have a chance of assignment to a cluster, as well as a score
+for whether it is a good assignment. The scoring and label step allows us to
+assign genes to clusters that were removed during the filtering step, yet are
+good matches to the centroids found during the clustering.
 
 The scoring and labeling is done via the \texttt{splines\_kmeans\_score\_and\_label}
 function. This function calculates the goodness of fit of the gene to the
@@ -942,6 +967,45 @@ the best scores, with the remaining genes getting \texttt{NA} as their assignmen
 \NormalTok{cluster2Score =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\NormalTok{cluster_of_interest])}
 \end{Highlighting}
 \end{Shaded}
+
+\textbf{Nelle: This is currently for debugging purposes. The distribution of scores
+seems very strange to me, with a lot of genes that don't match at all to any
+clusters.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Get the best score for each gene}
+\NormalTok{scores =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, min)}
+\KeywordTok{hist}\NormalTok{(scores, }\DataTypeTok{breaks=}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\OperatorTok{/}\DecValTok{50}\NormalTok{), }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Distribution of scores"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/visualize_scores_all_figure-1} \end{center}
+
+\textbf{Compared to the EPICON project, a lot of genes seem to have very very poor
+scores. The threshod on the EPICON project on the score was around 0.55, while
+here, it is close to 0.87. The scores range from 0 to 1, with 1 being no
+correlation between the gene and the centroid.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Get the best score for each gene}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{))}
+\NormalTok{scores =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, min)}
+\NormalTok{labels =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, which.min)}
+\NormalTok{n_clusters =}\StringTok{ }\KeywordTok{dim}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids)[}\DecValTok{1}\NormalTok{]}
+\ControlFlowTok{for}\NormalTok{(cluster_id }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n_clusters)\{}
+    \KeywordTok{hist}\NormalTok{(scores[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_id],}
+     \DataTypeTok{breaks=}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\OperatorTok{/}\DecValTok{50}\NormalTok{), }\DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{),}
+     \DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"C"}\NormalTok{, cluster_id, }\DataTypeTok{sep=}\StringTok{""}\NormalTok{))}
+\NormalTok{\}}
+
+\NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
+\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/visualize_scores-1} \end{center}
 
 After running \texttt{scores\_and\_labels} we now have 19772 genes that
 are assigned to a cluster.
@@ -1302,7 +1366,7 @@ matrices for \(k=5\) and \(k=20\).
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{consensus_matrix_stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{5}\NormalTok{,}
-                            \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
+                        \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
 \KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{5}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
      \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
      \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{main=}\StringTok{"K=5"}\NormalTok{)}
