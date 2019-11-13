@@ -259,7 +259,8 @@ percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
 
 We then plot the two first PC components, and color each sample by (1) its
-condition; (2) its sampling time. We use different plotting symbols for each replicate. We also plot the second and third components in the second column.
+condition; (2) its sampling time. We use different plotting symbols for each
+replicate. We also plot the second and third components in the second column.
 
 ```{r pca_plots, fig.width=6, fig.height=6}
 par(mfrow=c(2, 2))
@@ -354,9 +355,8 @@ between conditions at a single time-point.
 time, and consider what genes have either different patterns between
 conditions or a changing pattern (i.e. non-constant) over time. A common
 approach first step is to fit a spline model to each gene
-[@storey:significance],
-and then use that spline model to test for different kinds of differential
-expression across time. 
+[@storey:significance], and then use that spline model to test for different
+kinds of differential expression across time. 
 
 
 The per-time point analysis is using classical differential expression
@@ -399,12 +399,21 @@ moanin_model = create_moanin_model(meta, degrees_of_freedom=6)
 
 The `moanin_model` object contains a number of metadata and options used
 throughout this analysis: the condition and timepoints of each samples, the
-formula object used, the basis, and the degrees of freedom of the model. 
+formula object used, the basis matrix, and the degrees of freedom of the model. 
 
 If no formula is provided, it will default to the following, which provides
 for a different spline fit for every group (as defined by the `Group` variable
 in the `meta` data.frame): 
 `formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0`.
+
+The basis matrix contains the value of all of the spline basis function for
+each sample of the moment. As such, replicate samples will have the same
+values.
+
+```{r basis_matrix}
+kable(head(moanin_model$basis))
+```
+
 
 **EAP: General comment: you need a few more print() and head() of some objects
 to demonstrate what the output looks like**
@@ -841,14 +850,27 @@ Since we arbitrarily chose a subset of genes based on our filter, we would
 like all genes to have a chance of assignment to a cluster, as well as a score
 for whether it is a good assignment.  The scoring and label step allows us to
 assign genes to clusters that were removed during the filtering step, yet are
-good matches to the centroids found during the clustering.
+good matches to the centroids found during the clustering. The score
+corresponds to a goodness-of-fit between each gene and each cluster, computed
+as follows:
+
+$$
+S(y_i, \mu_k) =  \frac{1}{S_0(k)} \times \underset{a_{iG_j}, b_{iG_j}}{\text{min}}\sum_{j}
+  {\left(b_{iG_j}y_{ij} + a_{iG_j}
+   - \mu_k(t_j)\right)}^2 \,,
+$$
+
+where $\mu_k$ is the centroid of cluster $k$ and $y_i$ the gene of interest.
+The scoring function thus returns a value between 0 and 1, 0 being the best
+score possible and 1 the worst score possible (no correlation between the gene
+and the cluster centroid).
 
 The scoring and labeling is done via the `splines_kmeans_score_and_label`
 function. This function calculates the goodness of fit of the gene to the
 cluster centroid. By default, the function labels only the 50% of genes with
 the best scores, with the remaining genes getting `NA` as their assignment.
 
-```{r}
+```{r assigning_scores_and_labels}
 # Then assign scores and labels to all the data, using a goodness-of-fit
 # scoring function.
 scores_and_labels = splines_kmeans_score_and_label(
@@ -856,39 +878,24 @@ scores_and_labels = splines_kmeans_score_and_label(
 labels = scores_and_labels$labels
 
 # Let's keep only the list of genes that have a label.
+scores = rowMin(scores_and_labels$scores[!is.na(labels), ])
 labels = unlist(labels[!is.na(labels)])
-cluster2Score = names(labels[labels==cluster_of_interest])
+genes_in_cluster2 = names(labels[labels==cluster_of_interest])
 ```
 
-**Nelle: This is currently for debugging purposes. The distribution of scores
-seems very strange to me, with a lot of genes that don't match at all to any
-clusters.**
-
-```{r visualize_scores_all_figure, fig.height=6, fix.width=6}
-# Get the best score for each gene
-scores = apply(scores_and_labels$scores, 1, min)
-hist(scores, breaks=(1:50/50), col="black", main="Distribution of scores")
-```
-
-**Compared to the EPICON project, a lot of genes seem to have very very poor
-scores. The threshod on the EPICON project on the score was around 0.55, while
-here, it is close to 0.87. The scores range from 0 to 1, with 1 being no
-correlation between the gene and the centroid.**
+Let us now, for each cluster, visualize the distribution of scores of the
+genes assigned to that cluster.
 
 ```{r visualize_scores, fig.height=6, fix.width=6}
 # Get the best score for each gene
-par(mfrow=c(4, 5))
-scores = apply(scores_and_labels$scores, 1, min)
-labels = apply(scores_and_labels$scores, 1, which.min)
+par(mfrow=c(4, 3))
 n_clusters = dim(kmeans_clusters$centroids)[1]
 for(cluster_id in 1:n_clusters){
     hist(scores[labels == cluster_id],
 	 breaks=(1:50/50), xlim=c(0, 1),
-	 col="black", main=paste("C", cluster_id, sep=""))
+	 col="black", main=paste("C", cluster_id, sep=""),
+	 xlab="score", ylab="Num. genes")
 }
-
-labels = scores_and_labels$labels
-labels = unlist(labels[!is.na(labels)])
 
 ```
 
@@ -941,20 +948,27 @@ labels = unlist(labels[!is.na(labels)])
 ```
 
 Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in%
-cluster2Score)` of them remained assigned to cluster `r cluster_of_interest`. We can again look at a
+genes_in_cluster2)` of them remained assigned to cluster `r cluster_of_interest`. We can again look at a
 few genes in cluster `r cluster_of_interest`, only now pick the best scoring genes 
 
 ```{r fig.height=6, fig.width=6}
 # order them by their score
-cluster2Score = cluster2Score[order(scores_and_labels$scores[cluster2Score, cluster_of_interest],
-				    decreasing = TRUE)]
-dataToPlot = rbind(data[cluster2Score[1:4], ],"Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
+cluster2Score = cluster2Score[order(scores_and_labels$scores[genes_in_cluster2, cluster_of_interest])]
+dataToPlot = rbind(
+    data[cluster2Score[1:4], ],
+    "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(dataToPlot, moanin_model,
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
 ```
 
-**EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make**-
+**EAP: I don't know what to think about these plots -- these are best scoring,
+but pretty noisy. Also the per-gene spline is sometimes not as good of a
+explanation as the cluster centroid. It's seems like an important plot to
+make**-
+
+**NV: this were the worst scoring genes. I fixed this and the plots now look
+much better**
 
 
 ```{r results="hide", echo=FALSE}

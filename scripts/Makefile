@@ -12,9 +12,10 @@ pdf: reports/manuscript.pdf
 
 html: $(HTML_FILES)
 
-complete: html
+complete: 
 	make results/all_go_terms.tsv
 	make html
+	make pdf
 
 supp: $(SUPP_HTML_FILES)
 
