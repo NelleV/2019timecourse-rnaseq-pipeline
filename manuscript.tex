@@ -107,7 +107,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2019-11-12 09:12:17.
+The manuscript was last compile on 2019-11-13 08:34:55.
 
 \#\textless{}U+00A0\textgreater{}TODO list
 
@@ -335,7 +335,8 @@ centered and scaled gene expression data.
 \end{Shaded}
 
 We then plot the two first PC components, and color each sample by (1) its
-condition; (2) its sampling time. We use different plotting symbols for each replicate. We also plot the second and third components in the second column.
+condition; (2) its sampling time. We use different plotting symbols for each
+replicate. We also plot the second and third components in the second column.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -442,9 +443,8 @@ determining differentially expressed genes,
   time, and consider what genes have either different patterns between
   conditions or a changing pattern (i.e.~non-constant) over time. A common
   approach first step is to fit a spline model to each gene
-  \citep{storey:significance},
-  and then use that spline model to test for different kinds of differential
-  expression across time.
+  \citep{storey:significance}, and then use that spline model to test for different
+  kinds of differential expression across time.
 \end{enumerate}
 
 The per-time point analysis is using classical differential expression
@@ -502,12 +502,40 @@ We create a \texttt{moanin\_model} for our data:
 
 The \texttt{moanin\_model} object contains a number of metadata and options used
 throughout this analysis: the condition and timepoints of each samples, the
-formula object used, the basis, and the degrees of freedom of the model.
+formula object used, the basis matrix, and the degrees of freedom of the model.
 
 If no formula is provided, it will default to the following, which provides
 for a different spline fit for every group (as defined by the \texttt{Group} variable
 in the \texttt{meta} data.frame):
 \texttt{formula\ =\ \textasciitilde{}Group:ns(Timepoint,\ df=degrees\_of\_fredoom)\ +\ Group\ +\ 0}.
+
+The basis matrix contains the value of all of the spline basis function for
+each sample of the moment. As such, replicate samples will have the same
+values.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(}\KeywordTok{head}\NormalTok{(moanin_model}\OperatorTok{$}\NormalTok{basis))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
+\hline
+  & GroupM & GroupK & GroupC & GroupVL & GroupVH & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)6\\
+\hline
+GSM1557140 & 0 & 1 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0\\
+\hline
+GSM1557141 & 0 & 1 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0\\
+\hline
+GSM1557142 & 0 & 1 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0\\
+\hline
+GSM1557143 & 0 & 1 & 0 & 0 & 0 & 0 & 0.5142857 & 0 & 0 & 0 & 0 & 0.0357143 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.1546016 & 0 & 0 & 0 & 0 & 0.3478535 & 0 & 0 & 0 & 0 & -0.1932519 & 0 & 0 & 0\\
+\hline
+GSM1557144 & 0 & 1 & 0 & 0 & 0 & 0 & 0.5142857 & 0 & 0 & 0 & 0 & 0.0357143 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.1546016 & 0 & 0 & 0 & 0 & 0.3478535 & 0 & 0 & 0 & 0 & -0.1932519 & 0 & 0 & 0\\
+\hline
+GSM1557145 & 0 & 1 & 0 & 0 & 0 & 0 & 0.5142857 & 0 & 0 & 0 & 0 & 0.0357143 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.1546016 & 0 & 0 & 0 & 0 & 0.3478535 & 0 & 0 & 0 & 0 & -0.1932519 & 0 & 0 & 0\\
+\hline
+\end{tabular}
 
 \textbf{EAP: General comment: you need a few more print() and head() of some objects
 to demonstrate what the output looks like}
@@ -947,7 +975,20 @@ Since we arbitrarily chose a subset of genes based on our filter, we would
 like all genes to have a chance of assignment to a cluster, as well as a score
 for whether it is a good assignment. The scoring and label step allows us to
 assign genes to clusters that were removed during the filtering step, yet are
-good matches to the centroids found during the clustering.
+good matches to the centroids found during the clustering.The score
+corresponds to a goodness-of-fit between each gene and each cluster, computed
+as follows:
+
+\[
+S(y_i, \mu_k) =  \frac{1}{S_0(k)} \times \underset{a_{iG_j}, b_{iG_j}}{\text{min}}\sum_{j}
+  {\left(b_{iG_j}y_{ij} + a_{iG_j}
+   - \mu_k(t_j)\right)}^2 \,,
+\]
+
+where \(\mu_k\) is the centroid of cluster \(k\) and \(y_i\) the gene of interest.
+The scoring function thus returns a value between 0 and 1, 0 being the best
+score possible and 1 the worst score possible (no correlation between the gene
+and the cluster centroid).
 
 The scoring and labeling is done via the \texttt{splines\_kmeans\_score\_and\_label}
 function. This function calculates the goodness of fit of the gene to the
@@ -963,45 +1004,26 @@ the best scores, with the remaining genes getting \texttt{NA} as their assignmen
 \NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
 
 \CommentTok{# Let's keep only the list of genes that have a label.}
+\NormalTok{scores =}\StringTok{ }\KeywordTok{rowMin}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels), ])}
 \NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
-\NormalTok{cluster2Score =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\NormalTok{cluster_of_interest])}
+\NormalTok{genes_in_cluster2 =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\NormalTok{cluster_of_interest])}
 \end{Highlighting}
 \end{Shaded}
 
-\textbf{Nelle: This is currently for debugging purposes. The distribution of scores
-seems very strange to me, with a lot of genes that don't match at all to any
-clusters.}
+Let us now, for each cluster, visualize the distribution of scores of the
+genes assigned to that cluster.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Get the best score for each gene}
-\NormalTok{scores =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, min)}
-\KeywordTok{hist}\NormalTok{(scores, }\DataTypeTok{breaks=}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\OperatorTok{/}\DecValTok{50}\NormalTok{), }\DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Distribution of scores"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/visualize_scores_all_figure-1} \end{center}
-
-\textbf{Compared to the EPICON project, a lot of genes seem to have very very poor
-scores. The threshod on the EPICON project on the score was around 0.55, while
-here, it is close to 0.87. The scores range from 0 to 1, with 1 being no
-correlation between the gene and the centroid.}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# Get the best score for each gene}
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{5}\NormalTok{))}
-\NormalTok{scores =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, min)}
-\NormalTok{labels =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, which.min)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{3}\NormalTok{))}
 \NormalTok{n_clusters =}\StringTok{ }\KeywordTok{dim}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids)[}\DecValTok{1}\NormalTok{]}
 \ControlFlowTok{for}\NormalTok{(cluster_id }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n_clusters)\{}
     \KeywordTok{hist}\NormalTok{(scores[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_id],}
      \DataTypeTok{breaks=}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\OperatorTok{/}\DecValTok{50}\NormalTok{), }\DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{),}
-     \DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"C"}\NormalTok{, cluster_id, }\DataTypeTok{sep=}\StringTok{""}\NormalTok{))}
+     \DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"C"}\NormalTok{, cluster_id, }\DataTypeTok{sep=}\StringTok{""}\NormalTok{),}
+     \DataTypeTok{xlab=}\StringTok{"score"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Num. genes"}\NormalTok{)}
 \NormalTok{\}}
-
-\NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
-\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1014,7 +1036,7 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labeling step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
 
 Of the original 3950 genes used in the
 clustering, 3467 are still assigned to a cluster based on their goodness of
@@ -1024,7 +1046,7 @@ shown on the rows, and the goodness-of-fit assignments in the columns, with
 the number in each cell indicating the number of genes in the intersection of
 the two clusters.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
 
 Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a
 few genes in cluster 2, only now pick the best scoring genes
@@ -1032,18 +1054,25 @@ few genes in cluster 2, only now pick the best scoring genes
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# order them by their score}
-\NormalTok{cluster2Score =}\StringTok{ }\NormalTok{cluster2Score[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[cluster2Score, cluster_of_interest],}
-                    \DataTypeTok{decreasing =} \OtherTok{TRUE}\NormalTok{)]}
-\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
+\NormalTok{cluster2Score =}\StringTok{ }\NormalTok{genes_in_cluster2[}\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[genes_in_cluster2, cluster_of_interest])]}
+\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}
+\NormalTok{    data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}
+    \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
 \KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
 
-\textbf{EAP: I don't know what to think about these plots -- these are best scoring, but pretty noisy. Also the per-gene spline is sometimes not as good of a explanation as the cluster centroid. It's seems like an important plot to make}-
+\textbf{EAP: I don't know what to think about these plots -- these are best scoring,
+but pretty noisy. Also the per-gene spline is sometimes not as good of a
+explanation as the cluster centroid. It's seems like an important plot to
+make}-
+
+\textbf{NV: this were the worst scoring genes. I fixed this and the plots now look
+much better}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1113,7 +1142,7 @@ Now we will create the heatmaps of these genes (4332 genes).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-32-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1373,7 +1402,7 @@ matrices for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-37-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1385,7 +1414,7 @@ matrices for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-37-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-2} \end{center}
 
 We can see that the choice of \(K=5\) seems much more stable across resampling runs than that of \(K=20\).
 
@@ -1421,7 +1450,7 @@ results for all labels.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-39-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-38-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1440,7 +1469,7 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-40-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-39-1} \end{center}
 
 This analysis doesn't necessarily pick a particular \(k\), but can help decide between \(k\) within a desired range, for example, or to avoid \(k\) that degrade the stability.
 
