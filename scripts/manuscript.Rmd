@@ -953,7 +953,7 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 
 ```{r fig.height=6, fig.width=6}
 # order them by their score
-cluster2Score = cluster2Score[order(scores_and_labels$scores[genes_in_cluster2, cluster_of_interest])]
+cluster2Score = genes_in_cluster2[order(scores_and_labels$scores[genes_in_cluster2, cluster_of_interest])]
 dataToPlot = rbind(
     data[cluster2Score[1:4], ],
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
