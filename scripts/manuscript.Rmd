@@ -70,16 +70,6 @@ The manuscript was last compile on `r Sys.time()`.
 
 *EAP*: What is your plan for the installation instructions Nelle? Shouldn't it be moved where we introduce the package, and give instructions about how to install it there. 
 
-```{r eval=FALSE}
-library(devtools)
-install_github("NelleV/moanin")
-
-library(moanin)
-```
-
-```{r echo=FALSE}
-library(moanin)
-```
 
 
 # Introduction
@@ -168,6 +158,33 @@ regulated by virus concentration.
 While we showcase this pipeline on micro-array data, [@varoquaux:lifecycle]
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop *S. bicolor* to drought.
+
+## Package versions
+
+The following packages are needed for this workflow.
+
+```{r all_libraries}
+# From CRAN
+library(NMF)
+library(ggfortify)
+
+# From Bioconductor
+library(topGO)
+library(biomaRt)
+
+# From GitHub
+library(moanin)
+```
+
+To install `moanin` directly from GitHub, use the devtools' `install_github`
+function:
+
+```{r eval=FALSE}
+library(devtools)
+install_github("NelleV/moanin")
+
+library(moanin)
+```
 
 
 ## Quality control and normalization
@@ -411,7 +428,8 @@ each sample of the moment. As such, replicate samples will have the same
 values.
 
 ```{r basis_matrix}
-kable(head(moanin_model$basis))
+kable(head(moanin_model$basis), digits=2) %>%
+  kable_styling(font_size = 7)
 ```
 
 
@@ -553,11 +571,11 @@ tabCombos<-table(signifCombos)
 Another difficulty with such an approach is making sense of the general
 temporal structure for any particular gene, as different genes will have
 different combinations of timepoints DE. For the comparison of the Kawasaki
-strain to the control, for example, there are `length(signifCombos)` genes
-found DE in some timepoints, and there are `length(tabCombos)` different
+strain to the control, for example, there are `r length(signifCombos)` genes
+found DE in some timepoints, and there are `r length(tabCombos)` different
 combinations of timepoints for which they are DE. Some of these make sense,
-such as DE in timepoints 48H-168H (`tabCombos["48,60,72,120,168"]` genes), but
-many are very fragmentary. For example there are `tabCombos["48,60,120,168"]`
+such as DE in timepoints 48H-168H (`r tabCombos["48,60,72,120,168"]` genes), but
+many are very fragmentary. For example there are `r tabCombos["48,60,120,168"]`
 genes which are DE in timepoints 48,60,120,168H, but *not* in the 72H. Many of
 these genes are likely to have not made the cutoff for significance in 72H,
 but don't show real differences in the overall trend between 48H-168H. 
@@ -569,7 +587,7 @@ a single replicate that is different or increased variability at 72H.
 ```{r showMissingDEGenes, echo=FALSE}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
 plot_splines_data(data, moanin_model, subset_data=exampleGenes,
-		  colors=ann_colors$Group)
+		  colors=ann_colors$Group, smooth=TRUE)
 ```
 
 As a summary, classic differential expression methods are appropriate for
@@ -656,17 +674,17 @@ table of the possible ways to compute log-fold change values.
 | Name   | Formula   |     |
 |------- | --------- |--- |
 | timely | $\text{lfc}(t)$  | Function of time |
-| sum  | $\sum_t lfc(t)$  | Sum of log fold change. |
-| abs_sum  | $\sum_t \lvert lfc(t)\lvert$  | Always positive |
-| max  | $\max_t \lvert lfc(t) \lvert$  | Always positive  |
-| min  | $\min_t \lvert lfc(t) \lvert$  | Always positive |
+| sum  | $\sum_t \text{lfc}(t)$  | Sum of log fold change. |
+| abs_sum  | $\sum_t \lvert \text{lfc}(t)\lvert$  | Always positive |
+| max  | $\max_t \lvert \text{lfc}(t) \lvert$  | Always positive  |
+| min  | $\min_t \lvert \text{lfc}(t) \lvert$  | Always positive |
 | timecourse | See details below | Captures overall strength and direction  |
 
 To capture the overall strength and direction of the response, we leverage the
 timepoint by timepoint log-fold change $\text{lfc}(t)$, and apply the
 following formula:
 
-$$\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T lfc(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {lfc(t)} \lvert \right)$$
+$$\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T \text{lfc}(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {\text{lfc}(t)} \lvert \right)$$
 
 Note that when a gene is not consistently up or down-regulated the estimation
 of the direction will not represent accurately the changes observed.
@@ -690,6 +708,16 @@ log_fold_change_min = estimate_log_fold_change(
     data, moanin_model, timecourse_contrasts, method="min")
 ```
 
+The returning object is a matrix, where each row corresponds to a gene,
+each column to a contrasts, and each entry to the log-fold change for this
+pair of contrast and gene.
+
+```{r display_lfc}
+kable(log_fold_change_timecourse[1:5, ], digits=3, booktabs=TRUE)
+``` 
+
+Each methods of computing the log-fold change captures different elements of
+the time-course data: overall change, largest change, ...
 
 ```{r echo=FALSE, fig.height=6, fig.width=6, message=FALSE}
 par(mfrow=c(2, 2))
@@ -719,7 +747,7 @@ lfc_timecourse = log_fold_change_timecourse[, "M-K"]
 names(lfc_timecourse) = row.names(log_fold_change_timecourse)
 
 plot(lfc_timecourse, -log10(pvalue), pch=20, main="Volcano plot",
-     xlim=c(-2.5, 2))
+     xlim=c(-2.5, 2), xlab="Timecourse lfc")
 ```
 
 As another sanity check, `moanin` provides a simple utility function to
@@ -815,6 +843,12 @@ kmeans_clusters = splines_kmeans(
     n_init=20)
 ```
 
+The `splines_kmeans` function returns a named list with:
+
+- `centroids`: a matrix containing the cluster centroids. The matrix is of
+  shape (`n_centroid`, `n_samples`).
+- `clusters`: a vector of size `n_genes`, containing the 
+
 We then use the `plot_splines_data` function to visualize the centroids of
 each cluster obtained with the splines k-means model. 
 
@@ -875,29 +909,54 @@ the best scores, with the remaining genes getting `NA` as their assignment.
 # scoring function.
 scores_and_labels = splines_kmeans_score_and_label(
     data, kmeans_clusters)
-labels = scores_and_labels$labels
-
-# Let's keep only the list of genes that have a label.
-scores = rowMin(scores_and_labels$scores[!is.na(labels), ])
-labels = unlist(labels[!is.na(labels)])
-genes_in_cluster2 = names(labels[labels==cluster_of_interest])
 ```
 
-Let us now, for each cluster, visualize the distribution of scores of the
-genes assigned to that cluster.
+The `scores_and_labels` list contains two elements:
 
-```{r visualize_scores, fig.height=6, fix.width=6}
-# Get the best score for each gene
-par(mfrow=c(4, 3))
+    - `scores_and_labels$scores`: the matrix of shape `n_cluster` x `n_genes`,
+      containing for each gene and each cluster, the goodness of fit as
+      described above.
+    - `scores_and_labels$labels`: the labels for all of the genes with a
+      good-enough goodness-of-fit score.
+
+
+
+First, let us visualize the distribution of goodness-of-fit scores for each
+cluster. Here, we display the whole set of scores assigned to each cluster,
+prior to filtering poor-quality fits.
+
+```{r visualize_scores, fig.height=6, fix.width=6, echo=TRUE, caption="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
+# Get the best score and best label for all of the genes
+scores = rowMin(scores_and_labels$scores)
+labels = apply(scores_and_labels$scores, 1, which.min)
+max_score = quantile(scores, 0.5)
+par(mfrow=c(3, 3))
 n_clusters = dim(kmeans_clusters$centroids)[1]
 for(cluster_id in 1:n_clusters){
     hist(scores[labels == cluster_id],
 	 breaks=(1:50/50), xlim=c(0, 1),
 	 col="black", main=paste("C", cluster_id, sep=""),
 	 xlab="score", ylab="Num. genes")
+    abline(v=max_score, col="red", lwd=3, lty=2)
 }
 
 ```
+
+Note that for some of the genes, the best scores is 1. A score of 1 indicates
+that there is no correlation between the gene and the cluster: those genes fit
+poorly to all clusters and the assignment to one cluster is done randomly..
+This underlines the importance of filtering genes that fit poorly to clusters.
+
+```{r scores_and_labels}
+labels = scores_and_labels$labels
+
+# Let's keep only the list of genes that have a label.
+labels = unlist(labels[!is.na(labels)])
+
+# And also keep track of all the genes in cluster 2.
+genes_in_cluster2 = names(labels[labels==cluster_of_interest])
+```
+
 
 After running `scores_and_labels` we now have `r length(labels)` genes that
 are assigned to a cluster. 
@@ -961,14 +1020,6 @@ plot_splines_data(dataToPlot, moanin_model,
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
 ```
-
-**EAP: I don't know what to think about these plots -- these are best scoring,
-but pretty noisy. Also the per-gene spline is sometimes not as good of a
-explanation as the cluster centroid. It's seems like an important plot to
-make**-
-
-**NV: this were the worst scoring genes. I fixed this and the plots now look
-much better**
 
 
 ```{r results="hide", echo=FALSE}
@@ -1327,8 +1378,6 @@ plot_model_explorer(selected_labels)
 ```
 
 This analysis doesn't necessarily pick a particular $k$, but can help decide between $k$ within a desired range, for example, or to avoid $k$ that degrade the stability.
-
-**EAP: `plot_model_explorer` is relatively slow, because it does all those pairwise calculations. And then to do it for smaller subset, redo all the calculations. Can't the output be saved, or the calculations be a different step from the plotting?**
 
 #### Consensus clustering as a way to find $k$
 
