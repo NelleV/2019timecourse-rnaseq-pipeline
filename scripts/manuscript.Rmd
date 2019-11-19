@@ -713,7 +713,7 @@ each column to a contrasts, and each entry to the log-fold change for this
 pair of contrast and gene.
 
 ```{r display_lfc}
-kable(log_fold_change_timecourse[1:5, ], digits=3, booktabs=TRUE, escape=F)
+kable(log_fold_change_timecourse[1:5, ], digits=3, booktabs=TRUE)
 ``` 
 
 Each methods of computing the log-fold change captures different elements of
