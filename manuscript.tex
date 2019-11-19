@@ -107,7 +107,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2019-11-18 09:14:48.
+The manuscript was last compile on 2019-11-19 02:22:00.
 
 \#\textless{}U+00A0\textgreater{}TODO list
 
@@ -121,15 +121,6 @@ The manuscript was last compile on 2019-11-18 09:14:48.
 \end{itemize}
 
 \emph{EAP}: What is your plan for the installation instructions Nelle? Shouldn't it be moved where we introduce the package, and give instructions about how to install it there.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(devtools)}
-\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{)}
-
-\KeywordTok{library}\NormalTok{(moanin)}
-\end{Highlighting}
-\end{Shaded}
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -228,6 +219,38 @@ While we showcase this pipeline on micro-array data, \citep{varoquaux:lifecycle}
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop \emph{S. bicolor} to drought.
 
+\hypertarget{package-versions}{%
+\subsection{Package versions}\label{package-versions}}
+
+The following packages are needed for this workflow.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# From CRAN}
+\KeywordTok{library}\NormalTok{(NMF)}
+\KeywordTok{library}\NormalTok{(ggfortify)}
+
+\CommentTok{# From Bioconductor}
+\KeywordTok{library}\NormalTok{(topGO)}
+\KeywordTok{library}\NormalTok{(biomaRt)}
+
+\CommentTok{# From GitHub}
+\KeywordTok{library}\NormalTok{(moanin)}
+\end{Highlighting}
+\end{Shaded}
+
+To install \texttt{moanin} directly from GitHub, use the devtools' \texttt{install\_github}
+function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(devtools)}
+\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{)}
+
+\KeywordTok{library}\NormalTok{(moanin)}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{quality-control-and-normalization}{%
 \subsection{Quality control and normalization}\label{quality-control-and-normalization}}
 
@@ -322,7 +345,7 @@ variable genes: for this step, we keep only the top 50\% most variable genes.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-9-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data.
@@ -515,27 +538,33 @@ values.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{kable}\NormalTok{(}\KeywordTok{head}\NormalTok{(moanin_model}\OperatorTok{$}\NormalTok{basis))}
+\KeywordTok{kable}\NormalTok{(}\KeywordTok{head}\NormalTok{(moanin_model}\OperatorTok{$}\NormalTok{basis), }\DataTypeTok{digits=}\DecValTok{2}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{kable_styling}\NormalTok{(}\DataTypeTok{font_size =} \DecValTok{7}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{table}[H]
+\centering\begingroup\fontsize{7}{9}\selectfont
 
 \begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & GroupM & GroupK & GroupC & GroupVL & GroupVH & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)1 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)2 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)3 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)4 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)5 & GroupM:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupK:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupC:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupVL:splines::ns(Timepoint, df = degrees\_of\_freedom)6 & GroupVH:splines::ns(Timepoint, df = degrees\_of\_freedom)6\\
 \hline
-GSM1557140 & 0 & 1 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0\\
+GSM1557140 & 0 & 1 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0\\
 \hline
-GSM1557141 & 0 & 1 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0\\
+GSM1557141 & 0 & 1 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0\\
 \hline
-GSM1557142 & 0 & 1 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0 & 0 & 0.0000000 & 0 & 0 & 0\\
+GSM1557142 & 0 & 1 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0 & 0 & 0.00 & 0 & 0 & 0\\
 \hline
-GSM1557143 & 0 & 1 & 0 & 0 & 0 & 0 & 0.5142857 & 0 & 0 & 0 & 0 & 0.0357143 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.1546016 & 0 & 0 & 0 & 0 & 0.3478535 & 0 & 0 & 0 & 0 & -0.1932519 & 0 & 0 & 0\\
+GSM1557143 & 0 & 1 & 0 & 0 & 0 & 0 & 0.51 & 0 & 0 & 0 & 0 & 0.04 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.15 & 0 & 0 & 0 & 0 & 0.35 & 0 & 0 & 0 & 0 & -0.19 & 0 & 0 & 0\\
 \hline
-GSM1557144 & 0 & 1 & 0 & 0 & 0 & 0 & 0.5142857 & 0 & 0 & 0 & 0 & 0.0357143 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.1546016 & 0 & 0 & 0 & 0 & 0.3478535 & 0 & 0 & 0 & 0 & -0.1932519 & 0 & 0 & 0\\
+GSM1557144 & 0 & 1 & 0 & 0 & 0 & 0 & 0.51 & 0 & 0 & 0 & 0 & 0.04 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.15 & 0 & 0 & 0 & 0 & 0.35 & 0 & 0 & 0 & 0 & -0.19 & 0 & 0 & 0\\
 \hline
-GSM1557145 & 0 & 1 & 0 & 0 & 0 & 0 & 0.5142857 & 0 & 0 & 0 & 0 & 0.0357143 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.1546016 & 0 & 0 & 0 & 0 & 0.3478535 & 0 & 0 & 0 & 0 & -0.1932519 & 0 & 0 & 0\\
+GSM1557145 & 0 & 1 & 0 & 0 & 0 & 0 & 0.51 & 0 & 0 & 0 & 0 & 0.04 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -0.15 & 0 & 0 & 0 & 0 & 0.35 & 0 & 0 & 0 & 0 & -0.19 & 0 & 0 & 0\\
 \hline
 \end{tabular}
+\endgroup{}
+\end{table}
 
 \textbf{EAP: General comment: you need a few more print() and head() of some objects
 to demonstrate what the output looks like}
@@ -637,7 +666,7 @@ accompanying Rmarkdown document).
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
 
 Such an analysis can demonstrate some general trends, with clearly more genes
 being differentially expressed at later time points, and the Vietnam high-dose
@@ -658,11 +687,11 @@ ability to detect significance.
 Another difficulty with such an approach is making sense of the general
 temporal structure for any particular gene, as different genes will have
 different combinations of timepoints DE. For the comparison of the Kawasaki
-strain to the control, for example, there are \texttt{length(signifCombos)} genes
-found DE in some timepoints, and there are \texttt{length(tabCombos)} different
+strain to the control, for example, there are 26534 genes
+found DE in some timepoints, and there are 1590 different
 combinations of timepoints for which they are DE. Some of these make sense,
-such as DE in timepoints 48H-168H (\texttt{tabCombos{[}"48,60,72,120,168"{]}} genes), but
-many are very fragmentary. For example there are \texttt{tabCombos{[}"48,60,120,168"{]}}
+such as DE in timepoints 48H-168H (509 genes), but
+many are very fragmentary. For example there are 330
 genes which are DE in timepoints 48,60,120,168H, but \emph{not} in the 72H. Many of
 these genes are likely to have not made the cutoff for significance in 72H,
 but don't show real differences in the overall trend between 48H-168H.
@@ -718,7 +747,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-16-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -765,10 +794,10 @@ Name & Formula &\tabularnewline
 \midrule
 \endhead
 timely & \(\text{lfc}(t)\) & Function of time\tabularnewline
-sum & \(\sum_t lfc(t)\) & Sum of log fold change.\tabularnewline
-abs\_sum & \(\sum_t \lvert lfc(t)\lvert\) & Always positive\tabularnewline
-max & \(\max_t \lvert lfc(t) \lvert\) & Always positive\tabularnewline
-min & \(\min_t \lvert lfc(t) \lvert\) & Always positive\tabularnewline
+sum & \(\sum_t \text{lfc}(t)\) & Sum of log fold change.\tabularnewline
+abs\_sum & \(\sum_t \lvert \text{lfc}(t)\lvert\) & Always positive\tabularnewline
+max & \(\max_t \lvert \text{lfc}(t) \lvert\) & Always positive\tabularnewline
+min & \(\min_t \lvert \text{lfc}(t) \lvert\) & Always positive\tabularnewline
 timecourse & See details below & Captures overall strength and direction\tabularnewline
 \bottomrule
 \end{longtable}
@@ -777,7 +806,7 @@ To capture the overall strength and direction of the response, we leverage the
 timepoint by timepoint log-fold change \(\text{lfc}(t)\), and apply the
 following formula:
 
-\[\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T lfc(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {lfc(t)} \lvert \right)\]
+\[\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T \text{lfc}(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {\text{lfc}(t)} \lvert \right)\]
 
 Note that when a gene is not consistently up or down-regulated the estimation
 of the direction will not represent accurately the changes observed.
@@ -802,7 +831,32 @@ well as the method to use to estimate the log-fold change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+The returning object is a matrix, where each row corresponds to a gene,
+each column to a contrasts, and each entry to the log-fold change for this
+pair of contrast and gene.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{kable}\NormalTok{(log_fold_change_timecourse[}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{, ], }\DataTypeTok{digits=}\DecValTok{3}\NormalTok{, }\DataTypeTok{booktabs=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{tabular}{lrrrr}
+\toprule
+  & M-K & M-C & M-VL & M-VH\\
+\midrule
+NM\_009912 & 0.432 & 0.753 & -0.836 & -0.488\\
+NM\_008725 & -1.257 & -2.008 & 1.924 & 1.729\\
+NM\_007473 & 0.385 & 0.335 & 0.516 & 0.263\\
+ENSMUST00000094955 & 0.355 & 0.376 & -0.316 & 0.256\\
+NM\_001042489 & -0.266 & 0.410 & 0.415 & 0.374\\
+\bottomrule
+\end{tabular}
+
+Each methods of computing the log-fold change captures different elements of
+the time-course data: overall change, largest change, \ldots{}
+
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -817,11 +871,11 @@ computation.
 \KeywordTok{names}\NormalTok{(lfc_timecourse) =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(log_fold_change_timecourse)}
 
 \KeywordTok{plot}\NormalTok{(lfc_timecourse, }\OperatorTok{-}\KeywordTok{log10}\NormalTok{(pvalue), }\DataTypeTok{pch=}\DecValTok{20}\NormalTok{, }\DataTypeTok{main=}\StringTok{"Volcano plot"}\NormalTok{,}
-     \DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+     \DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{), }\DataTypeTok{xlab=}\StringTok{"Timecourse lfc"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
 visualize gene time-course data in different conditions. Here, we plot the 10
@@ -836,7 +890,7 @@ genes with the smallest p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
 
 And here we visualize the genes with the largest absolute timecourse log-fold
 change.
@@ -852,7 +906,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -931,6 +985,17 @@ will return to the question of picking the best number of clusters below.
 \end{Highlighting}
 \end{Shaded}
 
+The \texttt{splines\_kmeans} function returns a named list with:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{centroids}: a matrix containing the cluster centroids. The matrix is of
+  shape (\texttt{n\_centroid}, \texttt{n\_samples}).
+\item
+  \texttt{clusters}: a vector of size \texttt{n\_genes}, containing the
+\end{itemize}
+
 We then use the \texttt{plot\_splines\_data} function to visualize the centroids of
 each cluster obtained with the splines k-means model.
 
@@ -943,7 +1008,7 @@ each cluster obtained with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. We can plot a few
@@ -961,7 +1026,7 @@ of the actual genes in a cluster to see the difference:
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
 
 The spline plots are fitted per gene in the above plot, and illustrate that
 the genes assigned to a cluster have differing degrees to which their data
@@ -1001,33 +1066,59 @@ the best scores, with the remaining genes getting \texttt{NA} as their assignmen
 \CommentTok{# scoring function.}
 \NormalTok{scores_and_labels =}\StringTok{ }\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(}
 \NormalTok{    data, kmeans_clusters)}
-\NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
-
-\CommentTok{# Let's keep only the list of genes that have a label.}
-\NormalTok{scores =}\StringTok{ }\KeywordTok{rowMin}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels), ])}
-\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
-\NormalTok{genes_in_cluster2 =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\NormalTok{cluster_of_interest])}
 \end{Highlighting}
 \end{Shaded}
 
-Let us now, for each cluster, visualize the distribution of scores of the
-genes assigned to that cluster.
+The \texttt{scores\_and\_labels} list contains two elements:
+
+\begin{verbatim}
+- `scores_and_labels$scores`: the matrix of shape `n_cluster` x `n_genes`,
+  containing for each gene and each cluster, the goodness of fit as
+  described above.
+- `scores_and_labels$labels`: the labels for all of the genes with a
+  good-enough goodness-of-fit score.
+\end{verbatim}
+
+First, let us visualize the distribution of goodness-of-fit scores for each
+cluster. Here, we display the whole set of scores assigned to each cluster,
+prior to filtering poor-quality fits.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Get the best score for each gene}
-\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+\CommentTok{# Get the best score and best label for all of the genes}
+\NormalTok{scores =}\StringTok{ }\KeywordTok{rowMin}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
+\NormalTok{labels =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, which.min)}
+\NormalTok{max_score =}\StringTok{ }\KeywordTok{quantile}\NormalTok{(scores, }\FloatTok{0.5}\NormalTok{)}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{3}\NormalTok{))}
 \NormalTok{n_clusters =}\StringTok{ }\KeywordTok{dim}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids)[}\DecValTok{1}\NormalTok{]}
 \ControlFlowTok{for}\NormalTok{(cluster_id }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n_clusters)\{}
     \KeywordTok{hist}\NormalTok{(scores[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_id],}
      \DataTypeTok{breaks=}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\OperatorTok{/}\DecValTok{50}\NormalTok{), }\DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{),}
      \DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"C"}\NormalTok{, cluster_id, }\DataTypeTok{sep=}\StringTok{""}\NormalTok{),}
      \DataTypeTok{xlab=}\StringTok{"score"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Num. genes"}\NormalTok{)}
+    \KeywordTok{abline}\NormalTok{(}\DataTypeTok{v=}\NormalTok{max_score, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{3}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{)}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{center}\includegraphics{reports/manuscript_files/figure-latex/visualize_scores-1} \end{center}
+
+Note that for some of the genes, the best scores is 1. A score of 1 indicates
+that there is no correlation between the gene and the cluster: those genes fit
+poorly to all clusters and the assignment to one cluster is done randomly..
+This underlines the importance of filtering genes that fit poorly to clusters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{labels =}\StringTok{ }\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{labels}
+
+\CommentTok{# Let's keep only the list of genes that have a label.}
+\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels[}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(labels)])}
+
+\CommentTok{# And also keep track of all the genes in cluster 2.}
+\NormalTok{genes_in_cluster2 =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels[labels}\OperatorTok{==}\NormalTok{cluster_of_interest])}
+\end{Highlighting}
+\end{Shaded}
 
 After running \texttt{scores\_and\_labels} we now have 19772 genes that
 are assigned to a cluster.
@@ -1036,7 +1127,7 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labeling step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} \end{center}
 
 Of the original 3950 genes used in the
 clustering, 3467 are still assigned to a cluster based on their goodness of
@@ -1046,7 +1137,7 @@ shown on the rows, and the goodness-of-fit assignments in the columns, with
 the number in each cell indicating the number of genes in the intersection of
 the two clusters.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
 
 Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a
 few genes in cluster 2, only now pick the best scoring genes
@@ -1064,15 +1155,7 @@ few genes in cluster 2, only now pick the best scoring genes
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-28-1} \end{center}
-
-\textbf{EAP: I don't know what to think about these plots -- these are best scoring,
-but pretty noisy. Also the per-gene spline is sometimes not as good of a
-explanation as the cluster centroid. It's seems like an important plot to
-make}-
-
-\textbf{NV: this were the worst scoring genes. I fixed this and the plots now look
-much better}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1142,7 +1225,7 @@ Now we will create the heatmaps of these genes (4332 genes).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-31-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1402,7 +1485,7 @@ matrices for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-35-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1414,7 +1497,7 @@ matrices for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-35-2} \end{center}
 
 We can see that the choice of \(K=5\) seems much more stable across resampling runs than that of \(K=20\).
 
@@ -1450,7 +1533,7 @@ results for all labels.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-38-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-37-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1469,11 +1552,9 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-39-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-38-1} \end{center}
 
 This analysis doesn't necessarily pick a particular \(k\), but can help decide between \(k\) within a desired range, for example, or to avoid \(k\) that degrade the stability.
-
-\textbf{EAP: \texttt{plot\_model\_explorer} is relatively slow, because it does all those pairwise calculations. And then to do it for smaller subset, redo all the calculations. Can't the output be saved, or the calculations be a different step from the plotting?}
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
 \paragraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
@@ -1714,16 +1795,17 @@ this pipeline and their version numbers.
 ##  [8] datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] RColorBrewer_1.1-2   moanin_0.0.0         topGO_2.32.0        
-##  [4] SparseM_1.77         GO.db_3.6.0          AnnotationDbi_1.42.1
-##  [7] IRanges_2.14.12      S4Vectors_0.18.3     graph_1.58.2        
-## [10] viridis_0.5.1        viridisLite_0.3.0    KEGGprofile_1.22.0  
-## [13] RCurl_1.95-4.12      bitops_1.0-6         NMF_0.21.0          
-## [16] Biobase_2.40.0       BiocGenerics_0.26.0  cluster_2.0.9       
-## [19] rngtools_1.3.1.1     pkgmaker_0.27        registry_0.5-1      
-## [22] ggplot2_3.1.1        kableExtra_1.1.0     biomaRt_2.36.1      
-## [25] BiocStyle_2.8.2      knitr_1.22           limma_3.36.5        
-## [28] usethis_1.5.0        devtools_2.0.2       rmarkdown_1.12      
+##  [1] RColorBrewer_1.1-2   moanin_0.0.0         ggfortify_0.4.6     
+##  [4] topGO_2.32.0         SparseM_1.77         GO.db_3.6.0         
+##  [7] AnnotationDbi_1.42.1 IRanges_2.14.12      S4Vectors_0.18.3    
+## [10] graph_1.58.2         viridis_0.5.1        viridisLite_0.3.0   
+## [13] KEGGprofile_1.22.0   RCurl_1.95-4.12      bitops_1.0-6        
+## [16] NMF_0.21.0           Biobase_2.40.0       BiocGenerics_0.26.0 
+## [19] cluster_2.0.9        rngtools_1.3.1.1     pkgmaker_0.27       
+## [22] registry_0.5-1       ggplot2_3.1.1        kableExtra_1.1.0    
+## [25] biomaRt_2.36.1       BiocStyle_2.8.2      knitr_1.22          
+## [28] limma_3.36.5         usethis_1.5.0        devtools_2.0.2      
+## [31] rmarkdown_1.12      
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] colorspace_1.4-1        rprojroot_1.3-2        
@@ -1765,16 +1847,16 @@ this pipeline and their version numbers.
 ## [73] tidyselect_0.2.5        plyr_1.8.4             
 ## [75] magrittr_1.5            bookdown_0.9           
 ## [77] R6_2.4.0                DBI_1.0.0              
-## [79] pillar_1.3.1            withr_2.1.2            
-## [81] mgcv_1.8-28             abind_1.4-5            
+## [79] mgcv_1.8-28             pillar_1.3.1           
+## [81] withr_2.1.2             abind_1.4-5            
 ## [83] KEGGREST_1.20.2         tibble_2.1.1           
 ## [85] crayon_1.3.4            progress_1.2.0         
 ## [87] grid_3.6.0              blob_1.1.1             
 ## [89] callr_3.2.0             git2r_0.25.2           
 ## [91] vegan_2.5-4             digest_0.6.18          
 ## [93] webshot_0.5.1           xtable_1.8-4           
-## [95] munsell_0.5.0           magic_1.5-9            
-## [97] sessioninfo_1.1.1
+## [95] tidyr_0.8.3             munsell_0.5.0          
+## [97] magic_1.5-9             sessioninfo_1.1.1
 \end{verbatim}
 
 \hypertarget{author-contributions}{%
