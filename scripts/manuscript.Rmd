@@ -185,13 +185,7 @@ While we showcase this pipeline on micro-array data, [@varoquaux:lifecycle]
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop *S. bicolor* to drought.
 
-## Quality control and normalization
-
-The first steps of analysis of gene expression data is always to do
-normalization and quality control checks of the data. In what follows, we show
-an example of this for the influenza data using generic methods; these steps
-are not in specific to time course data, but could be done for any gene expression
-analysis. 
+## Overview of the data
 
 First let's load the data. The package `moanin` contains the normalized
 data and metadata of [@shoemaker:ultrasensitive].
@@ -214,7 +208,7 @@ Before we dive into the exploratory analysis and quality control, let us
 define color schemes for our data that we will use across the whole analysis.
 We define color schemes for groups and time points as named vectors. We also
 define a series of markers (or plotting symbols) to distinguish replicate
-samples in scatter plots.
+samples in scatter plots. We also reorder the factor `Group` which describes the treatments so that the treatments are order from low to high pathogeny (with Control being first). 
 
 ```{r}
 group_colors = c(
@@ -236,7 +230,23 @@ replicate_markers = c(15, 17, 19)
 names(replicate_markers) = c(1, 2, 3)
 ann_markers = list(
     Replicate=replicate_markers)
+
+# Reorder the conditions such that:
+#	- Control is before any influenza treatment
+#	- Each treatment is ordered from low to high pathogeny
+meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
+
 ```
+
+
+## Quality control and normalization
+
+The first steps of analysis of gene expression data is always to do
+normalization and quality control checks of the data. In what follows, we show
+an example of this for the influenza data using generic methods; these steps
+are not in specific to time course data, but could be done for any gene expression
+analysis. For this reason, we will not print the detailed code that is needed for this part of the analysis; interested readers can examine the `rmarkdown` code that accompanies this workflow.
+
 
 ### Exploratory analysis and quality control
 
@@ -265,12 +275,10 @@ hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
 abline(v=min_variance, col="#AB0000", lw=2)
 ```
 
-**EAP**: Not sure why you hide the code for this plot, but not for others...
-
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data. 
 
-```{r pca, fig.width=6, fig.height=6}
+```{r pca, echo=FALSE, results="hide",fig.width=6, fig.height=6}
 pca_data = prcomp(t(variance_filtered_data), rank=3, center=TRUE, scale=TRUE) 
 percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
@@ -279,7 +287,7 @@ We then plot the two first PC components, and color each sample by (1) its
 condition; (2) its sampling time. We use different plotting symbols for each
 replicate. We also plot the second and third components in the second column.
 
-```{r pca_plots, fig.width=6, fig.height=6}
+```{r pca_plots, echo=FALSE, results="hide", fig.width=6, fig.height=6}
 par(mfrow=c(2, 2))
 par(mar=c(4.5, 4.5, 1.5, 1.5))
 plot(
@@ -313,18 +321,14 @@ plot(
 axis(2, labels=FALSE)
 ```
 
-Then, we plot the pearson correlation across each samples. We order the
+Then, we plot the pearson correlation between each sample as a heatmap diagram (using the function `aheatmap` in `NMF`). We order the
 samples by their Group (treatment) and Timepoint (the time of sampling).
 Additionally, in this example, we order each treatment by strength of the
 pathogenicity of the treatment: Control, Kawasaki, California, low dose of
 Vietnam, then high dose of Vietnam.
 
 
-```{r  correlation_plot, fig.width=6, fig.height=6, fig.cap="Cross-correlation of the samples"}
-# Reorder the conditions such that:
-#	- Control is before any influenza treatment
-#	- Each treatment is ordered from low to high pathogeny
-meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
+```{r  correlation_plot, echo=FALSE, results="hide",fig.width=6, fig.height=6, fig.cap="Cross-correlation of the samples"}
 
 # Reorder genes on condition, time, and replicate
 ord = order(
