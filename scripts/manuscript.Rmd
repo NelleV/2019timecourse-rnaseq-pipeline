@@ -329,7 +329,7 @@ pathogenicity of the treatment: Control, Kawasaki, California, low dose of
 Vietnam, then high dose of Vietnam.
 
 
-```{r  correlation_plot, echo=FALSE, results="hide",fig.width=6, fig.height=6, fig.cap="Cross-correlation of the samples"}
+```{r  correlation_plot, echo=FALSE, results="hide",fig.width=6, fig.height=6, fig.cap="Heatmap of the correlation between samples"}
 
 # Reorder genes on condition, time, and replicate
 ord = order(
