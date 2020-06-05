@@ -55,14 +55,14 @@ library(topGO)
 knitr::opts_chunk$set(
   cache=TRUE, autodep=TRUE, warning=FALSE, error=FALSE, message=FALSE,
   echo=TRUE, out.width=".5\\textwidth",
-  duplicate.label="allow",out.extra = "")
+  duplicate.label="allow")
 
 ```
 
 
 The manuscript was last compile on `r Sys.time()`.
 
-# TODO list
+# TODO list
 
 - Make clear that it applies to RNASeq and how to call the different functions
     to RNASeq
@@ -269,7 +269,7 @@ min_variance = quantile(variance_per_genes, c(variance_cutoff))
 variance_filtered_data = data[variance_per_genes > min_variance,]
 ```
 
-```{r echo=FALSE, fig.width=6, fig.height=3, fig.cap="Distribution of variance"}
+```{r geneVarHist, echo=FALSE, fig.width=6, fig.height=3, fig.cap="Distribution of variance"}
 hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
      ylab="# probes", main="")
 abline(v=min_variance, col="#AB0000", lw=2)
@@ -288,7 +288,7 @@ condition (top row) and its sampling time (bottom row).
 We use different plotting symbols for each
 replicate. We also plot the second and third components in the second column.
 
-```{r pca_plots, echo=FALSE, results="hide", fig.width=6, fig.height=6, fig.cap="Plot of PC components: PC2 vs PC1 (right) and PC2 vs PC3 (left). Samples are colored by condition (top row) and sampling time (bottom row)."}
+```{r pcaPlots, echo=FALSE, results="hide", fig.width=6, fig.height=6, fig.cap="Plot of PC components: PC2 vs PC1 (right) and PC2 vs PC3 (left). Samples are colored by condition (top row) and sampling time (bottom row)."}
 par(mfrow=c(2, 2))
 par(mar=c(4.5, 4.5, 1.5, 1.5))
 plot(
@@ -329,8 +329,7 @@ pathogenicity of the treatment: Control, Kawasaki, California, low dose of
 Vietnam, then high dose of Vietnam.
 
 
-```{r  correlation_plot, echo=FALSE, results="hide",fig.width=6, fig.height=6, fig.cap="Heatmap of the correlation between samples"}
-
+```{r  correlationPlot, echo=FALSE, results="hide",fig.width=6, fig.height=6, fig.cap="Heatmap of the correlation between samples"}
 # Reorder genes on condition, time, and replicate
 ord = order(
   meta$Group,
