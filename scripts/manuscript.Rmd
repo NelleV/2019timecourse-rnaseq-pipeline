@@ -67,10 +67,7 @@ The manuscript was last compile on `r Sys.time()`.
 - Make clear that it applies to RNASeq and how to call the different functions
     to RNASeq
 - Check that clustering can deal with count data.
-
-*EAP*: What is your plan for the installation instructions Nelle? Shouldn't it be moved where we introduce the package, and give instructions about how to install it there. 
-
-
+- Update Nelle's affiliation!
 
 # Introduction
 
@@ -134,6 +131,35 @@ knitr::include_graphics("images/fig1_schemas.png")
 
 ```
 
+## Installation and setup
+
+ `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`:
+
+```{r eval=FALSE}
+library(devtools)
+install_github("NelleV/moanin")
+library(moanin)
+```
+
+The following additional packages are needed for this workflow:
+
+```{r all_libraries}
+# From CRAN
+library(NMF)
+library(ggfortify)
+
+# From Bioconductor
+library(topGO)
+library(biomaRt)
+
+# From GitHub
+library(moanin)
+```
+
+**EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at the beginning of the document? I also needed to install `BiocWorkflowTools`, `KEGGprofile` to run the .Rmd
+
+
+
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
 This workflow is illustrated using data from a micro-array time-course
@@ -158,34 +184,6 @@ regulated by virus concentration.
 While we showcase this pipeline on micro-array data, [@varoquaux:lifecycle]
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop *S. bicolor* to drought.
-
-## Package versions
-
-The following packages are needed for this workflow.
-
-```{r all_libraries}
-# From CRAN
-library(NMF)
-library(ggfortify)
-
-# From Bioconductor
-library(topGO)
-library(biomaRt)
-
-# From GitHub
-library(moanin)
-```
-
-To install `moanin` directly from GitHub, use the devtools' `install_github`
-function:
-
-```{r eval=FALSE}
-library(devtools)
-install_github("NelleV/moanin")
-
-library(moanin)
-```
-
 
 ## Quality control and normalization
 
