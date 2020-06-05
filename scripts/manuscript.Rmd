@@ -54,9 +54,9 @@ library(topGO)
 ```{r echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(
   cache=TRUE, autodep=TRUE, warning=FALSE, error=FALSE, message=FALSE,
-  echo=TRUE,
-  duplicate.label="allow"
-)
+  echo=TRUE, fig.width=4,
+  duplicate.label="allow",out.extra = "")
+
 ```
 
 
@@ -127,7 +127,7 @@ functions in a R package called `moanin`.
 
 ```{r schema, echo=FALSE, fig.width=1, fig.cap="Workflow for analyzing time-course datasets."}
 
-knitr::include_graphics("images/fig1_schemas.png")
+knitr::include_graphics("images/fig1_schemas.png",dpi=30 )
 
 ```
 
@@ -259,11 +259,13 @@ min_variance = quantile(variance_per_genes, c(variance_cutoff))
 variance_filtered_data = data[variance_per_genes > min_variance,]
 ```
 
-```{r echo=FALSE, fig.width=6, fig.height=3, fig.caption="Distribution of variance"}
+```{r echo=FALSE, fig.width=6, fig.height=3, fig.cap="Distribution of variance"}
 hist(variance_per_genes, breaks=100, col="black", xlab="Variance",
      ylab="# probes", main="")
 abline(v=min_variance, col="#AB0000", lw=2)
 ```
+
+**EAP**: Not sure why you hide the code for this plot, but not for others...
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data. 
@@ -318,7 +320,7 @@ pathogenicity of the treatment: Control, Kawasaki, California, low dose of
 Vietnam, then high dose of Vietnam.
 
 
-```{r  correlation_plot, fig.width=6, fig.height=6, fig.caption="Cross-correlation of the samples"}
+```{r  correlation_plot, fig.width=6, fig.height=6, fig.cap="Cross-correlation of the samples"}
 # Reorder the conditions such that:
 #	- Control is before any influenza treatment
 #	- Each treatment is ordered from low to high pathogeny
@@ -632,7 +634,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30% to 70% of the genes found differentially
 expressed in this time-course experiment.
 
-```{r echo=FALSE, fig.width=3, fig.height=3, fig.caption="Distribution of DE genes per condition"}
+```{r echo=FALSE, fig.width=3, fig.height=3, fig.cap="Distribution of DE genes per condition"}
 num_de = colSums(qvalues < 0.05)
 names(num_de) = c(
     "Kawasaki", "California", "Vietnam LD", "Vietname HD")
@@ -980,7 +982,7 @@ shown on the rows, and the goodness-of-fit assignments in the columns, with
 the number in each cell indicating the number of genes in the intersection of
 the two clusters. 
 
-```{r echo=FALSE, fig.height=6, fig.width=6, fig.caption="Confusion matrix between the two sets of labels"}
+```{r echo=FALSE, fig.height=6, fig.width=6, fig.cap="Confusion matrix between the two sets of labels"}
 genes_scored = names(labels)
 
 # of those used in clustering, keep only those 
