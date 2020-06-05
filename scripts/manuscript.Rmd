@@ -55,7 +55,7 @@ library(topGO)
 knitr::opts_chunk$set(
   cache=TRUE, autodep=TRUE, warning=FALSE, error=FALSE, message=FALSE,
   echo=TRUE, fig.width=4,
-  duplicate.label="allow",out.extra = "")
+  duplicate.label="allow",fig.align="center")
 
 ```
 
