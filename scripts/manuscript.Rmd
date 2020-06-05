@@ -54,7 +54,7 @@ library(topGO)
 ```{r echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(
   cache=TRUE, autodep=TRUE, warning=FALSE, error=FALSE, message=FALSE,
-  echo=TRUE, fig.width=4,
+  echo=TRUE, out.width=".5\\textwidth",
   duplicate.label="allow",out.extra = "")
 
 ```
@@ -125,7 +125,7 @@ analysing gene expression data, some specific for time-course data, others
 broadly used by the community. We provide the various steps of the workflow as
 functions in a R package called `moanin`.
 
-```{r schema, echo=FALSE, fig.width=1, fig.cap="Workflow for analyzing time-course datasets."}
+```{r schema, echo=FALSE, fig.cap="Workflow for analyzing time-course datasets."}
 
 knitr::include_graphics("images/fig1_schemas.png",dpi=30 )
 
@@ -278,16 +278,17 @@ abline(v=min_variance, col="#AB0000", lw=2)
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data. 
 
-```{r pca, echo=FALSE, results="hide",fig.width=6, fig.height=6}
+```{r pca, echo=FALSE, results="hide"}
 pca_data = prcomp(t(variance_filtered_data), rank=3, center=TRUE, scale=TRUE) 
 percent_var = round(100 * attr(pca_data, "percentVar"))
 ```
 
-We then plot the two first PC components, and color each sample by (1) its
-condition; (2) its sampling time. We use different plotting symbols for each
+In the following plot, we plot the two first PC components in the first column, where each sample is colored by its
+condition (top row) and its sampling time (bottom row). 
+We use different plotting symbols for each
 replicate. We also plot the second and third components in the second column.
 
-```{r pca_plots, echo=FALSE, results="hide", fig.width=6, fig.height=6}
+```{r pca_plots, echo=FALSE, results="hide", fig.width=6, fig.height=6, fig.cap="Plot of PC components: PC2 vs PC1 (right) and PC2 vs PC3 (left). Samples are colored by condition (top row) and sampling time (bottom row)."}
 par(mfrow=c(2, 2))
 par(mar=c(4.5, 4.5, 1.5, 1.5))
 plot(
