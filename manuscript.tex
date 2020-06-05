@@ -107,9 +107,10 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-06-05 10:32:54.
+The manuscript was last compile on 2020-06-05 16:11:32.
 
-\#\textless{}U+00A0\textgreater{}TODO list
+\hypertarget{todo-list}{%
+\section{TODO list}\label{todo-list}}
 
 \begin{itemize}
 \tightlist
@@ -118,9 +119,9 @@ The manuscript was last compile on 2020-06-05 10:32:54.
   to RNASeq
 \item
   Check that clustering can deal with count data.
+\item
+  Update Nelle's affiliation!
 \end{itemize}
-
-\emph{EAP}: What is your plan for the installation instructions Nelle? Shouldn't it be moved where we introduce the package, and give instructions about how to install it there.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -186,12 +187,44 @@ functions in a R package called \texttt{moanin}.
 
 \begin{figure}
 
-{\centering \includegraphics[width=4.81in]{images/fig1_schemas} 
+{\centering \includegraphics[width=11.53in]{images/fig1_schemas} 
 
 }
 
 \caption{Workflow for analyzing time-course datasets.}\label{fig:schema}
 \end{figure}
+
+\hypertarget{installation-and-setup}{%
+\subsection{Installation and setup}\label{installation-and-setup}}
+
+\texttt{moanin} is available from GitHub, and can be installed using the \texttt{install\_github} function in the package \texttt{devtools}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(devtools)}
+\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(moanin)}
+\end{Highlighting}
+\end{Shaded}
+
+The following additional packages are needed for this workflow:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# From CRAN}
+\KeywordTok{library}\NormalTok{(NMF)}
+\KeywordTok{library}\NormalTok{(ggfortify)}
+
+\CommentTok{# From Bioconductor}
+\KeywordTok{library}\NormalTok{(topGO)}
+\KeywordTok{library}\NormalTok{(biomaRt)}
+
+\CommentTok{# From GitHub}
+\KeywordTok{library}\NormalTok{(moanin)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{EAP}: Why is this list not the same as the (hidden via echo=FALSE) list at the beginning of the document? I also needed to install \texttt{BiocWorkflowTools}, \texttt{KEGGprofile} to run the .Rmd
 
 \hypertarget{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}{%
 \section{Analysis of the dynamical response of mouse lung tissue to influenza}\label{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}}
@@ -218,38 +251,6 @@ regulated by virus concentration.
 While we showcase this pipeline on micro-array data, \citep{varoquaux:lifecycle}
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop \emph{S. bicolor} to drought.
-
-\hypertarget{package-versions}{%
-\subsection{Package versions}\label{package-versions}}
-
-The following packages are needed for this workflow.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# From CRAN}
-\KeywordTok{library}\NormalTok{(NMF)}
-\KeywordTok{library}\NormalTok{(ggfortify)}
-
-\CommentTok{# From Bioconductor}
-\KeywordTok{library}\NormalTok{(topGO)}
-\KeywordTok{library}\NormalTok{(biomaRt)}
-
-\CommentTok{# From GitHub}
-\KeywordTok{library}\NormalTok{(moanin)}
-\end{Highlighting}
-\end{Shaded}
-
-To install \texttt{moanin} directly from GitHub, use the devtools' \texttt{install\_github}
-function:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(devtools)}
-\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{)}
-
-\KeywordTok{library}\NormalTok{(moanin)}
-\end{Highlighting}
-\end{Shaded}
 
 \hypertarget{quality-control-and-normalization}{%
 \subsection{Quality control and normalization}\label{quality-control-and-normalization}}
@@ -345,7 +346,16 @@ variable genes: for this step, we keep only the top 50\% most variable genes.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-8-1} \end{center}
+\begin{figure}
+
+{\centering \includegraphics{reports/manuscript_files/figure-latex/geneVarHist-1} 
+
+}
+
+\caption{Distribution of variance}\label{fig:geneVarHist}
+\end{figure}
+
+\textbf{EAP}: Not sure why you hide the code for this plot, but not for others\ldots{}
 
 Let us first perform the PCA analysis. Here, we perform a PCA of rank 3 of the
 centered and scaled gene expression data.
@@ -397,7 +407,7 @@ replicate. We also plot the second and third components in the second column.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/pca_plots-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/pcaPlots-1} \end{center}
 
 Then, we plot the pearson correlation across each samples. We order the
 samples by their Group (treatment) and Timepoint (the time of sampling).
@@ -434,7 +444,14 @@ Vietnam, then high dose of Vietnam.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/correlation_plot-1} \end{center}
+\begin{figure}
+
+{\centering \includegraphics{reports/manuscript_files/figure-latex/correlationPlot-1} 
+
+}
+
+\caption{Cross-correlation of the samples}\label{fig:correlationPlot}
+\end{figure}
 
 We can already see interesting patterns emerging from the correlation plot.
 First, the cross-correlation amongst samples taking from the control mice is
@@ -666,7 +683,7 @@ accompanying Rmarkdown document).
 Let's look at the distribution of genes found differentially expressed per
 week between control and each of the influenza strains.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-13-1} \end{center}
 
 Such an analysis can demonstrate some general trends, with clearly more genes
 being differentially expressed at later time points, and the Vietnam high-dose
@@ -747,7 +764,14 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-15-1} \end{center}
+\begin{figure}
+
+{\centering \includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-14-1} 
+
+}
+
+\caption{Distribution of DE genes per condition}\label{fig:unnamed-chunk-14}
+\end{figure}
 
 The next step in a classical differential expression analysis is typically to
 assess the effect of the treatment by looking at the log fold change.
@@ -856,7 +880,7 @@ NM\_001042489 & -0.266 & 0.410 & 0.415 & 0.374\\
 Each methods of computing the log-fold change captures different elements of
 the time-course data: overall change, largest change, \ldots{}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
 
 From the single measures of log-fold change and the p-value, we can now look
 at the volcano plot. Here is an example of a volcano plot for the comparaison
@@ -875,7 +899,7 @@ computation.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
 
 As another sanity check, \texttt{moanin} provides a simple utility function to
 visualize gene time-course data in different conditions. Here, we plot the 10
@@ -890,7 +914,7 @@ genes with the smallest p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-20-1} \end{center}
 
 And here we visualize the genes with the largest absolute timecourse log-fold
 change.
@@ -906,7 +930,7 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-21-1} \end{center}
 
 Thanks to those visualization, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -1008,7 +1032,7 @@ each cluster obtained with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-22-1} \end{center}
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. We can plot a few
@@ -1026,7 +1050,7 @@ of the actual genes in a cluster to see the difference:
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-23-1} \end{center}
 
 The spline plots are fitted per gene in the above plot, and illustrate that
 the genes assigned to a cluster have differing degrees to which their data
@@ -1127,7 +1151,7 @@ Before performing the next steps, let us investigate in more detail the
 differences between the labels provided by the splines k-means model and the
 scoring and labeling step.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-24-1} \end{center}
 
 Of the original 3950 genes used in the
 clustering, 3467 are still assigned to a cluster based on their goodness of
@@ -1137,7 +1161,14 @@ shown on the rows, and the goodness-of-fit assignments in the columns, with
 the number in each cell indicating the number of genes in the intersection of
 the two clusters.
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
+\begin{figure}
+
+{\centering \includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-25-1} 
+
+}
+
+\caption{Confusion matrix between the two sets of labels}\label{fig:unnamed-chunk-25}
+\end{figure}
 
 Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a
 few genes in cluster 2, only now pick the best scoring genes
@@ -1155,7 +1186,7 @@ few genes in cluster 2, only now pick the best scoring genes
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-27-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-26-1} \end{center}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1225,7 +1256,7 @@ Now we will create the heatmaps of these genes (4332 genes).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-30-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-29-1} \end{center}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1485,7 +1516,7 @@ matrices for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-35-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-34-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1497,7 +1528,7 @@ matrices for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-35-2} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-34-2} \end{center}
 
 We can see that the choice of \(K=5\) seems much more stable across resampling runs than that of \(K=20\).
 
@@ -1533,7 +1564,7 @@ results for all labels.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-37-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-36-1} \end{center}
 
 From this plot, we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
@@ -1552,7 +1583,7 @@ measures in that range.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-38-1} \end{center}
+\begin{center}\includegraphics{reports/manuscript_files/figure-latex/unnamed-chunk-37-1} \end{center}
 
 This analysis doesn't necessarily pick a particular \(k\), but can help decide between \(k\) within a desired range, for example, or to avoid \(k\) that degrade the stability.
 
