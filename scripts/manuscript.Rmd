@@ -1392,7 +1392,7 @@ results for all labels.
 ```{r plotModelExplorer, fig.width=6, fig.height=6,fig.cap="Plot of the cumulative density of similarity of clusterings of data for different k"}
 plot_model_explorer(all_labels)
 ```
-**EAP** I'm confused by this plot. Isn't the numbering here for different values of $k$? Why do the labels say "B1" and "B2"? Isn't that the notation above for the bootstrap replications for each values of $k$? 
+**EAP** I'm confused by this plot. Isn't the numbering here for different values of $k$? Why do the labels say "B1" and "B2"? Isn't that the notation above for the bootstrap replications for each values of $k$? It seems like the names of `all_labels` should be something like `k=1`,..., while the names of `all_labels[[1]]` should be `B1,B2,...`. But currently they have the same values.
 
 
 From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
@@ -1468,13 +1468,12 @@ data, where the number of clusters is not clearly defined.
 ## Downstream analysis of clusters.
 
 Once good clusters are obtained, the next step is to leverage the clustering
-to ease interpretation. Classic enrichment analysis step can then be performed
-in the gene set defined in each cluster: KEGG pathway enrichment analysis, GO
-term enrichment analysis, motif enrichment analysis, etc.
+to ease interpretation. Classic enrichment analysis can then be performed
+on the gene set defined by each cluster. Examples include KEGG pathway enrichment analysis, 
+GO term enrichment analysis, and motif enrichment analysis.
 
 First, let us clean up the genes we work with and only select the genes we are
-going to use in the enrichment analysis. One can either use the whole set of
-genes, only the set of differentially expressed genes in each cluster, or a
+going to use in the enrichment analysis. One can either all genes assigned to the cluster, only the set of differentially expressed genes in each cluster, or the
 subset of genes that fit well to a cluster (based on some criterion).
 
 ### Finding enriched pathways using `biomaRt` and `KEGGprofile`
@@ -1482,59 +1481,77 @@ subset of genes that fit well to a cluster (based on some criterion).
 Let us first tackle the case of pathway enrichment analysis. We will leverage
 the packages `biomaRt` [@durinck:biomart] and `KEGGprofile` [@zhao:keggprofile]
 for this step. `KEGGprofile` is a
-package that easily allows to perform pathway enrichment analysis on a set of
-genes labeled with the ensembl annotation. We thus need to convert the gene
-names into the appropriate format. This is where `biomaRt` comes in handy: it
-enables easy conversion from one gene annotation to another. Here, we will use
-it to convert the gene names from the Refseq annotation to the ensembl one.
+package that facilitates enrichment analysis on a set of
+genes labeled with the Ensembl annotation [@ensembl2020] based on the set of biological pathways described in the KEGG database[@KEGG].
 
+We thus need to convert the gene
+names, which are given in the Refseq annotation, into the corresponding Ensembl name. This is where `biomaRt` comes in handy: it
+enables easy conversion from one gene annotation to another. Here, we will use the function `getBM`
+in `biomaRt` to convert the gene names from cluster 8.
 
-```{r results="hide"}
+```{r ensemble_setup, results="hide"}
+## Set up right ensembl database
 ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
-```
 
-```{r enrichment_analysis, results="hide", message=FALSE}
+## Get gene names of genes in Cluster 8
 cluster = 8
 labels = unlist(labels)
 gene_names = names(labels)
 genes = gene_names[labels == cluster]
 
-# convert gene names
+## Convert gene names
 genes = getBM(attributes=c("ensembl_gene_id", "entrezgene_id"),
 		filters="refseq_mrna", values=genes,
 		mart=ensembl)["entrezgene_id"]
+```
+
+Then we use the function `find_enriched_pathway` in the `KEGGprofile` package to determine whether any KEGG pathways are enriched in cluster 8, i.e. whether a higher percentage of genes from a single pathway are found in cluster 8 than we would expect by simply proportional assignment of genes to clusters. 
+
+```{r enrichment_analysis, results="hide", message=FALSE}
 genes = as.vector(unlist(genes))
 pathways = find_enriched_pathway(
     genes, species="mmu",
     download_latest=FALSE)$stastic
-
 ```
 
-```{r echo=FALSE}
 
+```{r echo=FALSE}
+## order the results by adjusted p-value
 pathways = pathways[
     order(pathways["pvalueAdj"]),]
 
-# Select the columns to print
+# Select the columns to print and give nicer column names
 pathways = subset(
     pathways,
     select=c(
 	"Pathway_Name", "Percentage",
 	"pvalueAdj"))
-
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways[1:10, ], format="latex", escape=F, digits=4, booktabs=TRUE)
+kable(pathways[1:min(10,nrow(pathways)), ], format="latex", escape=F, digits=4, booktabs=TRUE)
 ```
+
+**EAP: I changed this to be the min(10, nrow(pathways)) but wondering if there's a problem, since presumably there used to be more than 10 pathways found significant and on my machine there are only 2?**
+
 
 
 ### Finding enriched GO terms
 
-To find GO terms, we use `biomaRt` to find the mapping between GO terms and
-gene mapping. The GO enrichment library `topGO` [@alexa:topgo] expects the GO term to gene
+The Gene Ontology (GO) database [@GO], also categorizes genes into meaningful biological ontologies and can be used for enrichment analysis via the package `topGO` [@alexa:topgo]. We again use `biomaRt` to find the mapping between genes and the GO terms to which they match. 
+
+```{r get_go_mappings, message=FALSE}
+genes = getBM(attributes=c("go_id", "refseq_mrna"),
+	      values=gene_names,
+	      filters="refseq_mrna",
+	      mart=ensembl)
+}
+```
+
+The `biomaRt` query results in a matrix with two columns: gene names and GO
+term ID. The package `topGO` [@alexa:topgo] expects the GO term to gene
 mapping to be a list where each item is a mapping between a gene name and a GO
-term ID vector. 
+term ID vector, for example:
 
 ```text
 $NM_199153
@@ -1546,26 +1563,20 @@ $NM_201361
  [6] "GO:0005829" "GO:0005737" "GO:0005856" "GO:0005874" "GO:0005739"
 [11] "GO:0005819" "GO:0000922" "GO:0072686"
 ```
-
-`biomaRt` queries results a matrix with two named columns of gene names and GO
-term ID.
-
+`moanin` provides a simple function (`create_go_term_mapping`) to make this conversion:
 
 ```{r go_to_gene_mapping, results="hide", message=FALSE}
-genes = getBM(attributes=c("go_id", "refseq_mrna"),
-	      values=gene_names,
-	      filters="refseq_mrna",
-	      mart=ensembl)
 
 # Create gene to GO id mapping
 gene_id_go_mapping = create_go_term_mapping(genes)
 ```
 
-Once the gene ID to GO mapping list is created, `moanin` provides a simple
-interface to `topGO` to fetch enriched GO terms. Here, we show an example of
-running a GO term enrichment on the "Biological process" ontology (BP).
+Once the gene ID to GO mapping list is created, `moanin` provides an 
+interface to `topGO` to determine enriched GO terms. **EAP: What does the package do that is an enhancement to topGO output? Would be good to briefly describe** Here, we show an example of
+running a GO term enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
+# Create logical vector of whether in cluster 8
 assignments = labels == cluster
 
 go_terms_enriched = find_enriched_go_terms(
@@ -1583,14 +1594,17 @@ colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
 kable(go_terms_enriched[1:15, ], format="latex", escape=F,
       digits=3, booktabs=TRUE, row.names=FALSE)
 ```
+
+
 # Conclusion
 
-This workflow provides a tutoral for the analysis of time-course gene
-expression data in R, illustrated through the analysis of mice lung tissue
-exposed to different influenza strain. It covers four main steps; (1) quality
-control and normalization; (2) differential expression analysis; (3)
-clustering of time-course gene expression data; (4) downstream analysis of
-clusters.
+This workflow provides a tutoral for the analysis of lengthy time-course gene
+expression data in R using the package `moanin`, which aids in implementing common timecourse analyses. We illustrate the workflow through the analysis of mice lung tissue
+exposed to different influenza strain and measured over time. 
+The proposed workflow covers consists of three common analysis main steps generally performed after quality
+control and normalization: (1) differential expression analysis; (2)
+clustering of time-course gene expression data; (3) downstream analysis of
+clusters. We demonstrate how the use of the package `moanin` allows for easy implementation of these procedures in the setting of time-course data.
 
 
 # Software and data availability
