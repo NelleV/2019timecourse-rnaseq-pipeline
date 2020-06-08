@@ -645,7 +645,7 @@ The number of genes found differentially expressed ranges from around 12000 to
 This corresponds to between 30% to 70% of the genes found differentially
 expressed in this time-course experiment.
 
-```{r echo=FALSE, fig.cap="Distribution of DE genes per condition based on global splines analysis"}
+```{r deTimeDist, echo=FALSE, fig.cap="Distribution of DE genes per condition based on global splines analysis"}
 num_de = colSums(qvalues < 0.05)
 par(mar=c(7.1,5.1,1.1,1.1))
 names(num_de) = c(
@@ -1193,7 +1193,7 @@ to drop, but there is no clear drop in the decrease, except for very small
 values of $k$ (3-4 clusters). However, 3-4 seems a very small number of gene
 clusters to find, given the complexity 
 
-```{r elbow_method, fig.width=6, fig.height=4, fig.cap="Plot of WCSS as a function of k"}
+```{r elbowMethod, fig.width=6, fig.height=4, fig.cap="Plot of WCSS as a function of k"}
 plot(all_possible_n_clusters, wss_values,
      type="b", pch=19, frame=FALSE, 
      xlab="Number of clusters K",
