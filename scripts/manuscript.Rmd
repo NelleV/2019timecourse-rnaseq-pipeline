@@ -926,7 +926,7 @@ cluster centroid and gives a cluster label to the gene if they have a sufficient
 
 
 ```{r assigning_scores_and_labels}
-# Then assign scores and labels to all the data, using a goodness-of-fit
+# Then assign scores and labels to all the data, using a goodness-of-fit
 # scoring function.
 scores_and_labels = splines_kmeans_score_and_label(
     data, kmeans_clusters)
@@ -1545,7 +1545,7 @@ genes = getBM(attributes=c("go_id", "refseq_mrna"),
 	      values=gene_names,
 	      filters="refseq_mrna",
 	      mart=ensembl)
-}
+
 ```
 
 The `biomaRt` query results in a matrix with two columns: gene names and GO
