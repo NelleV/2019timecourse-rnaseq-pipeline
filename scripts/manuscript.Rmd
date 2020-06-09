@@ -1206,7 +1206,7 @@ plot(all_possible_n_clusters, wss_values,
 The silhouette value is a measure of how similar a data point is to its own
 cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:average_silhouette_method}. 
 
-```{r average_silhouette_method, fig.width=6, fig.height=4, fig.cap="Plot of silhouette values as a function of k"}
+```{r averageSilhouetteMethod, fig.width=6, fig.height=4, fig.cap="Plot of silhouette values as a function of k"}
 # function to compute average silhouette for k clusters
 average_silhouette = function(labels, y) {
     silhouette_results = silhouette(unlist(labels[1]), dist(y))
