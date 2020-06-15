@@ -10,13 +10,13 @@ abstract: >
     The phenotypic diversity of cells is governed by a complex equilibrium
     between their genetic identity and their environmental interactions:
     Understanding the dynamics of gene expression is a fundamental question of
-    biology. However, analysing time-course transcriptomic data raises unique
+    biology. However, analysing time-course transcriptomic data raises unique
     challenging statistical and computational questions, requiring the
     development of novel methods and software.  Using as case study
     time-course transcriptomics data from mice exposed to different strains of
     influenza, this workflow provides a step-by-step tutorial of the
-    methodology used to analyse time-course data: (1) normalization of the
-    micro-array data set; (2) differential expression analysis using functional
+    methodology used to analyse time-course data: (1) quality control and normalization of the
+    data set; (2) differential expression analysis using functional
     data analysis; (3) clustering of time-course data; (4) interpreting
     clusters with GO term and KEGG pathway enrichment analysis.
 
@@ -27,9 +27,10 @@ vignette: >
     %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
     %\VignetteEngine{knitr::rmarkdown}
 output: BiocWorkflowTools::f1000_article
-
 bibliography: bibliography.bib
 ---
+**EAP**: I don't know that describing normalization as part of our tutorial makes sense.
+I've tried to change the text. 
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
@@ -55,8 +56,7 @@ library(topGO)
 knitr::opts_chunk$set(
   cache=TRUE, autodep=TRUE, warning=FALSE, error=FALSE, message=FALSE,
   echo=TRUE, out.width=".5\\textwidth",
-  duplicate.label="allow")
-
+  duplicate.label="allow", fig.pos = "H", out.extra = "")
 ```
 
 
@@ -242,16 +242,17 @@ meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
 ## Quality control and normalization
 
 The first steps of analysis of gene expression data is always to do
-normalization and quality control checks of the data. In what follows, we show
-an example of this for the influenza data using generic methods; these steps
-are not in specific to time course data, but could be done for any gene expression
+normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file. **EAP**: perhaps a citation to review papers for normalization on microarray and mRNA-Seq. 
+
+Instead, we focus on common steps for exploratory analysis of the data, including for the purpose of quality control. These steps
+are not specific to time course data, but could be applied for any gene expression
 analysis. For this reason, we will not print the detailed code that is needed for this part of the analysis; interested readers can examine the `rmarkdown` code that accompanies this workflow.
 
 
 ### Exploratory analysis and quality control
 
 
-Typically, two quality control and exploratory analysis steps are also
+Typically, two quality control and exploratory analysis steps are 
 performed before and after normalization: (1) low dimensionality embedding of
 the samples; (2) correlation plots between each samples. In both cases, we
 expect a strong biological signal, while replicate samples should be strongly
@@ -426,17 +427,14 @@ in the `meta` data.frame). This is done by the following `R` formula syntax:
 
 `formula = ~Group:ns(Timepoint, df=degrees_of_fredoom) + Group + 0`.
 
-
 Alternatively, the user can provide a formula of their own, or simply provide the basis matrix themselves. 
 
+We can see this information when we print the object:
 
 ```{r basis_matrix}
-kable(head(moanin_model$basis), digits=2) %>%
-  kable_styling(font_size = 7)
+print(moanin_model)
 ```
 
-
-**EAP: This needs to be worked on, because too big to print. Really, need a `print.moanin_model` in the package (submitted issue) and put that here.**
 
 ### Weekly differential expression analysis
 
@@ -608,7 +606,7 @@ data between different treatment conditions, using a similar mechanism of
 contrasts -- only now the contrasts are differences between the estimated mean
 functions. This is done with the function `DE_timecourse`, which takes as
 similar input that of `DE_timepoints`, only now will fit spline functions for each gene and test the entire mean
-function (and unlike `DE_timecourse` therefore does not require the extra step of expanding the contrasts into contrasts for individual timepoints). 
+function (and unlike `DE_timepoints`, therefore does not require the extra step of expanding the contrasts into contrasts for individual timepoints). 
 
 ```{r de_analysis}
 # Differential expression analysis
@@ -616,7 +614,7 @@ timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
 
 # The function takes the data (data.frame or named matrix), the meta data
 # (data.frame containing a timepoint and group column, the first corresponding
-# to the time-course information, the latter corresponding to the
+# to the time-course information, the latter corresponding to the
 # treatment).
 DE_results = DE_timecourse(
     data, moanin_model, timecourse_contrasts,
@@ -959,9 +957,10 @@ We can visualize the impact of this filtering process by considering the distrib
 cluster if we did not have the filtering cutoff of `splines_kmeans_score_and_label`, i.e. if we simply assign every gene to a cluster based on which gives them their minimum score.
 We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure.
 
-```{r visualizeScores, fig.height=6, fix.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled by \\texttt{splines_kmeans_score_and_label}."}
+```{r visualizeScores, fig.height=6, fix.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
 # Get the best score and best label for all of the genes
-# This is different from output of `splines_kmeans_score_and_label`, which filters
+# This is different from output of `splines_kmeans_score_and_label`, 
+# which filters the genes
 scores = rowMin(scores_and_labels$scores)
 labels = apply(scores_and_labels$scores, 1, which.min)
 max_score = quantile(scores, 0.5)
@@ -1035,10 +1034,11 @@ genes_in_cluster2)` of them remained assigned to cluster `r cluster_of_interest`
 few genes in cluster `r cluster_of_interest`, only now pick the best scoring genes (Figure \ref{fig:topScoreInCluster2})
 
 ```{r topScoreInCluster2, fig.height=6, fig.width=6, fig.cap=paste("Top scoring genes in Cluster",cluster_of_interest)}
-# order them by their score
-cluster2Score = genes_in_cluster2[order(scores_and_labels$scores[genes_in_cluster2, cluster_of_interest])]
-dataToPlot = rbind(
-    data[cluster2Score[1:4], ],
+# order them by their score in cluster
+ord = order(scores_and_labels$scores[genes_in_cluster2,
+                     cluster_of_interest])
+cluster2Score = genes_in_cluster2[ord]
+dataToPlot = rbind(data[cluster2Score[1:4], ],
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(dataToPlot, moanin_model,
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
@@ -1118,6 +1118,8 @@ aheatmap(
     treeheight=0)
 
 ```
+
+**EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow. 
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
