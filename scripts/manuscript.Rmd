@@ -246,7 +246,7 @@ meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
 ## Quality control and normalization
 
 The first steps of analysis of gene expression data is always to do
-normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file [@abrams:protocol] [@park:evalution].  
+normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file [@abrams:protocol; @park:evalution].  
 
 Instead, we focus on common steps for exploratory analysis of the data, including for the purpose of quality control. These steps
 are not specific to time course data, but could be applied for any gene expression
