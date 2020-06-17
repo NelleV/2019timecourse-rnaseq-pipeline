@@ -110,7 +110,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \textbf{EAP}: I don't know that describing normalization as part of our tutorial makes sense.
 I've tried to change the text.
 
-The manuscript was last compile on 2020-06-17 05:37:22.
+The manuscript was last compile on 2020-06-17 08:56:13.
 
 \hypertarget{todo-list}{%
 \section{TODO list}\label{todo-list}}
@@ -123,7 +123,7 @@ The manuscript was last compile on 2020-06-17 05:37:22.
 \item
   Check that clustering can deal with count data.
 \item
-  Update Nelle's affiliation!
+  Make sure package is compatible bioconductor
 \end{itemize}
 
 \hypertarget{introduction}{%
@@ -221,13 +221,17 @@ The following additional packages are needed for this workflow:
 \CommentTok{# From Bioconductor}
 \KeywordTok{library}\NormalTok{(topGO)}
 \KeywordTok{library}\NormalTok{(biomaRt)}
+\KeywordTok{library}\NormalTok{(KEGGprofile)}
+\KeywordTok{library}\NormalTok{(BiocWorkflowTools)}
 
 \CommentTok{# From GitHub}
 \KeywordTok{library}\NormalTok{(moanin)}
 \end{Highlighting}
 \end{Shaded}
 
-\textbf{EAP}: Why is this list not the same as the (hidden via echo=FALSE) list at the beginning of the document? I also needed to install \texttt{BiocWorkflowTools}, \texttt{KEGGprofile} to run the .Rmd
+\textbf{EAP}: Why is this list not the same as the (hidden via echo=FALSE) list at
+the beginning of the document? I also needed to install \texttt{BiocWorkflowTools},
+\texttt{KEGGprofile} to run the .Rmd
 
 \hypertarget{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}{%
 \section{Analysis of the dynamical response of mouse lung tissue to influenza}\label{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}}
@@ -330,7 +334,7 @@ samples in scatter plots. We also reorder the factor \texttt{Group} which descri
 \subsection{Quality control and normalization}\label{quality-control-and-normalization}}
 
 The first steps of analysis of gene expression data is always to do
-normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file. \textbf{EAP}: perhaps a citation to review papers for normalization on microarray and mRNA-Seq.
+normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file \citep{abrams:protocol, park:evalution}.
 
 Instead, we focus on common steps for exploratory analysis of the data, including for the purpose of quality control. These steps
 are not specific to time course data, but could be applied for any gene expression
@@ -551,8 +555,6 @@ This creates a character vector of contrasts to be tested, one for each timepoin
 \begin{verbatim}
 ## [1] "M.0-VL.0"   "M.3-VL.3"   "M.6-VL.6"   "M.9-VL.9"   "M.12-VL.12"
 \end{verbatim}
-
-\textbf{EAP}: I think it's better here to actually show the output, rather than a table, so you can see what the contrasts actually look like. I like to reserve table format for actual results, rather than code-like input
 
 Then \texttt{moanin} will run the differential expression analysis on all of those timepoints
 jointly using the function \texttt{DE\_timepoints}.
@@ -1122,6 +1124,9 @@ poorly to all clusters and the assignment we did above to one cluster is done ar
 This underlines the importance of filtering genes that fit poorly to clusters.
 
 \textbf{EAP} In fact, \texttt{which.min} which you used above, picks the first match, so actually a preference to assign into first cluster in this plot.
+\textbf{NV} Fair point\textless{}80\textgreater{} maybe this should be fixed somehow by adding a random
+perturbation to the scores when the scores are equal? Although I think the
+text is still appropriate: those genes should definitely be filtered out.
 
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
@@ -1235,7 +1240,7 @@ Now we will create the heatmaps of these genes (4332 genes, Figure \ref{fig:heat
 
 \CommentTok{# Now use the results of the previous call to aheatmap to reorder the genes.}
 \KeywordTok{aheatmap}\NormalTok{(}
-\NormalTok{    moanin}\OperatorTok{:::}\KeywordTok{rescale_values}\NormalTok{(data_to_plot)[res}\OperatorTok{$}\NormalTok{rowInd,],}
+\NormalTok{    moanin}\OperatorTok{::}\KeywordTok{rescale_values}\NormalTok{(data_to_plot)[res}\OperatorTok{$}\NormalTok{rowInd,],}
     \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
     \DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
     \DataTypeTok{annCol=}\NormalTok{submeta[,}
@@ -1255,8 +1260,6 @@ Now we will create the heatmaps of these genes (4332 genes, Figure \ref{fig:heat
 
 \caption{Heatmap of genes in Cluster 8}\label{fig:heatmapCluster8}
 \end{figure}
-
-\textbf{EAP:} We shouldn't use any hidden functions (i.e.~that use \texttt{:::} as in \texttt{moanin:::rescale\_values}). We should make it a exported function if use it in workflow.
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1301,8 +1304,6 @@ identify the number of clusters:
 First, let us run the clustering for all values of \(k\) of interest. We
 will, for each clustering, conserve (1) with within cluster sum of
 squares; (2) the clustering assignement (or label) for each gene.
-
-\textbf{EAP} This didn't make sense to me: ``run the clustering for all possible clusters of interest.'' Do you mean across different values of \(k\)? That's what I changed it to.
 
 Below we run the clustering for \(k\) equal to \(2-20\). The \texttt{splines\_kmeans}
 function returns the WCSS for each cluster, which we sum to get the total
@@ -1455,22 +1456,8 @@ log-fold-change higher than 2 (computed with the \texttt{lfc\_max} method), and 
 time the computations take, we have evaluate these values separately and provided the
 results in separate files (one per \(k\)) for users to explore more quickly.
 
-\textbf{EAP}: Why don't you use the same rule/code as above? i.e.~with the fisher p-values etc.? A little strange to have two different filtering rules for the clustering. Or is this the same, and you're restating the rule? (Unclear why you'd have to redo everything here\ldots{}didn't go back and compare code)
-
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{pvalues =}\StringTok{ }\NormalTok{de_analysis[, pval_col_to_keep]}
-
-\NormalTok{splines_model =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{create_moanin_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
-\NormalTok{fishers_pval =}\StringTok{ }\NormalTok{moanin}\OperatorTok{:::}\KeywordTok{pvalues_fisher_method}\NormalTok{(pvalues)}
-\NormalTok{fishers_qval =}\StringTok{ }\NormalTok{stats}\OperatorTok{::}\KeywordTok{p.adjust}\NormalTok{(fishers_pval)}
-
-\CommentTok{# Keep only the genes found differentially expressed after combining the}
-\CommentTok{# p-values using Fisher's method and with a log fold change greater than 2}
-\NormalTok{genes_to_keep =}\StringTok{ }\KeywordTok{row.names}\NormalTok{(}
-\NormalTok{    lfc_max[(}\KeywordTok{rowSums}\NormalTok{(lfc_max }\OperatorTok{>}\StringTok{ }\DecValTok{2}\NormalTok{) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{&}\StringTok{ }\NormalTok{(fishers_qval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05}\NormalTok{), ])}
-\NormalTok{y =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(data[genes_to_keep, ])}
-
 \CommentTok{# You may want to set the random seed of the experiment so that the results}
 \CommentTok{# don't vary if you rerun the experiment.}
 \CommentTok{# set.seed(random_seed)}
@@ -1523,10 +1510,8 @@ A\_51\_P277048 & 1 & 1 & 4 & 5 & 5 & 2 & 5 & 5 & 2 & 4 & 3 & 4 & 2 & 5 & 4 & 3 &
 
 Now we will use the function \texttt{consensus\_matrix} in the \texttt{moanin} package to
 calculate proportion of times each pair of samples was clustered together
-across the 20 resampling runs, and plot the heatmap of those consensus
+across the 25 resampling runs, and plot the heatmap of those consensus
 matrices for \(k=5\) and \(k=20\).
-
-\textbf{EAP} It's somewhat unfortunately that B=20 and the maximum k=20. Makes it easy to get them confused. Could we switch one of these to be 15 or 25 so as to keep them straight for the reader?
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1609,8 +1594,6 @@ results for all labels.
 \caption{Plot of the cumulative density of similarity of clusterings of data for different k}\label{fig:plotModelExplorer}
 \end{figure}
 
-\textbf{EAP} I'm confused by this plot. Isn't the numbering here for different values of \(k\)? Why do the labels say ``B1'' and ``B2''? Isn't that the notation above for the bootstrap replications for each values of \(k\)? It seems like the names of \texttt{all\_labels} should be something like \texttt{k=1},\ldots{}, while the names of \texttt{all\_labels{[}{[}1{]}{]}} should be \texttt{B1,B2,...}. But currently they have the same values.
-
 From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
 but not as stable as \(k=2\). The model explorer strategy, in addition to
 visualizing the diversity of the centroids, can thus help assessing an
@@ -1622,7 +1605,7 @@ measures in that range (Figure \ref{fig:plotModelExplorerZoom}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"B6"}\NormalTok{, }\StringTok{"B7"}\NormalTok{, }\StringTok{"B8"}\NormalTok{, }\StringTok{"B9"}\NormalTok{, }\StringTok{"B10"}\NormalTok{)}
+\NormalTok{clusters =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"k=6"}\NormalTok{, }\StringTok{"k=7"}\NormalTok{, }\StringTok{"k=8"}\NormalTok{, }\StringTok{"k=9"}\NormalTok{, }\StringTok{"k=10"}\NormalTok{)}
 \NormalTok{selected_labels =}\StringTok{ }\NormalTok{all_labels[clusters]}
 \KeywordTok{plot_model_explorer}\NormalTok{(selected_labels)}
 \end{Highlighting}
@@ -1827,9 +1810,11 @@ $NM_201361
 \end{Highlighting}
 \end{Shaded}
 
-Once the gene ID to GO mapping list is created, \texttt{moanin} provides an
-interface to \texttt{topGO} to determine enriched GO terms. \textbf{EAP: What does the package do that is an enhancement to topGO output? Would be good to briefly describe} Here, we show an example of
-running a GO term enrichment on the ``Biological process'' ontology (BP).
+Once the gene ID to GO mapping list is created, \texttt{moanin} provides an interface
+to \texttt{topGO} to determine enriched GO terms. In particular, it performs a
+p-value correction and only returns the significant GO-term enrichment in an
+easy to use \texttt{data.frame} object. Here, we show an example of running a GO term
+enrichment on the ``Biological process'' ontology (BP).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1918,68 +1903,57 @@ this pipeline and their version numbers.
 ##  [8] datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] RColorBrewer_1.1-2   moanin_0.0.0         ggfortify_0.4.6     
-##  [4] topGO_2.32.0         SparseM_1.77         GO.db_3.6.0         
-##  [7] AnnotationDbi_1.42.1 IRanges_2.14.12      S4Vectors_0.18.3    
-## [10] graph_1.58.2         viridis_0.5.1        viridisLite_0.3.0   
-## [13] KEGGprofile_1.22.0   RCurl_1.95-4.12      bitops_1.0-6        
-## [16] NMF_0.21.0           Biobase_2.40.0       BiocGenerics_0.26.0 
-## [19] cluster_2.0.9        rngtools_1.3.1.1     pkgmaker_0.27       
-## [22] registry_0.5-1       ggplot2_3.1.1        kableExtra_1.1.0    
-## [25] biomaRt_2.36.1       BiocStyle_2.8.2      knitr_1.22          
-## [28] limma_3.36.5         usethis_1.5.0        devtools_2.0.2      
-## [31] rmarkdown_1.12      
+##  [1] RColorBrewer_1.1-2      moanin_0.0.0           
+##  [3] BiocWorkflowTools_1.6.2 ggfortify_0.4.6        
+##  [5] topGO_2.32.0            SparseM_1.77           
+##  [7] GO.db_3.6.0             AnnotationDbi_1.42.1   
+##  [9] IRanges_2.14.12         S4Vectors_0.18.3       
+## [11] graph_1.58.2            viridis_0.5.1          
+## [13] viridisLite_0.3.0       KEGGprofile_1.22.0     
+## [15] RCurl_1.95-4.12         bitops_1.0-6           
+## [17] NMF_0.21.0              Biobase_2.40.0         
+## [19] BiocGenerics_0.26.0     cluster_2.0.9          
+## [21] rngtools_1.3.1.1        pkgmaker_0.27          
+## [23] registry_0.5-1          ggplot2_3.1.1          
+## [25] kableExtra_1.1.0        biomaRt_2.36.1         
+## [27] BiocStyle_2.8.2         knitr_1.22             
+## [29] limma_3.36.5            usethis_1.5.0          
+## [31] devtools_2.0.2          rmarkdown_1.12         
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] colorspace_1.4-1        rprojroot_1.3-2        
-##  [3] XVector_0.20.0          fs_1.3.1               
-##  [5] rstudioapi_0.10         remotes_2.0.4          
-##  [7] bit64_0.9-7             ClusterR_1.1.9         
-##  [9] KEGG.db_3.2.3           xml2_1.2.0             
-## [11] codetools_0.2-16        doParallel_1.0.14      
-## [13] pkgload_1.0.2           ade4_1.7-13            
-## [15] gridBase_0.4-7          png_0.1-7              
-## [17] FD_1.0-12               readr_1.3.1            
-## [19] compiler_3.6.0          httr_1.4.0             
-## [21] backports_1.1.4         Matrix_1.2-17          
-## [23] assertthat_0.2.1        lazyeval_0.2.2         
-## [25] cli_1.1.0               htmltools_0.3.6        
-## [27] prettyunits_1.0.2       tools_3.6.0            
-## [29] gmp_0.5-13.5            gtable_0.3.0           
-## [31] glue_1.3.1              reshape2_1.4.3         
-## [33] dplyr_0.8.0.1           BiocWorkflowTools_1.6.2
-## [35] Rcpp_1.0.1              Biostrings_2.48.0      
-## [37] NMI_2.0                 ape_5.3                
-## [39] nlme_3.1-139            iterators_1.0.10       
-## [41] xfun_0.6                stringr_1.4.0          
-## [43] ps_1.3.0                testthat_2.1.1         
-## [45] rvest_0.3.3             gtools_3.8.1           
-## [47] XML_3.98-1.19           zlibbioc_1.26.0        
-## [49] MASS_7.3-51.4           scales_1.0.0           
-## [51] hms_0.4.2               curl_3.3               
-## [53] yaml_2.2.0              memoise_1.1.0          
-## [55] gridExtra_2.3           TeachingDemos_2.10     
-## [57] stringi_1.4.3           RSQLite_2.1.1          
-## [59] desc_1.2.0              foreach_1.4.4          
-## [61] permute_0.9-5           pkgbuild_1.0.3         
-## [63] bibtex_0.4.2            geometry_0.4.1         
-## [65] rlang_0.4.6             pkgconfig_2.0.2        
-## [67] matrixStats_0.54.0      evaluate_0.13          
-## [69] lattice_0.20-38         purrr_0.3.2            
-## [71] bit_1.1-14              processx_3.3.1         
-## [73] tidyselect_0.2.5        plyr_1.8.4             
-## [75] magrittr_1.5            bookdown_0.9           
-## [77] R6_2.4.0                DBI_1.0.0              
-## [79] mgcv_1.8-28             pillar_1.3.1           
-## [81] withr_2.1.2             abind_1.4-5            
-## [83] KEGGREST_1.20.2         tibble_2.1.1           
-## [85] crayon_1.3.4            progress_1.2.0         
-## [87] grid_3.6.0              blob_1.1.1             
-## [89] callr_3.2.0             git2r_0.25.2           
-## [91] vegan_2.5-4             digest_0.6.18          
-## [93] webshot_0.5.1           xtable_1.8-4           
-## [95] tidyr_0.8.3             munsell_0.5.0          
-## [97] magic_1.5-9             sessioninfo_1.1.1
+##  [1] colorspace_1.4-1   rprojroot_1.3-2    XVector_0.20.0    
+##  [4] fs_1.3.1           rstudioapi_0.10    remotes_2.0.4     
+##  [7] bit64_0.9-7        ClusterR_1.1.9     KEGG.db_3.2.3     
+## [10] xml2_1.2.0         codetools_0.2-16   doParallel_1.0.14 
+## [13] pkgload_1.0.2      ade4_1.7-13        gridBase_0.4-7    
+## [16] png_0.1-7          FD_1.0-12          readr_1.3.1       
+## [19] compiler_3.6.0     httr_1.4.0         backports_1.1.4   
+## [22] Matrix_1.2-17      assertthat_0.2.1   lazyeval_0.2.2    
+## [25] cli_1.1.0          htmltools_0.3.6    prettyunits_1.0.2 
+## [28] tools_3.6.0        gmp_0.5-13.5       gtable_0.3.0      
+## [31] glue_1.3.1         reshape2_1.4.3     dplyr_0.8.0.1     
+## [34] Rcpp_1.0.1         Biostrings_2.48.0  NMI_2.0           
+## [37] ape_5.3            nlme_3.1-139       iterators_1.0.10  
+## [40] xfun_0.6           stringr_1.4.0      ps_1.3.0          
+## [43] testthat_2.1.1     rvest_0.3.3        gtools_3.8.1      
+## [46] XML_3.98-1.19      zlibbioc_1.26.0    MASS_7.3-51.4     
+## [49] scales_1.0.0       hms_0.4.2          curl_3.3          
+## [52] yaml_2.2.0         memoise_1.1.0      gridExtra_2.3     
+## [55] TeachingDemos_2.10 stringi_1.4.3      RSQLite_2.1.1     
+## [58] desc_1.2.0         foreach_1.4.4      permute_0.9-5     
+## [61] pkgbuild_1.0.3     bibtex_0.4.2       geometry_0.4.1    
+## [64] rlang_0.4.6        pkgconfig_2.0.2    matrixStats_0.54.0
+## [67] evaluate_0.13      lattice_0.20-38    purrr_0.3.2       
+## [70] bit_1.1-14         processx_3.3.1     tidyselect_0.2.5  
+## [73] plyr_1.8.4         magrittr_1.5       bookdown_0.9      
+## [76] R6_2.4.0           DBI_1.0.0          mgcv_1.8-28       
+## [79] pillar_1.3.1       withr_2.1.2        abind_1.4-5       
+## [82] KEGGREST_1.20.2    tibble_2.1.1       crayon_1.3.4      
+## [85] progress_1.2.0     grid_3.6.0         blob_1.1.1        
+## [88] callr_3.2.0        git2r_0.25.2       vegan_2.5-4       
+## [91] digest_0.6.18      webshot_0.5.1      xtable_1.8-4      
+## [94] tidyr_0.8.3        munsell_0.5.0      magic_1.5-9       
+## [97] sessioninfo_1.1.1
 \end{verbatim}
 
 \hypertarget{author-contributions}{%
