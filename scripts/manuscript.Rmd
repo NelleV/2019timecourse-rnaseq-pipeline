@@ -1557,9 +1557,11 @@ $NM_201361
 gene_id_go_mapping = create_go_term_mapping(genes)
 ```
 
-Once the gene ID to GO mapping list is created, `moanin` provides an 
-interface to `topGO` to determine enriched GO terms. **EAP: What does the package do that is an enhancement to topGO output? Would be good to briefly describe** Here, we show an example of
-running a GO term enrichment on the "Biological process" ontology (BP).
+Once the gene ID to GO mapping list is created, `moanin` provides an interface
+to `topGO` to determine enriched GO terms. In particular, it performs a
+p-value correction and only returns the significant GO-term enrichment in an
+easy to use `data.frame` object. Here, we show an example of running a GO term
+enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
 # Create logical vector of whether in cluster 8
