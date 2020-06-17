@@ -469,7 +469,6 @@ This creates a character vector of contrasts to be tested, one for each timepoin
 ```{r echo=FALSE}
 contrasts[1:5]
 ```
-**EAP**: I think it's better here to actually show the output, rather than a table, so you can see what the contrasts actually look like. I like to reserve table format for actual results, rather than code-like input
 
 Then `moanin` will run the differential expression analysis on all of those timepoints
 jointly using the function `DE_timepoints`.
@@ -985,7 +984,9 @@ poorly to all clusters and the assignment we did above to one cluster is done ar
 This underlines the importance of filtering genes that fit poorly to clusters.
 
 **EAP** In fact, `which.min` which you used above, picks the first match, so actually a preference to assign into first cluster in this plot.
-
+**NV** Fair point… maybe this should be fixed somehow by adding a random
+perturbation to the scores when the scores are equal? Although I think the
+text is still appropriate: those genes should definitely be filtered out.
 
 
 We can also investigate the
