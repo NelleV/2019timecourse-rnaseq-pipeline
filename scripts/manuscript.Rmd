@@ -1112,7 +1112,7 @@ res = aheatmap(
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
 aheatmap(
-    moanin:::rescale_values(data_to_plot)[res$rowInd,],
+    moanin::rescale_values(data_to_plot)[res$rowInd,],
     Colv=NA,
     Rowv=NA,
     annCol=submeta[,
@@ -1123,8 +1123,6 @@ aheatmap(
     treeheight=0)
 
 ```
-
-**EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow. 
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1162,8 +1160,6 @@ identify the number of clusters:
 First, let us run the clustering for all values of $k$ of interest. We
 will, for each clustering, conserve (1) with within cluster sum of
 squares; (2) the clustering assignement (or label) for each gene. 
-
-**EAP** This didn't make sense to me: "run the clustering for all possible clusters of interest." Do you mean across different values of $k$? That's what I changed it to.
 
 Below we run the clustering for $k$ equal to $2-20$. The `splines_kmeans`
 function returns the WCSS for each cluster, which we sum to get the total
@@ -1286,21 +1282,8 @@ $B=20$ times for each of $k=2-20$. We show the code below, but because of the
 time the computations take, we have evaluate these values separately and provided the
 results in separate files (one per $k$) for users to explore more quickly.
 
-**EAP**: Why don't you use the same rule/code as above? i.e. with the fisher p-values etc.? A little strange to have two different filtering rules for the clustering. Or is this the same, and you're restating the rule? (Unclear why you'd have to redo everything here...didn't go back and compare code)
 
 ```{r bootstrapped_clustering, eval=FALSE}
-pvalues = de_analysis[, pval_col_to_keep]
-
-splines_model = moanin::create_moanin_model(meta, degrees_of_freedom=6)
-fishers_pval = moanin:::pvalues_fisher_method(pvalues)
-fishers_qval = stats::p.adjust(fishers_pval)
-
-# Keep only the genes found differentially expressed after combining the
-# p-values using Fisher's method and with a log fold change greater than 2
-genes_to_keep = row.names(
-    lfc_max[(rowSums(lfc_max > 2) > 0) & (fishers_qval < 0.05), ])
-y = as.matrix(data[genes_to_keep, ])
-
 # You may want to set the random seed of the experiment so that the results
 # don't vary if you rerun the experiment.
 # set.seed(random_seed)
@@ -1337,10 +1320,8 @@ kable(head(stability_5))
 
 Now we will use the function `consensus_matrix` in the `moanin` package to
 calculate proportion of times each pair of samples was clustered together
-across the 20 resampling runs, and plot the heatmap of those consensus
+across the 25 resampling runs, and plot the heatmap of those consensus
 matrices for $k=5$ and $k=20$. 
-
-**EAP** It's somewhat unfortunately that B=20 and the maximum k=20. Makes it easy to get them confused. Could we switch one of these to be 15 or 25 so as to keep them straight for the reader?
 
 ```{r bootstrapConsensus, fig.width=6, fig.height=4,fig.cap="Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20."}
 consensus_matrix_stability_5 = consensus_matrix(stability_5,
@@ -1388,7 +1369,7 @@ all_labels = list()
 for(i in n_clusters){
     filename = paste0("results/stability_", i, ".tsv")
     stability = read.table(filename, sep="\t")
-    all_labels[[paste0("B", i)]] = stability
+    all_labels[[paste0("k=", i)]] = stability
 }
 ```
 
@@ -1399,8 +1380,6 @@ results for all labels.
 ```{r plotModelExplorer, fig.width=6, fig.height=6,fig.cap="Plot of the cumulative density of similarity of clusterings of data for different k"}
 plot_model_explorer(all_labels)
 ```
-**EAP** I'm confused by this plot. Isn't the numbering here for different values of $k$? Why do the labels say "B1" and "B2"? Isn't that the notation above for the bootstrap replications for each values of $k$? It seems like the names of `all_labels` should be something like `k=1`,..., while the names of `all_labels[[1]]` should be `B1,B2,...`. But currently they have the same values.
-
 
 From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
 but not as stable as $k=2$. The model explorer strategy, in addition to
@@ -1412,7 +1391,7 @@ $k=6$, $k=7$, $k=8$, $k=9$ and $k=10$ so that we can see more clearly the stabil
 measures in that range (Figure \ref{fig:plotModelExplorerZoom}).
 
 ```{r  plotModelExplorerZoom, fig.width=6, fig.height=6,fig.cap="Plot of the cumulative density of similarity of clusterings of data for different k, restricted to k=6-10"}
-clusters = c("B6", "B7", "B8", "B9", "B10")
+clusters = c("k=6", "k=7", "k=8", "k=9", "k=10")
 selected_labels = all_labels[clusters]
 plot_model_explorer(selected_labels)
 ```
