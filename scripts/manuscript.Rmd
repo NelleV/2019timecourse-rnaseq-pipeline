@@ -191,14 +191,13 @@ transcriptomic response of the crop *S. bicolor* to drought.
 
 ## Overview of the data
 
-First let's load the data. The package `moanin` contains the normalized
-data and metadata of [@shoemaker:ultrasensitive].
+First let's load the data. We provide the normalized
+data and metadata of [@shoemaker:ultrasensitive] for simplicity.
 
 ```{r}
 # Now load in the metadata
-data(shoemaker2015)
-meta = shoemaker2015$meta
-data = shoemaker2015$data
+meta = read.table("../data/shoemaker2015/meta.tsv")
+data = read.table(gzfile("../data/shoemaker2015/data.tsv.gz"))
 ```
 
 The meta data contains information about the treatment group, the replicate,
