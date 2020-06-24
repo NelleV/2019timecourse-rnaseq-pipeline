@@ -155,6 +155,11 @@ library(moanin)
 **EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at
 the beginning of the document? I also needed to install `BiocWorkflowTools`,
 `KEGGprofile` to run the .Rmd
+**NV**: I think some of the libraries above are not needed anymore. Some are
+also only used in hidden elements. I just checked that the whole pipeline
+works, by executing all command lines the reader will see, and the libraries
+are all loaded fine. I think BiocWorkflowTools is only need in the compilation
+of the Rmd file.
 
 
 
