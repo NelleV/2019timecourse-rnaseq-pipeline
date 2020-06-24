@@ -110,7 +110,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \textbf{EAP}: I don't know that describing normalization as part of our tutorial makes sense.
 I've tried to change the text.
 
-The manuscript was last compile on 2020-06-23 10:42:30.
+The manuscript was last compile on 2020-06-24 08:14:28.
 
 \hypertarget{todo-list}{%
 \section{TODO list}\label{todo-list}}
@@ -214,6 +214,9 @@ The following additional packages are needed for this workflow:
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{# From github}
+\KeywordTok{library}\NormalTok{(timecoursedata)}
+
 \CommentTok{# From CRAN}
 \KeywordTok{library}\NormalTok{(NMF)}
 \KeywordTok{library}\NormalTok{(ggfortify)}
@@ -1905,26 +1908,27 @@ this pipeline and their version numbers.
 ## other attached packages:
 ##  [1] RColorBrewer_1.1-2      moanin_0.0.0           
 ##  [3] BiocWorkflowTools_1.6.2 ggfortify_0.4.6        
-##  [5] topGO_2.32.0            SparseM_1.77           
-##  [7] GO.db_3.6.0             AnnotationDbi_1.42.1   
-##  [9] IRanges_2.14.12         S4Vectors_0.18.3       
-## [11] graph_1.58.2            viridis_0.5.1          
-## [13] viridisLite_0.3.0       KEGGprofile_1.22.0     
-## [15] RCurl_1.95-4.12         bitops_1.0-6           
-## [17] NMF_0.21.0              Biobase_2.40.0         
-## [19] BiocGenerics_0.26.0     cluster_2.0.9          
-## [21] rngtools_1.3.1.1        pkgmaker_0.27          
-## [23] registry_0.5-1          ggplot2_3.1.1          
-## [25] kableExtra_1.1.0        biomaRt_2.36.1         
-## [27] BiocStyle_2.8.2         knitr_1.22             
-## [29] limma_3.36.5            usethis_1.5.0          
-## [31] devtools_2.0.2          rmarkdown_1.12         
+##  [5] timecoursedata_0.0.0    topGO_2.32.0           
+##  [7] SparseM_1.77            GO.db_3.6.0            
+##  [9] AnnotationDbi_1.42.1    IRanges_2.14.12        
+## [11] S4Vectors_0.18.3        graph_1.58.2           
+## [13] viridis_0.5.1           viridisLite_0.3.0      
+## [15] KEGGprofile_1.22.0      RCurl_1.95-4.12        
+## [17] bitops_1.0-6            NMF_0.21.0             
+## [19] Biobase_2.40.0          BiocGenerics_0.26.0    
+## [21] cluster_2.0.9           rngtools_1.3.1.1       
+## [23] pkgmaker_0.27           registry_0.5-1         
+## [25] ggplot2_3.1.1           kableExtra_1.1.0       
+## [27] biomaRt_2.36.1          BiocStyle_2.8.2        
+## [29] knitr_1.22              limma_3.36.5           
+## [31] usethis_1.5.0           devtools_2.0.2         
+## [33] rmarkdown_1.12         
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] colorspace_1.4-1   rprojroot_1.3-2    XVector_0.20.0    
 ##  [4] fs_1.3.1           rstudioapi_0.10    remotes_2.0.4     
 ##  [7] bit64_0.9-7        ClusterR_1.1.9     KEGG.db_3.2.3     
-## [10] xml2_1.2.0         codetools_0.2-16   doParallel_1.0.14 
+## [10] xml2_1.3.2         codetools_0.2-16   doParallel_1.0.14 
 ## [13] pkgload_1.0.2      ade4_1.7-13        gridBase_0.4-7    
 ## [16] png_0.1-7          FD_1.0-12          readr_1.3.1       
 ## [19] compiler_3.6.0     httr_1.4.0         backports_1.1.4   
@@ -1949,8 +1953,8 @@ this pipeline and their version numbers.
 ## [76] R6_2.4.0           DBI_1.0.0          mgcv_1.8-28       
 ## [79] pillar_1.3.1       withr_2.1.2        abind_1.4-5       
 ## [82] KEGGREST_1.20.2    tibble_2.1.1       crayon_1.3.4      
-## [85] progress_1.2.0     grid_3.6.0         blob_1.1.1        
-## [88] callr_3.2.0        git2r_0.25.2       vegan_2.5-4       
+## [85] progress_1.2.0     grid_3.6.0         vegan_2.5-4       
+## [88] blob_1.1.1         callr_3.2.0        git2r_0.25.2      
 ## [91] digest_0.6.18      webshot_0.5.1      xtable_1.8-4      
 ## [94] tidyr_0.8.3        munsell_0.5.0      magic_1.5-9       
 ## [97] sessioninfo_1.1.1
