@@ -144,6 +144,9 @@ library(moanin)
 The following additional packages are needed for this workflow:
 
 ```{r all_libraries}
+# From github
+library(timecoursedata)
+
 # From CRAN
 library(NMF)
 library(ggfortify)
