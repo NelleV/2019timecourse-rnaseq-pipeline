@@ -29,8 +29,6 @@ vignette: >
 output: BiocWorkflowTools::f1000_article
 bibliography: bibliography.bib
 ---
-**EAP**: I don't know that describing normalization as part of our tutorial makes sense.
-I've tried to change the text. 
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
@@ -61,13 +59,6 @@ knitr::opts_chunk$set(
 
 
 The manuscript was last compile on `r Sys.time()`.
-
-# TODO list
-
-- Make clear that it applies to RNASeq and how to call the different functions
-    to RNASeq
-- Check that clustering can deal with count data.
-- Make sure package is compatible bioconductor
 
 # Introduction
 
@@ -249,7 +240,10 @@ meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
 ## Quality control and normalization
 
 The first steps of analysis of gene expression data is always to do
-normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file [@abrams:protocol; @park:evalution].  
+normalization and quality control checks of the data. However, in what
+follows, we do not show the steps for normalization, as these are specific to
+the platform (microarray); the code for the normalization can be found in as a
+supplemental file [@abrams:protocol; @park:evaluation].  
 
 Instead, we focus on common steps for exploratory analysis of the data, including for the purpose of quality control. These steps
 are not specific to time course data, but could be applied for any gene expression
