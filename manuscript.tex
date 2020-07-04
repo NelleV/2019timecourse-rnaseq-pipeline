@@ -107,7 +107,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-07-03 10:51:29.
+The manuscript was last compile on 2020-07-04 10:52:02.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -503,7 +503,7 @@ We can see this information when we print the object:
 \end{Shaded}
 
 \begin{verbatim}
-## moanin_object on 209 samples containing the following information:
+## moanin_model object on 209 samples containing the following information:
 ## 1) Meta data with 5 variables:
 ## [1] ""            "Group"       "Replicate"   "Timepoint"   "WeeklyGroup"
 ## 2) Basis matrix with 35 basis functions
@@ -511,10 +511,10 @@ We can see this information when we print the object:
 ## ~Group + Group:splines::ns(Timepoint, df = degrees_of_freedom) + 0 
 ## Where degrees_of_freedom=6 
 ## To access these objects use:
-##  <object_name>$degrees_of_freedom
-##  <object_name>$basis
-##  <object_name>$meta
-##  <object_name>$formula
+##  <x_name>$degrees_of_freedom
+##  <x_name>$basis
+##  <x_name>$meta
+##  <x_name>$formula
 \end{verbatim}
 
 \hypertarget{weekly-differential-expression-analysis}{%
