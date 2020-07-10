@@ -124,18 +124,19 @@ knitr::include_graphics("images/fig1_schemas.png",dpi=30 )
 
 ## Installation and setup
 
- `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`:
+ `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`, along with the corresponding package that contains time course datasets we will use:
 
 ```{r eval=FALSE}
 library(devtools)
 install_github("NelleV/moanin")
-library(moanin)
+install_github("NelleV/timecoursedata")
 ```
 
 The following additional packages are needed for this workflow:
 
 ```{r all_libraries}
-# From github
+# From Github
+library(moanin)
 library(timecoursedata)
 
 # From CRAN
@@ -146,10 +147,13 @@ library(ggfortify)
 library(topGO)
 library(biomaRt)
 library(KEGGprofile)
-library(BiocWorkflowTools)
+library(BiocWorkflowTools) #Needed for compiling the .Rmd script
+```
 
-# From GitHub
-library(moanin)
+If Bioconductor is installed, the CRAN and Bioconductor packages above can be installed via
+
+```{r eval=FALSE}
+BiocManager::install(c("NMF","ggfortify","topGO","biomaRt","KEGGprofile","BiocWorkflowTools"))
 ```
 
 **EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at
@@ -193,7 +197,7 @@ transcriptomic response of the crop *S. bicolor* to drought.
 First let's load the data. The package `moanin` contains the normalized
 data and metadata of [@shoemaker:ultrasensitive].
 
-```{r}
+```{r loadData}
 # Now load in the metadata
 data(shoemaker2015)
 meta = shoemaker2015$meta
