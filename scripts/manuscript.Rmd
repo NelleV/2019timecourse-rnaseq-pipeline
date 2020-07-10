@@ -1119,7 +1119,9 @@ aheatmap(
 
 ```
 
-**EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow. 
+**EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow.  
+
+**EAPL** actually, why do we need to rescale them between 0-1 rather than just a normal call to `scale`? Would it really make a difference?
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
