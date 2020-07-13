@@ -57,7 +57,7 @@ kmeans_clusters = moanin:::splines_kmeans(
     n_init=20)
 
 # Perform prediction on the whole set of data.
-kmeans_clusters = moanin:::splines_kmeans_prediction(
+kmeans_clusters = moanin::: splines_kmeans_predict(
     y, kmeans_clusters)
 
 # Let's save only the labels here.
