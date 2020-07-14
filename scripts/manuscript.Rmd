@@ -2,7 +2,7 @@
 title: "A pipeline to analyse time-course gene expression data"
 author:
     - name: Nelle Varoquaux
-      affiliation: Department of Statistics and Berkeley Institute for Data Science, University of California, Berkeley, Berkeley, CA 
+      affiliation: CNRS, University Grenoble Alpes, TIMC-IMAG, Grenoble, France
     - name: Elizabeth Purdom
       affiliation: Department of Statistics, University of California, Berkeley, Berkeley, CA
 
@@ -29,8 +29,6 @@ vignette: >
 output: BiocWorkflowTools::f1000_article
 bibliography: bibliography.bib
 ---
-**EAP**: I don't know that describing normalization as part of our tutorial makes sense.
-I've tried to change the text. 
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
@@ -61,13 +59,6 @@ knitr::opts_chunk$set(
 
 
 The manuscript was last compile on `r Sys.time()`.
-
-# TODO list
-
-- Make clear that it applies to RNASeq and how to call the different functions
-    to RNASeq
-- Check that clustering can deal with count data.
-- Update Nelle's affiliation!
 
 # Introduction
 
@@ -133,17 +124,21 @@ knitr::include_graphics("images/fig1_schemas.png",dpi=30 )
 
 ## Installation and setup
 
- `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`:
+ `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`, along with the corresponding package that contains time course datasets we will use:
 
 ```{r eval=FALSE}
 library(devtools)
 install_github("NelleV/moanin")
-library(moanin)
+install_github("NelleV/timecoursedata")
 ```
 
 The following additional packages are needed for this workflow:
 
 ```{r all_libraries}
+# From Github
+library(moanin)
+library(timecoursedata)
+
 # From CRAN
 library(NMF)
 library(ggfortify)
@@ -151,12 +146,24 @@ library(ggfortify)
 # From Bioconductor
 library(topGO)
 library(biomaRt)
-
-# From GitHub
-library(moanin)
+library(KEGGprofile)
+library(BiocWorkflowTools) #Needed for compiling the .Rmd script
 ```
 
-**EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at the beginning of the document? I also needed to install `BiocWorkflowTools`, `KEGGprofile` to run the .Rmd
+If Bioconductor is installed, the CRAN and Bioconductor packages above can be installed via
+
+```{r eval=FALSE}
+BiocManager::install(c("NMF","ggfortify","topGO","biomaRt","KEGGprofile","BiocWorkflowTools"))
+```
+
+**EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at
+the beginning of the document? I also needed to install `BiocWorkflowTools`,
+`KEGGprofile` to run the .Rmd
+**NV**: I think some of the libraries above are not needed anymore. Some are
+also only used in hidden elements. I just checked that the whole pipeline
+works, by executing all command lines the reader will see, and the libraries
+are all loaded fine. I think BiocWorkflowTools is only need in the compilation
+of the Rmd file.
 
 
 
@@ -190,7 +197,7 @@ transcriptomic response of the crop *S. bicolor* to drought.
 First let's load the data. The package `moanin` contains the normalized
 data and metadata of [@shoemaker:ultrasensitive].
 
-```{r}
+```{r loadData}
 # Now load in the metadata
 data(shoemaker2015)
 meta = shoemaker2015$meta
@@ -242,7 +249,10 @@ meta$Group = factor(meta$Group, levels(meta$Group)[c(3, 2, 1, 5, 4)])
 ## Quality control and normalization
 
 The first steps of analysis of gene expression data is always to do
-normalization and quality control checks of the data. However, in what follows, we do not show the steps for normalization, as these are specific to the platform (microarray); the code for the normalization can be found in as a supplemental file. **EAP**: perhaps a citation to review papers for normalization on microarray and mRNA-Seq. 
+normalization and quality control checks of the data. However, in what
+follows, we do not show the steps for normalization, as these are specific to
+the platform (microarray); the code for the normalization can be found in as a
+supplemental file [@abrams:protocol; @park:evaluation].  
 
 Instead, we focus on common steps for exploratory analysis of the data, including for the purpose of quality control. These steps
 are not specific to time course data, but could be applied for any gene expression
@@ -465,7 +475,6 @@ This creates a character vector of contrasts to be tested, one for each timepoin
 ```{r echo=FALSE}
 contrasts[1:5]
 ```
-**EAP**: I think it's better here to actually show the output, rather than a table, so you can see what the contrasts actually look like. I like to reserve table format for actual results, rather than code-like input
 
 Then `moanin` will run the differential expression analysis on all of those timepoints
 jointly using the function `DE_timepoints`.
@@ -981,7 +990,9 @@ poorly to all clusters and the assignment we did above to one cluster is done ar
 This underlines the importance of filtering genes that fit poorly to clusters.
 
 **EAP** In fact, `which.min` which you used above, picks the first match, so actually a preference to assign into first cluster in this plot.
-
+**NV** Fair point… maybe this should be fixed somehow by adding a random
+perturbation to the scores when the scores are equal? Although I think the
+text is still appropriate: those genes should definitely be filtered out.
 
 
 We can also investigate the
@@ -1107,7 +1118,7 @@ res = aheatmap(
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
 aheatmap(
-    moanin:::rescale_values(data_to_plot)[res$rowInd,],
+    moanin::rescale_values(data_to_plot)[res$rowInd,],
     Colv=NA,
     Rowv=NA,
     annCol=submeta[,
@@ -1121,7 +1132,7 @@ aheatmap(
 
 **EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow.  
 
-**EAPL** actually, why do we need to rescale them between 0-1 rather than just a normal call to `scale`? Would it really make a difference?
+**EAP** actually, why do we need to rescale them between 0-1 rather than just a normal call to `scale`? Would it really make a difference?
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1159,8 +1170,6 @@ identify the number of clusters:
 First, let us run the clustering for all values of $k$ of interest. We
 will, for each clustering, conserve (1) with within cluster sum of
 squares; (2) the clustering assignement (or label) for each gene. 
-
-**EAP** This didn't make sense to me: "run the clustering for all possible clusters of interest." Do you mean across different values of $k$? That's what I changed it to.
 
 Below we run the clustering for $k$ equal to $2-20$. The `splines_kmeans`
 function returns the WCSS for each cluster, which we sum to get the total
@@ -1283,21 +1292,8 @@ $B=20$ times for each of $k=2-20$. We show the code below, but because of the
 time the computations take, we have evaluate these values separately and provided the
 results in separate files (one per $k$) for users to explore more quickly.
 
-**EAP**: Why don't you use the same rule/code as above? i.e. with the fisher p-values etc.? A little strange to have two different filtering rules for the clustering. Or is this the same, and you're restating the rule? (Unclear why you'd have to redo everything here...didn't go back and compare code)
 
 ```{r bootstrapped_clustering, eval=FALSE}
-pvalues = de_analysis[, pval_col_to_keep]
-
-splines_model = moanin::create_moanin_model(meta, degrees_of_freedom=6)
-fishers_pval = moanin:::pvalues_fisher_method(pvalues)
-fishers_qval = stats::p.adjust(fishers_pval)
-
-# Keep only the genes found differentially expressed after combining the
-# p-values using Fisher's method and with a log fold change greater than 2
-genes_to_keep = row.names(
-    lfc_max[(rowSums(lfc_max > 2) > 0) & (fishers_qval < 0.05), ])
-y = as.matrix(data[genes_to_keep, ])
-
 # You may want to set the random seed of the experiment so that the results
 # don't vary if you rerun the experiment.
 # set.seed(random_seed)
@@ -1334,10 +1330,8 @@ kable(head(stability_5))
 
 Now we will use the function `consensus_matrix` in the `moanin` package to
 calculate proportion of times each pair of samples was clustered together
-across the 20 resampling runs, and plot the heatmap of those consensus
+across the 25 resampling runs, and plot the heatmap of those consensus
 matrices for $k=5$ and $k=20$. 
-
-**EAP** It's somewhat unfortunately that B=20 and the maximum k=20. Makes it easy to get them confused. Could we switch one of these to be 15 or 25 so as to keep them straight for the reader?
 
 ```{r bootstrapConsensus, fig.width=6, fig.height=4,fig.cap="Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20."}
 consensus_matrix_stability_5 = consensus_matrix(stability_5,
@@ -1385,7 +1379,7 @@ all_labels = list()
 for(i in n_clusters){
     filename = paste0("results/stability_", i, ".tsv")
     stability = read.table(filename, sep="\t")
-    all_labels[[paste0("B", i)]] = stability
+    all_labels[[paste0("k=", i)]] = stability
 }
 ```
 
@@ -1396,8 +1390,6 @@ results for all labels.
 ```{r plotModelExplorer, fig.width=6, fig.height=6,fig.cap="Plot of the cumulative density of similarity of clusterings of data for different k"}
 plot_model_explorer(all_labels)
 ```
-**EAP** I'm confused by this plot. Isn't the numbering here for different values of $k$? Why do the labels say "B1" and "B2"? Isn't that the notation above for the bootstrap replications for each values of $k$? It seems like the names of `all_labels` should be something like `k=1`,..., while the names of `all_labels[[1]]` should be `B1,B2,...`. But currently they have the same values.
-
 
 From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
 but not as stable as $k=2$. The model explorer strategy, in addition to
@@ -1409,7 +1401,7 @@ $k=6$, $k=7$, $k=8$, $k=9$ and $k=10$ so that we can see more clearly the stabil
 measures in that range (Figure \ref{fig:plotModelExplorerZoom}).
 
 ```{r  plotModelExplorerZoom, fig.width=6, fig.height=6,fig.cap="Plot of the cumulative density of similarity of clusterings of data for different k, restricted to k=6-10"}
-clusters = c("B6", "B7", "B8", "B9", "B10")
+clusters = c("k=6", "k=7", "k=8", "k=9", "k=10")
 selected_labels = all_labels[clusters]
 plot_model_explorer(selected_labels)
 ```
@@ -1575,9 +1567,11 @@ $NM_201361
 gene_id_go_mapping = create_go_term_mapping(genes)
 ```
 
-Once the gene ID to GO mapping list is created, `moanin` provides an 
-interface to `topGO` to determine enriched GO terms. **EAP: What does the package do that is an enhancement to topGO output? Would be good to briefly describe** Here, we show an example of
-running a GO term enrichment on the "Biological process" ontology (BP).
+Once the gene ID to GO mapping list is created, `moanin` provides an interface
+to `topGO` to determine enriched GO terms. In particular, it performs a
+p-value correction and only returns the significant GO-term enrichment in an
+easy to use `data.frame` object. Here, we show an example of running a GO term
+enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
 # Create logical vector of whether in cluster 8

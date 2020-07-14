@@ -20,7 +20,7 @@ outname = paste0(
 # Clustering and everything 
 data("shoemaker2015")
 
-data = shoemaker2015$meta
+data = shoemaker2015$data
 meta = shoemaker2015$meta
 
 # Right now, the package doesn't contain the normalized data

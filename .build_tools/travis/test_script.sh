@@ -22,6 +22,7 @@ install_github_dependencies() {
     wget -P . https://github.com/NelleV/moanin/archive/master.zip
     unzip /tmp/master.zip
     cd moanin-master
+    make install-extra
     make install
     popd
 }
