@@ -806,7 +806,8 @@ genes_to_keep = row.names(
 	(rowSums(log_fold_change_max > 2) > 0) &
 	(fishers_qval < 0.05), ])
 # Keep the data corresponding to the genes of interest in another variable.
-y = as.matrix(data[genes_to_keep, ])
+# by subsetting the `moanin_model`, which contains the data.
+y = moanin_model[genes_to_keep,]
 ```
 
 ### Clustering Based on Spline Fits
@@ -832,8 +833,7 @@ will return to the question of picking the best number of clusters below.
 
 ```{r clustering}
 # First fit the kmeans clusters
-kmeans_clusters = splines_kmeans(
-    moanin_model[genes_to_keep, ], n_clusters=8,
+kmeans_clusters = splines_kmeans(y, n_clusters=8,
     random_seed=42,
     n_init=20)
 ```
@@ -907,15 +907,17 @@ scores_and_labels = splines_kmeans_score_and_label(
     moanin_model, kmeans_clusters)
 ```
 
-The `scores_and_labels` list contains two elements:
+The `scores_and_labels` list contains three elements:
 
     - `scores`: the matrix of shape `n_cluster` x `n_genes`,
       containing for each gene and each cluster, the goodness of fit as
       described above.
     - `labels`: the labels for all of the genes with a
       sufficiently good goodness-of-fit score.
+    - `score_cutoff`: the cutoff used on `scores` to determine whether to 
+      assign a label
 
-**Assigning cluster labels:** We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, `splines_kmeans_score_and_label` does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being "sufficiently low" is based on looking at the distribution of the scores of all genes on all clusters (i.e. the entire `scores` matrix returned by `splines_kmeans_score_and_label`). A gene is then assigned to a cluster only if their best score is above the 50% percentile of that distribution, with the remaining genes getting `NA` as their assignment. Note that because the distribution of scores of genes across *all* clusters are used, this is not equivalent to assigning 50% of genes to a cluster -- it is possible that all genes are assigned to a cluster. 
+**Assigning cluster labels:** We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, `splines_kmeans_score_and_label` does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being "sufficiently low" is based on looking at the distribution of the scores of all genes on all clusters (i.e. the entire `scores` matrix returned by `splines_kmeans_score_and_label`). A gene is then assigned to a cluster only if their best score is above the 50% percentile of that distribution, with the remaining genes getting `NA` as their assignment (this choice can be changed by `proportion_genes_to_label`). Note that because the distribution of scores of genes across *all* clusters are used, this is not equivalent to assigning 50% of genes to a cluster -- it is possible that all genes are assigned to a cluster. 
 
 ```{r scores_and_labels}
 labels = scores_and_labels$labels
@@ -932,23 +934,23 @@ are assigned to a cluster.
 
 We can visualize the impact of this filtering process by considering the distribution of goodness-of-fit scores for each
 cluster if we did not have the filtering cutoff of `splines_kmeans_score_and_label`, i.e. if we simply assign every gene to a cluster based on which gives them their minimum score.
-We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure.
+We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning `splines_kmeans_score_and_label` and setting the filter `percentage_genes_to_label=1` (and we can speed up the calculation by giving our previously calculated score via the argument `previous_scores`)
 
 ```{r visualizeScores, fig.height=6, fix.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
 # Get the best score and best label for all of the genes
-# This is different from output of `splines_kmeans_score_and_label`, 
-# which filters the genes
-scores = rowMin(scores_and_labels$scores)
-labels = apply(scores_and_labels$scores, 1, which.min)
-max_score = quantile(scores, 0.5)
+# This time without filtering labels
+# We can give the previous calculated scores to `previous_scores` to save time
+unfiltered_scores<-splines_kmeans_score_and_label(moanin_model,kmeans_clusters,proportion_genes_to_label=1, previous_scores=scores_and_labels$scores)
+best_score = rowMin(scores_and_labels$scores)
+best_label = unfiltered_scores$labels
 par(mfrow=c(3, 3))
 n_clusters = dim(kmeans_clusters$centroids)[1]
 for(cluster_id in 1:n_clusters){
-    hist(scores[labels == cluster_id],
+    hist(best_score[best_label==cluster_id],
 	 breaks=(1:50/50), xlim=c(0, 1),
 	 col="black", main=paste("C", cluster_id, sep=""),
 	 xlab="score", ylab="Num. genes")
-    abline(v=max_score, col="red", lwd=3, lty=2)
+    abline(v=scores_and_labels$score_cutoff, col="red", lwd=3, lty=2)
 }
 
 ```
@@ -956,12 +958,6 @@ for(cluster_id in 1:n_clusters){
 Note that for some of the genes, their scores in all clusters is 1. Such genes fit
 poorly to all clusters and the assignment we did above to one cluster is done arbitrarily to the first matching cluster.
 This underlines the importance of filtering genes that fit poorly to clusters.
-
-**EAP** In fact, `which.min` which you used above, picks the first match, so actually a preference to assign into first cluster in this plot.
-**NV** Fair point… maybe this should be fixed somehow by adding a random
-perturbation to the scores when the scores are equal? Although I think the
-text is still appropriate: those genes should definitely be filtered out.
-
 
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
@@ -1019,7 +1015,7 @@ ord = order(scores_and_labels$scores[genes_in_cluster2,
 cluster2Score = genes_in_cluster2[ord]
 dataToPlot = rbind(data[cluster2Score[1:4], ],
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
-plot_splines_data(dataToPlot, moanin_model,
+plot_splines_data(moanin_model, data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
 ```
@@ -1062,19 +1058,18 @@ Now we will create the heatmaps of these genes (`r length(genes_to_plot)` genes,
 ```{r heatmapCluster8, fig.width=6, fig.height=8, fig.cap="Heatmap of genes in Cluster 8"}
 layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 
-data_to_plot = data[genes_to_plot, ]
-submeta = meta
+# order the observations by Group, then time, then replicate
+orderedMeta<-colData(moanin_model)
 ord = order(
   submeta$Group,
   submeta$Timepoint,
   submeta$Replicate)
 submeta$Timepoint = as.factor(submeta$Timepoint)
 
-data_to_plot = data_to_plot[, ord]
 submeta = submeta[ord, ]
 
 res = aheatmap(
-    data_to_plot,
+    assay(moanin_model[genes_to_plot,ord]),
     Colv=NA,
     color="YlGnBu",
     annCol=submeta[,
@@ -1086,7 +1081,7 @@ res = aheatmap(
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
 aheatmap(
-    moanin::rescale_values(data_to_plot)[res$rowInd,],
+    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
     Colv=NA,
     Rowv=NA,
     annCol=submeta[,
@@ -1097,10 +1092,6 @@ aheatmap(
     treeheight=0)
 
 ```
-
-**EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow.  
-
-**EAP** actually, why do we need to rescale them between 0-1 rather than just a normal call to `scale`? Would it really make a difference?
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1150,10 +1141,9 @@ wss_values = list()
 
 i = 1
 for(n_cluster in all_possible_n_clusters){
-    clustering_results = splines_kmeans(
-	y, moanin_model,
-	n_clusters=n_cluster, random_seed=42,
-	n_init=10)
+    clustering_results = splines_kmeans(y,
+	    n_clusters=n_cluster, random_seed=42,
+	    n_init=10)
     wss_values[i] = sum(clustering_results$WCSS_per_cluster)
     all_clustering[[i]] = clustering_results$clusters
     i = i + 1
@@ -1269,14 +1259,13 @@ n_genes = dim(y)[1] * sample_proportion
 indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
 
 random_subsample_y = y[indices, ]
-kmeans_clusters = moanin::splines_kmeans(
+kmeans_clusters = splines_kmeans(y[indices,]
     random_subsample_y, splines_model, n_clusters=n_clusters,
     random_seed=random_seed,
     n_init=20)
 
 # Perform prediction on the whole set of data.
-kmeans_clusters = moanin::: splines_kmeans_predict(
-    y, kmeans_clusters)
+kmeans_clusters = splines_kmeans_predict(y, kmeans_clusters, method="distance")
 ```
 
 For now, we bring in the results for $k=5$ and $k=20$. 
