@@ -921,7 +921,7 @@ cluster centroid and gives a cluster label to the gene if they have a sufficient
 
 
 ```{r assigning_scores_and_labels}
-# Then assign scores and labels to all the data, using a goodness-of-fit
+# Then assign scores and labels to *all* the data, using a goodness-of-fit
 # scoring function.
 scores_and_labels = splines_kmeans_score_and_label(
     moanin_model, kmeans_clusters)
@@ -1020,6 +1020,8 @@ dim(text) = dim(confusion_matrix)
 aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
 	      border_color="black", txt=text, legend=FALSE, Rowv=NA,
 	      Colv=NA, sub="Goodness-of-fit assignments")
+
+# recreate, so in same order, etc as before
 labels = scores_and_labels$labels
 labels = unlist(labels[!is.na(labels)])
 
@@ -1034,7 +1036,7 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
                      cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind([cluster2Score[1:4], ],
+dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(moanin_model, data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
@@ -1090,7 +1092,7 @@ submeta$Timepoint = as.factor(submeta$Timepoint)
 submeta = submeta[ord, ]
 
 res = aheatmap(
-    assay(de_moanin_model[genes_to_plot,ord]),
+    assay(moanin_model[genes_to_plot,ord]),
     Colv=NA,
     color="YlGnBu",
     annCol=submeta[,
@@ -1102,7 +1104,7 @@ res = aheatmap(
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
 aheatmap(
-    rescale_values(de_moanin_model[genes_to_plot,ord])[res$rowInd,],
+    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
     Colv=NA,
     Rowv=NA,
     annCol=submeta[,
@@ -1162,7 +1164,7 @@ wss_values = list()
 
 i = 1
 for(n_cluster in all_possible_n_clusters){
-    clustering_results = splines_kmeans(y,
+    clustering_results = splines_kmeans(de_moanin_model,
 	    n_clusters=n_cluster, random_seed=42,
 	    n_init=10)
     wss_values[i] = sum(clustering_results$WCSS_per_cluster)
@@ -1251,18 +1253,18 @@ same size as our original clustering (i.e. `r dim(y)[1]` genes):
 
 ```{r}
 n_genes = dim(y)[1]
-indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
+indices = sample(1:dim(de_moanin_model)[1], n_genes, replace=TRUE)
 
-bootstrapped_y = y[indices, ]
+bootstrapped_y = de_moanin_model[indices, ]
 ```
 
 Using the subsampling strategy, we take a unique subset of the genes, keeping 80% of the genes:
 
 ```{r}
 subsample_proportion = 0.8
-indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=FALSE)
+indices = sample(1:dim(de_moanin_model)[1], n_genes * subsample_proportion, replace=FALSE)
 
-subsampled_y = y[indices, ]
+subsampled_y = de_moanin_model[indices, ]
 ```
 
 We run the bootstrap method on all genes differentially expressed and with a
@@ -1276,12 +1278,11 @@ results in separate files (one per $k$) for users to explore more quickly.
 # You may want to set the random seed of the experiment so that the results
 # don't vary if you rerun the experiment.
 # set.seed(random_seed)
-n_genes = dim(y)[1] * sample_proportion
-indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
+n_genes = dim(de_moanin_model)[1] * sample_proportion
+indices = sample(1:dim(de_moanin_model)[1], n_genes, replace=TRUE)
 
-random_subsample_y = y[indices, ]
-kmeans_clusters = splines_kmeans(y[indices,]
-    random_subsample_y, splines_model, n_clusters=n_clusters,
+kmeans_clusters = splines_kmeans(de_moanin_model[indices,]
+    n_clusters=n_clusters,
     random_seed=random_seed,
     n_init=20)
 
