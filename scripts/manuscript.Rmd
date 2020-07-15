@@ -156,17 +156,6 @@ If Bioconductor is installed, the CRAN and Bioconductor packages above can be in
 BiocManager::install(c("NMF","ggfortify","topGO","biomaRt","KEGGprofile","BiocWorkflowTools"))
 ```
 
-**EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at
-the beginning of the document? I also needed to install `BiocWorkflowTools`,
-`KEGGprofile` to run the .Rmd
-**NV**: I think some of the libraries above are not needed anymore. Some are
-also only used in hidden elements. I just checked that the whole pipeline
-works, by executing all command lines the reader will see, and the libraries
-are all loaded fine. I think BiocWorkflowTools is only need in the compilation
-of the Rmd file.
-
-
-
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
 This workflow is illustrated using data from a micro-array time-course
@@ -404,15 +393,15 @@ we are interested in.
 these types of approaches, though our focus is on the global approach, specifically by fitting spline models to the genes. 
 
 In both
-situations, we first need to set up a object (a `moanin_model` object) to
+situations, we first need to set up a object (a `Moanin` object) to
 hold the meta data, as well as information for fitting the spline model
-(formula, number of degrees of freedom of the splines, ...). The `moanin_model` object
+(formula, number of degrees of freedom of the splines, ...). The `Moanin` object
 will contain information used
 throughout this analysis, in particular the condition and timepoints of each sample and the
 the basis matrix for fitting splines models. 
 
 
-We start by creating the `moanin_model` object using the `create_moanin_model`
+We start by creating the `Moanin` object using the `create_moanin_model`
 function. We need to provide two things to the function: a `data.frame` with
 the metadata, and the number of degrees of freedom of the splines to be used in the
 functional modeling. The metadata `data.frame` object should contain at least
@@ -423,10 +412,11 @@ second one named `Timepoint` containing the timepoint information.
 kable(head(meta))
 ```
 
-We create a `moanin_model` for our data:
+We create a `Moanin` object for our data:
 
 ```{r}
-moanin_model = create_moanin_model(meta, degrees_of_freedom=6)
+moanin_model = create_moanin_model(data=data, meta=meta,
+    degrees_of_freedom=6)
 ```
 
 The main operation of the `create_moanin_model` function, in addition to holding the necessary meta data of the samples,
@@ -442,7 +432,7 @@ Alternatively, the user can provide a formula of their own, or simply provide th
 We can see this information when we print the object:
 
 ```{r basis_matrix}
-print(moanin_model)
+show(moanin_model)
 ```
 
 
@@ -467,7 +457,7 @@ interest:
 
 ```{r make_timepoints_contarts}
 # Define contrasts	
-contrasts = create_timepoints_contrasts("M", "VL", moanin_model)
+contrasts = create_timepoints_contrasts(moanin_model,"M", "VL")
 ```
 
 This creates a character vector of contrasts to be tested, one for each timepoint, in the format required by `limma`:
@@ -480,8 +470,7 @@ Then `moanin` will run the differential expression analysis on all of those time
 jointly using the function `DE_timepoints`.
 
 ```{r weekly_differential_analysis}
-weekly_de_analysis = DE_timepoints(
-     data, moanin_model, contrasts,
+weekly_de_analysis = DE_timepoints( moanin_model, contrasts,
      use_voom_weights=FALSE)
 ```
 
@@ -504,19 +493,19 @@ control ("M") (code not printed here, as it is a replicate of the above, see
 accompanying Rmarkdown document). 
 
 ```{r echo=FALSE, results="hide"}
-contrasts = create_timepoints_contrasts("M", "K", moanin_model)
+contrasts = create_timepoints_contrasts(moanin_model,"M", "K")
 K_weekly_de_analysis =  DE_timepoints(
-     data, moanin_model, contrasts,
+     moanin_model, contrasts,
      use_voom_weights=FALSE)
 
-contrasts = create_timepoints_contrasts("M", "C", moanin_model)
+contrasts = create_timepoints_contrasts(moanin_model,"M", "C")
 C_weekly_de_analysis =  DE_timepoints(
-     data, moanin_model, contrasts,
+     moanin_model, contrasts,
      use_voom_weights=FALSE)
 
-contrasts = create_timepoints_contrasts("M", "VH", moanin_model)
+contrasts = create_timepoints_contrasts( moanin_model,"M", "VH")
 VH_weekly_de_analysis =  DE_timepoints(
-     data, moanin_model, contrasts,
+     moanin_model, contrasts,
      use_voom_weights=FALSE)
 	 
 ```
@@ -526,34 +515,14 @@ week between control and each of the influenza strains. Such an analysis can dem
 being differentially expressed at later time points, and the Vietnam high-dose
 showing perhaps an earlier onset than the low-dose.
 
-
-
 ```{r timeSignifPerTime,fig.width=6, fig.height=6, echo=FALSE, fig.cap="Number of genes found DE in each timepoint when comparing the influenza strains to control."}
-timely_barplot = function(de_analysis, 
-    labels=NULL, qval_threshold=0.05,
-    xlab="Timepoint", ylab="Number of DE genes", main="", ylim=c(0, 20000), col="black", ...){
-
-    qval_colnames = colnames(de_analysis)[
-	grepl("qval", colnames(de_analysis))]
-    if(is.null(labels)){
-	labels = sapply(
-	    strsplit(gsub("-qval", "", qval_colnames), "\\."), .subset2, 3)
-    }
-    number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
-
-    barplot(number_de_genes_per_time, 
-            names.arg=labels, xlab=xlab,ylab=ylab,
-            col=col, main=main, ylim=ylim,...)  
-}
-
 par(mfrow=c(2, 2))
 time = names(time_colors)
-timely_barplot(K_weekly_de_analysis, labels=time, main="Kawasaki", las=3)
-timely_barplot(C_weekly_de_analysis, labels=time, main="California", las=3)
-timely_barplot(weekly_de_analysis, labels=time, main="Vietnam low-dose", las=3)
-timely_barplot(VH_weekly_de_analysis, labels=time, main="Vietnam high-dose", las=3)
+perWeek_barplot(K_weekly_de_analysis, labels=time, main="Kawasaki", las=3)
+perWeek_barplot(C_weekly_de_analysis, labels=time, main="California", las=3)
+perWeek_barplot(weekly_de_analysis, labels=time, main="Vietnam low-dose", las=3)
+perWeek_barplot(VH_weekly_de_analysis, labels=time, main="Vietnam high-dose", las=3)
 ```
-
 
 However, the distribution of the number of genes found differentially
 expressed by considering each time-point independently highlights the
@@ -594,7 +563,7 @@ a single replicate that is different or increased variability at 72H that result
 
 ```{r showMissingDEGenes, echo=FALSE, fig.cap="The expression values over time for 10 genes found significant DE in timepoints 48,60,120,168H, but not in the 72H timepoint."}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
-plot_splines_data(data, moanin_model, subset_data=exampleGenes,
+plot_splines_data(moanin_model, subset_data=exampleGenes,
 		  colors=ann_colors$Group, smooth=TRUE)
 ```
 
@@ -625,8 +594,7 @@ timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
 # (data.frame containing a timepoint and group column, the first corresponding
 # to the time-course information, the latter corresponding to the
 # treatment).
-DE_results = DE_timecourse(
-    data, moanin_model, timecourse_contrasts,
+DE_results = DE_timecourse( moanin_model, timecourse_contrasts,
     use_voom_weights=FALSE)
 ```
 
@@ -671,14 +639,14 @@ cumulative log-fold change. Sometimes a gene can be over-expressed at the
 beginning of the time-course data, and then under-expressed at the end of the
 experiment. As a result, `moanin` provides a number of possible ways to
 compute the log fold change across the whole time-course. This is done via the function `estimate_log_fold_change` which takes as
-arguments the data, the `moanin_model` object, the contrasts to evaluate, and the method to use to estimate the log-fold change.
+arguments the data, the `Moanin` object, the contrasts to evaluate, and the method to use to estimate the log-fold change.
 
 **Individual Timepoints** The first method ("timely") gives a simple interface to compute the log-fold change
 for each individual timepoints.
 
 ```{r}
 log_fold_change_timepoints = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts,  method="timely")
+    moanin_model, timecourse_contrasts,  method="timely")
 ```
 
 ```{r echo=FALSE}
@@ -717,16 +685,16 @@ We demonstrate several of these methods on our data.
 
 ```{r}
 log_fold_change_timecourse = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts,  method="timecourse")
+    moanin_model, timecourse_contrasts,  method="timecourse")
 
 log_fold_change_sum = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts,  method="sum")
+    moanin_model, timecourse_contrasts,  method="sum")
 
 log_fold_change_max = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts, method="max")
+    moanin_model, timecourse_contrasts, method="max")
 
 log_fold_change_min = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts, method="min")
+    moanin_model, timecourse_contrasts, method="min")
 ```
 
 The returning object is a matrix, where each row corresponds to a gene,
@@ -778,7 +746,7 @@ genes with the smallest p-values.
 
 ```{r topPvalueGenes, fig.height=6, fig.width=6}
 top_DE_genes_pval = names(sort(pvalue)[1:10])
-plot_splines_data(data[top_DE_genes_pval, ], moanin_model,
+plot_splines_data(moanin_model,subset_data=top_DE_genes_pval, 
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 ```
@@ -792,7 +760,7 @@ change.
 top_DE_genes_lfc = names(
     sort(abs(lfc_timecourse),
 	 decreasing=TRUE)[1:10])
-plot_splines_data(data[top_DE_genes_lfc, ], moanin_model,
+plot_splines_data(moanin_model, subset_data=top_DE_genes_lfc, 
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 
@@ -850,7 +818,7 @@ many genes share a similar gene expression pattern, but on different scale.
 We thus propose the following adaptation of k-means:
 
 - **Splines estimation**: for each gene, fit the splines function with the basis
-  of your choice (as contained in the `moanin_model` object).
+  of your choice (as contained in the `Moanin` object).
 - **Rescaling splines**: for each gene, rescale the estimated splines function
   such that the values are bounded between 0 and 1 and thus comparable between genes.
 - **K-means**: apply k-means on the rescaled fitted values of the splines to estimate the
@@ -865,7 +833,7 @@ will return to the question of picking the best number of clusters below.
 ```{r clustering}
 # First fit the kmeans clusters
 kmeans_clusters = splines_kmeans(
-    y, moanin_model, n_clusters=8,
+    moanin_model[genes_to_keep, ], n_clusters=8,
     random_seed=42,
     n_init=20)
 ```
@@ -880,8 +848,8 @@ We then use the `plot_splines_data`  function, only now applied to the centroids
 each cluster obtained with the splines k-means model. 
 
 ```{r fig.height=6, fig.width=6}
-plot_splines_data(
-    kmeans_clusters$centroids, moanin_model,
+plot_splines_data(moanin_model,
+    data=kmeans_clusters$centroids, 
     colors=ann_colors$Group,
     smooth=TRUE)
 ```
@@ -895,7 +863,7 @@ cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
 dataToPlot=rbind(y[cluster2Genes[3:6], ],"Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
-plot_splines_data(dataToPlot, moanin_model,
+plot_splines_data(moanin_model, data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     mar=c(1.5,2.5,2,0.1))
 ```
@@ -936,7 +904,7 @@ cluster centroid and gives a cluster label to the gene if they have a sufficient
 # Then assign scores and labels to all the data, using a goodness-of-fit
 # scoring function.
 scores_and_labels = splines_kmeans_score_and_label(
-    data, kmeans_clusters)
+    moanin_model, kmeans_clusters)
 ```
 
 The `scores_and_labels` list contains two elements:
