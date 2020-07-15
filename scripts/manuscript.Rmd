@@ -1252,7 +1252,7 @@ Using the bootstrapping strategy, we sample with replacement a sample of the
 same size as our original clustering (i.e. `r dim(y)[1]` genes):
 
 ```{r}
-n_genes = dim(y)[1]
+n_genes = dim(de_moanin_model)[1]
 indices = sample(1:dim(de_moanin_model)[1], n_genes, replace=TRUE)
 
 bootstrapped_y = de_moanin_model[indices, ]
@@ -1278,16 +1278,16 @@ results in separate files (one per $k$) for users to explore more quickly.
 # You may want to set the random seed of the experiment so that the results
 # don't vary if you rerun the experiment.
 # set.seed(random_seed)
-n_genes = dim(de_moanin_model)[1] * sample_proportion
+n_genes = dim(de_moanin_model)[1] * subsample_proportion
 indices = sample(1:dim(de_moanin_model)[1], n_genes, replace=TRUE)
 
-kmeans_clusters = splines_kmeans(de_moanin_model[indices,]
+kmeans_clusters = splines_kmeans(de_moanin_model[indices,],
     n_clusters=n_clusters,
     random_seed=random_seed,
     n_init=20)
 
 # Perform prediction on the whole set of data.
-kmeans_clusters = splines_kmeans_predict(y, kmeans_clusters, method="distance")
+kmeans_clusters = splines_kmeans_predict(de_moanin_model, kmeans_clusters, method="distance")
 ```
 
 For now, we bring in the results for $k=5$ and $k=20$. 
