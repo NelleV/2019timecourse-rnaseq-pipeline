@@ -1287,7 +1287,8 @@ kmeans_clusters = splines_kmeans(de_moanin_model[indices,],
     n_init=20)
 
 # Perform prediction on the whole set of data.
-kmeans_clusters = splines_kmeans_predict(de_moanin_model, kmeans_clusters, method="distance")
+kmeans_clusters = splines_kmeans_predict(de_moanin_model, kmeans_clusters, 
+    method="distance")
 ```
 
 For now, we bring in the results for $k=5$ and $k=20$. 
