@@ -869,7 +869,7 @@ of the actual genes assigned to cluster 2 to see the difference:
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
-dataToPlot=rbind(assay(de_moanin_model[cluster2Genes[3:6],]), 
+dataToPlot=rbind(as.matrix(assay(de_moanin_model[cluster2Genes[3:6],])), 
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
 plot_splines_data(de_moanin_model,  data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
@@ -886,9 +886,10 @@ We can also overlay the centroid on the data, after rescaling the data to be bet
 ```{r}
 de_moanin_rescale = de_moanin_model
 assay(de_moanin_rescale) = rescale_values(data=assay(de_moanin_model))
-plot_splines_data(de_moanin_rescale,  data=kmeans_clusters$centroids[cluster_of_interest,], 
+plot_splines_data(de_moanin_rescale,  
+    centroid=kmeans_clusters$centroids[cluster_of_interest,], 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
-    data_smooth_only=TRUE, subset_data=cluster2Genes[3:6],
+    subset_data=cluster2Genes[3:6],
     mar=c(1.5,2.5,2,0.1))
 ```
 **EAP** I added the functionality to plot centroid over data, rather than just fit to data, but I'm not sure it makes much sense to include this. The `rescale_values` function is too sensitive to outliers. Would be better to rescale each centroid to scale of gene. If we had a helper function to do that, could easily add that to plot_splines_data (made issue on moanin), but probably right now should remove this. 
@@ -1612,6 +1613,7 @@ sessionInfo()
 NV and EP wrote the workflow.
 
 # Competing interests
+
 The authors declare that they have no competing interests.
 
 # Grant information
