@@ -1083,7 +1083,7 @@ Now we will create the heatmaps of these genes (`r length(genes_to_plot)` genes,
 layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 
 # order the observations by Group, then time, then replicate
-orderedMeta<-colData(moanin_model)
+orderedMeta<-data.frame(colData(moanin_model))
 ord = order(
   orderedMeta$Group,
   orderedMeta$Timepoint,
@@ -1096,8 +1096,7 @@ res = aheatmap(
     assay(moanin_model[genes_to_plot,ord]),
     Colv=NA,
     color="YlGnBu",
-    annCol=orderedMeta[,
-                c("Group", "Timepoint")],
+    annCol=orderedMeta[,c("Group", "Timepoint")],
     annLegend=FALSE,
     annColors=ann_colors,
     main=paste("Cluster", cluster_to_plot, "(raw)"),
@@ -1108,8 +1107,7 @@ aheatmap(
     rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
     Colv=NA,
     Rowv=NA,
-    annCol=orderedMeta[,
-                c("Group", "Timepoint")],
+    annCol=orderedMeta[, c("Group", "Timepoint")],
     annLegend=TRUE,
     annColors=ann_colors,
     main=paste("Cluster", cluster_to_plot, "(rescaled)"),
