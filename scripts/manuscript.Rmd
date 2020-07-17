@@ -1085,18 +1085,18 @@ layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 # order the observations by Group, then time, then replicate
 orderedMeta<-colData(moanin_model)
 ord = order(
-  submeta$Group,
-  submeta$Timepoint,
-  submeta$Replicate)
-submeta$Timepoint = as.factor(submeta$Timepoint)
+  orderedMeta$Group,
+  orderedMeta$Timepoint,
+  orderedMeta$Replicate)
+orderedMeta$Timepoint = as.factor(orderedMeta$Timepoint)
 
-submeta = submeta[ord, ]
+orderedMeta = orderedMeta[ord, ]
 
 res = aheatmap(
     assay(moanin_model[genes_to_plot,ord]),
     Colv=NA,
     color="YlGnBu",
-    annCol=submeta[,
+    annCol=orderedMeta[,
                 c("Group", "Timepoint")],
     annLegend=FALSE,
     annColors=ann_colors,
@@ -1108,7 +1108,7 @@ aheatmap(
     rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
     Colv=NA,
     Rowv=NA,
-    annCol=submeta[,
+    annCol=orderedMeta[,
                 c("Group", "Timepoint")],
     annLegend=TRUE,
     annColors=ann_colors,
