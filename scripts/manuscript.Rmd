@@ -869,7 +869,7 @@ of the actual genes assigned to cluster 2 to see the difference:
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
-dataToPlot=rbind(as.matrix(assay(de_moanin_model[cluster2Genes[3:6],])), 
+dataToPlot=rbind(assay(de_moanin_model[cluster2Genes[3:6],]), 
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
 plot_splines_data(de_moanin_model,  data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
@@ -1037,7 +1037,7 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
                      cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind(as.matrix(assay(moanin_model[cluster2Score[1:4], ])),
+dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(moanin_model, data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
