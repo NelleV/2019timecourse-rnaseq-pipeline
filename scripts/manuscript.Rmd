@@ -819,7 +819,7 @@ de_moanin_model = moanin_model[genes_to_keep,]
 
 ### Clustering Based on Spline Fits
 
-After filtering, we are left with `r dim(y)[1]` genes. We can then apply a
+After filtering, we are left with `r dim(de_moanin_model)[1]` genes. We can then apply a
 clustering routine. As observed by looking at genes found differentially expressed, 
 many genes share a similar gene expression pattern, but on different scale. 
 
@@ -1037,7 +1037,7 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
                      cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
+dataToPlot = rbind(as.matrix(assay(moanin_model[cluster2Score[1:4], ])),
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(moanin_model, data=dataToPlot, 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
