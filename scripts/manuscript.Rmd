@@ -1202,7 +1202,7 @@ cluster (cohesion) compared to other clusters (separation), shown in Figure \ref
 ```{r averageSilhouetteMethod, fig.width=6, fig.height=4, fig.cap="Plot of silhouette values as a function of k"}
 # function to compute average silhouette for k clusters
 average_silhouette = function(labels, y) {
-    silhouette_results = silhouette(unlist(labels[1]), dist(y))
+    silhouette_results = silhouette(unlist(labels[1]),dist(y))
     return(mean(silhouette_results[, 3]))
 }
 
@@ -1211,7 +1211,8 @@ average_silhouette_values = list()
 i = 1
 for(i in 1:length(all_clustering)){
     clustering_results = all_clustering[i]
-    average_silhouette_values[i] = average_silhouette(clustering_results, assay(de_moanin_model))
+    average_silhouette_values[i] = average_silhouette(clustering_results,
+        assay(de_moanin_model))
     i = i + 1
 }
 
@@ -1248,7 +1249,7 @@ To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
 Using the bootstrapping strategy, we sample with replacement a sample of the
-same size as our original clustering (i.e. `r dim(y)[1]` genes):
+same size as our original clustering (i.e. `r dim(de_moanin_model)[1]` genes):
 
 ```{r}
 n_genes = dim(de_moanin_model)[1]
