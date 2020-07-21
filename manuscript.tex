@@ -67,6 +67,16 @@
 % disable section numbers
 \setcounter{secnumdepth}{0}
 
+%% added by MLS, this is not in the F1000 style by default %%
+
+\hypersetup{unicode=true,
+            pdftitle={A pipeline to analyse time-course gene expression data},
+            pdfkeywords={time-course gene expression data, clustering, differential expression, workflow},
+            pdfborder={0 0 0},
+            breaklinks=true}
+
+%% End added by MLS %%
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 
@@ -107,7 +117,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-07-07 10:53:49.
+The manuscript was last compile on 2020-07-21 12:22:19.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -183,13 +193,13 @@ functions in a R package called \texttt{moanin}.
 \hypertarget{installation-and-setup}{%
 \subsection{Installation and setup}\label{installation-and-setup}}
 
-\texttt{moanin} is available from GitHub, and can be installed using the \texttt{install\_github} function in the package \texttt{devtools}:
+\texttt{moanin} is available from GitHub, and can be installed using the \texttt{install\_github} function in the package \texttt{devtools}, along with the corresponding package that contains time course datasets we will use:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(devtools)}
 \KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(moanin)}
+\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/timecoursedata"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -197,7 +207,8 @@ The following additional packages are needed for this workflow:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# From github}
+\CommentTok{# From Github}
+\KeywordTok{library}\NormalTok{(moanin)}
 \KeywordTok{library}\NormalTok{(timecoursedata)}
 
 \CommentTok{# From CRAN}
@@ -208,21 +219,17 @@ The following additional packages are needed for this workflow:
 \KeywordTok{library}\NormalTok{(topGO)}
 \KeywordTok{library}\NormalTok{(biomaRt)}
 \KeywordTok{library}\NormalTok{(KEGGprofile)}
-\KeywordTok{library}\NormalTok{(BiocWorkflowTools)}
-
-\CommentTok{# From GitHub}
-\KeywordTok{library}\NormalTok{(moanin)}
+\KeywordTok{library}\NormalTok{(BiocWorkflowTools) }\CommentTok{#Needed for compiling the .Rmd script}
 \end{Highlighting}
 \end{Shaded}
 
-\textbf{EAP}: Why is this list not the same as the (hidden via echo=FALSE) list at
-the beginning of the document? I also needed to install \texttt{BiocWorkflowTools},
-\texttt{KEGGprofile} to run the .Rmd
-\textbf{NV}: I think some of the libraries above are not needed anymore. Some are
-also only used in hidden elements. I just checked that the whole pipeline
-works, by executing all command lines the reader will see, and the libraries
-are all loaded fine. I think BiocWorkflowTools is only need in the compilation
-of the Rmd file.
+If Bioconductor is installed, the CRAN and Bioconductor packages above can be installed via
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"NMF"}\NormalTok{,}\StringTok{"ggfortify"}\NormalTok{,}\StringTok{"topGO"}\NormalTok{,}\StringTok{"biomaRt"}\NormalTok{,}\StringTok{"KEGGprofile"}\NormalTok{,}\StringTok{"BiocWorkflowTools"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
 
 \hypertarget{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}{%
 \section{Analysis of the dynamical response of mouse lung tissue to influenza}\label{analysis-of-the-dynamical-response-of-mouse-lung-tissue-to-influenza}}
@@ -444,14 +451,14 @@ we are interested in.
 these types of approaches, though our focus is on the global approach, specifically by fitting spline models to the genes.
 
 In both
-situations, we first need to set up a object (a \texttt{moanin\_model} object) to
+situations, we first need to set up a object (a \texttt{Moanin} object) to
 hold the meta data, as well as information for fitting the spline model
-(formula, number of degrees of freedom of the splines, \ldots{}). The \texttt{moanin\_model} object
+(formula, number of degrees of freedom of the splines, \ldots{}). The \texttt{Moanin} object
 will contain information used
 throughout this analysis, in particular the condition and timepoints of each sample and the
 the basis matrix for fitting splines models.
 
-We start by creating the \texttt{moanin\_model} object using the \texttt{create\_moanin\_model}
+We start by creating the \texttt{Moanin} object using the \texttt{create\_moanin\_model}
 function. We need to provide two things to the function: a \texttt{data.frame} with
 the metadata, and the number of degrees of freedom of the splines to be used in the
 functional modeling. The metadata \texttt{data.frame} object should contain at least
@@ -476,11 +483,12 @@ GSM1557145 & 5 & K & 3 & 12\\
 \hline
 \end{tabular}
 
-We create a \texttt{moanin\_model} for our data:
+We create a \texttt{Moanin} object for our data:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{moanin_model =}\StringTok{ }\KeywordTok{create_moanin_model}\NormalTok{(meta, }\DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
+\NormalTok{moanin_model =}\StringTok{ }\KeywordTok{create_moanin_model}\NormalTok{(}\DataTypeTok{data=}\NormalTok{data, }\DataTypeTok{meta=}\NormalTok{meta,}
+    \DataTypeTok{degrees_of_freedom=}\DecValTok{6}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -498,23 +506,68 @@ We can see this information when we print the object:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{print}\NormalTok{(moanin_model)}
+\KeywordTok{show}\NormalTok{(moanin_model)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## moanin_model object on 209 samples containing the following information:
-## 1) Meta data with 5 variables:
-## [1] ""            "Group"       "Replicate"   "Timepoint"   "WeeklyGroup"
-## 2) Basis matrix with 35 basis functions
-## Basis matrix was constructed with the following formula
-## ~Group + Group:splines::ns(Timepoint, df = degrees_of_freedom) + 0 
-## Where degrees_of_freedom=6 
-## To access these objects use:
-##  <x_name>$degrees_of_freedom
-##  <x_name>$basis
-##  <x_name>$meta
-##  <x_name>$formula
+## Moanin object on 209 samples containing the following information:
+## Group variable given by 'Group' with the following levels:
+##  M  K  C VL VH 
+## 42 42 42 42 41 
+## Time variable given by 'Timepoint'
+## Basis matrix with 35 basis_matrix functions
+## Basis matrix was constructed with the following spline_formula
+## ~Group + Group:splines::ns(Timepoint, df = 6) + 0 
+## 
+## Information about the data (a SummarizedExperiment object):
+## class: SummarizedExperiment 
+## dim: 39544 209 
+## metadata(0):
+## assays(1): ''
+## rownames(39544): NM_009912 NM_008725 ... NM_010201.1 AK078781
+## rowData names(0):
+## colnames(209): GSM1557140 GSM1557141 ... GSM1557347 GSM1557348
+## colData names(5): '' Group Replicate Timepoint WeeklyGroup
+\end{verbatim}
+
+The \texttt{Moanin} class extends the \texttt{SummarizedExperiment} class of Bioconductor, so that the data as well as the meta data and our spline information are all held in one object. This means that the object can be subsetted just like the data matrix, and the corresponding meta data and basis function evaluations will be similarly subsetted:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(moanin_model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 39544   209
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{moanin_model[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{,}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Moanin object on 3 samples containing the following information:
+## Group variable given by 'Group' with the following levels:
+##  M  K  C VL VH 
+##  0  3  0  0  0 
+## Time variable given by 'Timepoint'
+## Basis matrix with 35 basis_matrix functions
+## Basis matrix was constructed with the following spline_formula
+## ~Group + Group:splines::ns(Timepoint, df = 6) + 0 
+## 
+## Information about the data (a SummarizedExperiment object):
+## class: SummarizedExperiment 
+## dim: 10 3 
+## metadata(0):
+## assays(1): ''
+## rownames(10): NM_009912 NM_008725 ... NM_013782 NM_028622
+## rowData names(0):
+## colnames(3): GSM1557140 GSM1557141 GSM1557142
+## colData names(5): '' Group Replicate Timepoint WeeklyGroup
 \end{verbatim}
 
 \hypertarget{weekly-differential-expression-analysis}{%
@@ -540,7 +593,7 @@ interest:
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Define contrasts  }
-\NormalTok{contrasts =}\StringTok{ }\KeywordTok{create_timepoints_contrasts}\NormalTok{(}\StringTok{"M"}\NormalTok{, }\StringTok{"VL"}\NormalTok{, moanin_model)}
+\NormalTok{contrasts =}\StringTok{ }\KeywordTok{create_timepoints_contrasts}\NormalTok{(moanin_model,}\StringTok{"M"}\NormalTok{, }\StringTok{"VL"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -555,8 +608,7 @@ jointly using the function \texttt{DE\_timepoints}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{weekly_de_analysis =}\StringTok{ }\KeywordTok{DE_timepoints}\NormalTok{(}
-\NormalTok{     data, moanin_model, contrasts,}
+\NormalTok{weekly_de_analysis =}\StringTok{ }\KeywordTok{DE_timepoints}\NormalTok{( moanin_model, contrasts,}
      \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -668,8 +720,7 @@ function (and unlike \texttt{DE\_timepoints}, therefore does not require the ext
 \CommentTok{# (data.frame containing a timepoint and group column, the first corresponding}
 \CommentTok{# to the time-course information, the latter corresponding to the}
 \CommentTok{# treatment).}
-\NormalTok{DE_results =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{(}
-\NormalTok{    data, moanin_model, timecourse_contrasts,}
+\NormalTok{DE_results =}\StringTok{ }\KeywordTok{DE_timecourse}\NormalTok{( moanin_model, timecourse_contrasts,}
     \DataTypeTok{use_voom_weights=}\OtherTok{FALSE}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -726,7 +777,7 @@ cumulative log-fold change. Sometimes a gene can be over-expressed at the
 beginning of the time-course data, and then under-expressed at the end of the
 experiment. As a result, \texttt{moanin} provides a number of possible ways to
 compute the log fold change across the whole time-course. This is done via the function \texttt{estimate\_log\_fold\_change} which takes as
-arguments the data, the \texttt{moanin\_model} object, the contrasts to evaluate, and the method to use to estimate the log-fold change.
+arguments the data, the \texttt{Moanin} object, the contrasts to evaluate, and the method to use to estimate the log-fold change.
 
 \textbf{Individual Timepoints} The first method (``timely'') gives a simple interface to compute the log-fold change
 for each individual timepoints.
@@ -734,21 +785,21 @@ for each individual timepoints.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{log_fold_change_timepoints =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
+\NormalTok{    moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timely"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{tabular}{lrrrrr}
 \toprule
-  & M-K:1 & M-K:7 & M-K:11 & M-K:14 & M-K:2\\
+  & M-K:0 & M-K:3 & M-K:6 & M-K:9 & M-K:12\\
 \midrule
-NM\_009912 & -0.0061424 & 0.0224948 & -0.0515947 & -0.1143973 & 0.0614619\\
-NM\_008725 & 2.6547855 & 0.2734387 & -0.6882925 & 0.4718807 & -1.7463319\\
-NM\_007473 & -0.1603623 & 0.1017655 & 0.5079573 & 0.0595773 & 0.4250185\\
-ENSMUST00000094955 & 0.3505920 & 0.6463011 & 0.2564796 & 0.3599102 & 0.4177116\\
-NM\_001042489 & 0.0889750 & 0.2321381 & -0.1891501 & 0.1786113 & 0.3320644\\
+NM\_009912 & -0.5662398 & -0.2454676 & -0.4096932 & -0.3320085 & -0.0502552\\
+NM\_008725 & 0.9947059 & -3.4609546 & 0.6561484 & -1.2106329 & -0.1998796\\
+NM\_007473 & -0.5176866 & -0.3146529 & 0.2327960 & -0.3445581 & 0.0476160\\
+ENSMUST00000094955 & -0.2201803 & 0.2566677 & -0.0358376 & -0.0469726 & -0.0707469\\
+NM\_001042489 & -0.2475888 & -0.2043850 & -0.3428368 & -0.3930846 & -0.4821660\\
 \addlinespace
-NM\_008159 & -0.3863770 & 0.0298395 & -0.0862755 & -0.3266351 & -0.1893062\\
+NM\_008159 & -0.7466435 & -0.0678902 & -0.3072220 & -0.7067393 & -0.4966867\\
 \bottomrule
 \end{tabular}
 
@@ -786,16 +837,16 @@ We demonstrate several of these methods on our data.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{log_fold_change_timecourse =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timecourse"}\NormalTok{)}
+\NormalTok{    moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"timecourse"}\NormalTok{)}
 
 \NormalTok{log_fold_change_sum =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
+\NormalTok{    moanin_model, timecourse_contrasts,  }\DataTypeTok{method=}\StringTok{"sum"}\NormalTok{)}
 
 \NormalTok{log_fold_change_max =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, moanin_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
+\NormalTok{    moanin_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"max"}\NormalTok{)}
 
 \NormalTok{log_fold_change_min =}\StringTok{ }\KeywordTok{estimate_log_fold_change}\NormalTok{(}
-\NormalTok{    data, moanin_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
+\NormalTok{    moanin_model, timecourse_contrasts, }\DataTypeTok{method=}\StringTok{"min"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -807,11 +858,11 @@ pair of contrast and gene.
 \toprule
   & M-K & M-C & M-VL & M-VH\\
 \midrule
-NM\_009912 & 0.432 & 0.753 & -0.836 & -0.488\\
-NM\_008725 & -1.257 & -2.008 & 1.924 & 1.729\\
-NM\_007473 & 0.385 & 0.335 & 0.516 & 0.263\\
-ENSMUST00000094955 & 0.355 & 0.376 & -0.316 & 0.256\\
-NM\_001042489 & -0.266 & 0.410 & 0.415 & 0.374\\
+NM\_009912 & -0.409 & -0.753 & -1.025 & -1.420\\
+NM\_008725 & 1.575 & 2.008 & 2.543 & 2.618\\
+NM\_007473 & -0.416 & -0.335 & -0.213 & 0.364\\
+ENSMUST00000094955 & -0.113 & -0.376 & -0.156 & -0.309\\
+NM\_001042489 & -0.234 & -0.410 & 0.308 & 0.430\\
 \bottomrule
 \end{tabular}
 
@@ -862,7 +913,7 @@ genes with the smallest p-values.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{top_DE_genes_pval =}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{sort}\NormalTok{(pvalue)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
-\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_pval, ], moanin_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(moanin_model,}\DataTypeTok{subset_data=}\NormalTok{top_DE_genes_pval, }
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -880,7 +931,7 @@ change.
 \NormalTok{top_DE_genes_lfc =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
     \KeywordTok{sort}\NormalTok{(}\KeywordTok{abs}\NormalTok{(lfc_timecourse),}
      \DataTypeTok{decreasing=}\OtherTok{TRUE}\NormalTok{)[}\DecValTok{1}\OperatorTok{:}\DecValTok{10}\NormalTok{])}
-\KeywordTok{plot_splines_data}\NormalTok{(data[top_DE_genes_lfc, ], moanin_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(moanin_model, }\DataTypeTok{subset_data=}\NormalTok{top_DE_genes_lfc, }
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -927,14 +978,15 @@ change of at least two for at least one condition and one time-point.
 \NormalTok{    (}\KeywordTok{rowSums}\NormalTok{(log_fold_change_max }\OperatorTok{>}\StringTok{ }\DecValTok{2}\NormalTok{) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{&}
 \StringTok{    }\NormalTok{(fishers_qval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05}\NormalTok{), ])}
 \CommentTok{# Keep the data corresponding to the genes of interest in another variable.}
-\NormalTok{y =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(data[genes_to_keep, ])}
+\CommentTok{# by subsetting the `moanin_model`, which contains the data.}
+\NormalTok{de_moanin_model =}\StringTok{ }\NormalTok{moanin_model[genes_to_keep,]}
 \end{Highlighting}
 \end{Shaded}
 
 \hypertarget{clustering-based-on-spline-fits}{%
 \subsubsection{Clustering Based on Spline Fits}\label{clustering-based-on-spline-fits}}
 
-After filtering, we are left with 3950 genes. We can then apply a
+After filtering, we are left with 5521 genes. We can then apply a
 clustering routine. As observed by looking at genes found differentially expressed,
 many genes share a similar gene expression pattern, but on different scale.
 
@@ -944,7 +996,7 @@ We thus propose the following adaptation of k-means:
 \tightlist
 \item
   \textbf{Splines estimation}: for each gene, fit the splines function with the basis
-  of your choice (as contained in the \texttt{moanin\_model} object).
+  of your choice (as contained in the \texttt{Moanin} object).
 \item
   \textbf{Rescaling splines}: for each gene, rescale the estimated splines function
   such that the values are bounded between 0 and 1 and thus comparable between genes.
@@ -962,8 +1014,7 @@ will return to the question of picking the best number of clusters below.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# First fit the kmeans clusters}
-\NormalTok{kmeans_clusters =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(}
-\NormalTok{    y, moanin_model, }\DataTypeTok{n_clusters=}\DecValTok{8}\NormalTok{,}
+\NormalTok{kmeans_clusters =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(de_moanin_model, }\DataTypeTok{n_clusters=}\DecValTok{8}\NormalTok{,}
     \DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
     \DataTypeTok{n_init=}\DecValTok{20}\NormalTok{)}
 \end{Highlighting}
@@ -985,8 +1036,8 @@ each cluster obtained with the splines k-means model.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{plot_splines_data}\NormalTok{(}
-\NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, moanin_model,}
+\KeywordTok{plot_splines_data}\NormalTok{(de_moanin_model,}
+    \DataTypeTok{data=}\NormalTok{kmeans_clusters}\OperatorTok{$}\NormalTok{centroids, }
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group,}
     \DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{)}
 \end{Highlighting}
@@ -1003,19 +1054,38 @@ of the actual genes assigned to cluster 2 to see the difference:
 \NormalTok{cluster_of_interest =}\StringTok{ }\DecValTok{2}
 \NormalTok{cluster2Genes =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
 \NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{clusters[kmeans_clusters}\OperatorTok{$}\NormalTok{clusters}\OperatorTok{==}\NormalTok{cluster_of_interest])}
-\NormalTok{dataToPlot=}\KeywordTok{rbind}\NormalTok{(y[cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{], ],}\StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,])}
-\KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
-    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
-    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
+\CommentTok{# }\AlertTok{FIXME}\CommentTok{ This line fails}
+\CommentTok{# dataToPlot = rbind(}
+\CommentTok{#     assay(de_moanin_model[cluster2Genes[3:6],]), }
+\CommentTok{#    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])}
+\CommentTok{# plot_splines_data(de_moanin_model, data=dataToPlot, }
+\CommentTok{#     colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,}
+\CommentTok{#    mar=c(1.5,2.5,2,0.1))}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/genesVsCentroids-1} \end{center}
 
 The spline plots are fitted per gene in the above plot and illustrate that
 the genes assigned to a cluster have differing degrees to which their data
 fits that of the cluster centroid, and indeed fits that of their individual
 spline fits.
+
+We can also overlay the centroid on the data, after rescaling the data to be between 0-1, like the centroids
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{de_moanin_rescale =}\StringTok{ }\NormalTok{de_moanin_model}
+\KeywordTok{assay}\NormalTok{(de_moanin_rescale) =}\StringTok{ }\KeywordTok{rescale_values}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{assay}\NormalTok{(de_moanin_model))}
+\KeywordTok{plot_splines_data}\NormalTok{(de_moanin_rescale,  }
+    \DataTypeTok{centroid=}\NormalTok{kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,], }
+    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{subset_data=}\NormalTok{cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{],}
+    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
+
+\textbf{EAP} I added the functionality to plot centroid over data, rather than just fit to data, but I'm not sure it makes much sense to include this. The \texttt{rescale\_values} function is too sensitive to outliers. Would be better to rescale each centroid to scale of gene. If we had a helper function to do that, could easily add that to plot\_splines\_data (made issue on moanin), but probably right now should remove this.
 
 \hypertarget{assigning-genes-to-clusters}{%
 \subsubsection{Assigning genes to clusters}\label{assigning-genes-to-clusters}}
@@ -1046,14 +1116,14 @@ cluster centroid and gives a cluster label to the gene if they have a sufficient
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Then assign scores and labels to all the data, using a goodness-of-fit}
+\CommentTok{# Then assign scores and labels to *all* the data, using a goodness-of-fit}
 \CommentTok{# scoring function.}
 \NormalTok{scores_and_labels =}\StringTok{ }\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(}
-\NormalTok{    data, kmeans_clusters)}
+\NormalTok{    moanin_model, kmeans_clusters)}
 \end{Highlighting}
 \end{Shaded}
 
-The \texttt{scores\_and\_labels} list contains two elements:
+The \texttt{scores\_and\_labels} list contains three elements:
 
 \begin{verbatim}
 - `scores`: the matrix of shape `n_cluster` x `n_genes`,
@@ -1061,9 +1131,11 @@ The \texttt{scores\_and\_labels} list contains two elements:
   described above.
 - `labels`: the labels for all of the genes with a
   sufficiently good goodness-of-fit score.
+- `score_cutoff`: the cutoff used on `scores` to determine whether to 
+  assign a label
 \end{verbatim}
 
-\textbf{Assigning cluster labels:} We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, \texttt{splines\_kmeans\_score\_and\_label} does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being ``sufficiently low'' is based on looking at the distribution of the scores of all genes on all clusters (i.e.~the entire \texttt{scores} matrix returned by \texttt{splines\_kmeans\_score\_and\_label}). A gene is then assigned to a cluster only if their best score is above the 50\% percentile of that distribution, with the remaining genes getting \texttt{NA} as their assignment. Note that because the distribution of scores of genes across \emph{all} clusters are used, this is not equivalent to assigning 50\% of genes to a cluster -- it is possible that all genes are assigned to a cluster.
+\textbf{Assigning cluster labels:} We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, \texttt{splines\_kmeans\_score\_and\_label} does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being ``sufficiently low'' is based on looking at the distribution of the scores of all genes on all clusters (i.e.~the entire \texttt{scores} matrix returned by \texttt{splines\_kmeans\_score\_and\_label}). A gene is then assigned to a cluster only if their best score is above the 50\% percentile of that distribution, with the remaining genes getting \texttt{NA} as their assignment (this choice can be changed by \texttt{proportion\_genes\_to\_label}). Note that because the distribution of scores of genes across \emph{all} clusters are used, this is not equivalent to assigning 50\% of genes to a cluster -- it is possible that all genes are assigned to a cluster.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1082,24 +1154,25 @@ are assigned to a cluster.
 
 We can visualize the impact of this filtering process by considering the distribution of goodness-of-fit scores for each
 cluster if we did not have the filtering cutoff of \texttt{splines\_kmeans\_score\_and\_label}, i.e.~if we simply assign every gene to a cluster based on which gives them their minimum score.
-We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure.
+We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning \texttt{splines\_kmeans\_score\_and\_label} and setting the filter \texttt{percentage\_genes\_to\_label=1} (and we can speed up the calculation by giving our previously calculated score via the argument \texttt{previous\_scores})
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Get the best score and best label for all of the genes}
-\CommentTok{# This is different from output of `splines_kmeans_score_and_label`, }
-\CommentTok{# which filters the genes}
-\NormalTok{scores =}\StringTok{ }\KeywordTok{rowMin}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
-\NormalTok{labels =}\StringTok{ }\KeywordTok{apply}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores, }\DecValTok{1}\NormalTok{, which.min)}
-\NormalTok{max_score =}\StringTok{ }\KeywordTok{quantile}\NormalTok{(scores, }\FloatTok{0.5}\NormalTok{)}
+\CommentTok{# This time without filtering labels}
+\CommentTok{# We can give the previous calculated scores to `previous_scores` to save time}
+\NormalTok{unfiltered_scores<-}\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(moanin_model,kmeans_clusters,}\DataTypeTok{proportion_genes_to_label=}\DecValTok{1}\NormalTok{, }\DataTypeTok{previous_scores=}\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
+\NormalTok{best_score =}\StringTok{ }\KeywordTok{rowMin}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
+\NormalTok{best_label =}\StringTok{ }\NormalTok{unfiltered_scores}\OperatorTok{$}\NormalTok{labels}
+
 \KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DecValTok{3}\NormalTok{))}
 \NormalTok{n_clusters =}\StringTok{ }\KeywordTok{dim}\NormalTok{(kmeans_clusters}\OperatorTok{$}\NormalTok{centroids)[}\DecValTok{1}\NormalTok{]}
 \ControlFlowTok{for}\NormalTok{(cluster_id }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{n_clusters)\{}
-    \KeywordTok{hist}\NormalTok{(scores[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_id],}
+    \KeywordTok{hist}\NormalTok{(best_score[best_label}\OperatorTok{==}\NormalTok{cluster_id],}
      \DataTypeTok{breaks=}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{50}\OperatorTok{/}\DecValTok{50}\NormalTok{), }\DataTypeTok{xlim=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{),}
      \DataTypeTok{col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"C"}\NormalTok{, cluster_id, }\DataTypeTok{sep=}\StringTok{""}\NormalTok{),}
      \DataTypeTok{xlab=}\StringTok{"score"}\NormalTok{, }\DataTypeTok{ylab=}\StringTok{"Num. genes"}\NormalTok{)}
-    \KeywordTok{abline}\NormalTok{(}\DataTypeTok{v=}\NormalTok{max_score, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{3}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{)}
+    \KeywordTok{abline}\NormalTok{(}\DataTypeTok{v=}\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{score_cutoff, }\DataTypeTok{col=}\StringTok{"red"}\NormalTok{, }\DataTypeTok{lwd=}\DecValTok{3}\NormalTok{, }\DataTypeTok{lty=}\DecValTok{2}\NormalTok{)}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
@@ -1117,11 +1190,6 @@ Note that for some of the genes, their scores in all clusters is 1. Such genes f
 poorly to all clusters and the assignment we did above to one cluster is done arbitrarily to the first matching cluster.
 This underlines the importance of filtering genes that fit poorly to clusters.
 
-\textbf{EAP} In fact, \texttt{which.min} which you used above, picks the first match, so actually a preference to assign into first cluster in this plot.
-\textbf{NV} Fair point\textless{}80\textgreater{} maybe this should be fixed somehow by adding a random
-perturbation to the scores when the scores are equal? Although I think the
-text is still appropriate: those genes should definitely be filtered out.
-
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
 scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}.
@@ -1135,8 +1203,8 @@ scoring and labeling step, in terms of the number of genes assigned to each clus
 \caption{Number of genes assigned to each cluster based on kmeans criteria of nearest centroid (top) versus our goodness-of-fit filtering strategy (bottom)}\label{fig:kmeansVsScore}
 \end{figure}
 
-Of the original 3950 genes used in the
-clustering, 3950 are still assigned to a cluster based on their goodness of
+Of the original 5521 genes used in the
+clustering, 4946 are still assigned to a cluster based on their goodness of
 fit score. We can compare whether they are still assigned to the same clusters
 based on a confusion matrix shown below (Figure \ref{fig:confusionMatrix}). The kmeans cluster assignments are
 shown on the rows, and the goodness-of-fit assignments in the columns, with
@@ -1152,7 +1220,7 @@ the two clusters.
 \caption{Confusion matrix between the two sets of labels}\label{fig:confusionMatrix}
 \end{figure}
 
-Of the four genes we plotted before, 3 of them remained assigned to cluster 2. We can again look at a
+Of the four genes we plotted before, 2 of them remained assigned to cluster 2. We can again look at a
 few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:topScoreInCluster2})
 
 \begin{Shaded}
@@ -1161,22 +1229,14 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 \NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[genes_in_cluster2,}
 \NormalTok{                     cluster_of_interest])}
 \NormalTok{cluster2Score =}\StringTok{ }\NormalTok{genes_in_cluster2[ord]}
-\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(data[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ],}
-    \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
-\KeywordTok{plot_splines_data}\NormalTok{(dataToPlot, moanin_model,}
-    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
-    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
+\CommentTok{# }\AlertTok{FIXME}\CommentTok{ this lines failes.}
+\CommentTok{# dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),}
+\CommentTok{#     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])}
+\CommentTok{# plot_splines_data(moanin_model, data=dataToPlot, }
+\CommentTok{#     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,}
+\CommentTok{#     mar=c(1.5,2.5,2,0.1))}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/topScoreInCluster2-1} 
-
-}
-
-\caption{Top scoring genes in Cluster 2}\label{fig:topScoreInCluster2}
-\end{figure}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1204,45 +1264,43 @@ our goodness-of-fit assignment.
 \end{Highlighting}
 \end{Shaded}
 
-Now we will create the heatmaps of these genes (4332 genes, Figure \ref{fig:heatmapCluster8}).
+Now we will create the heatmaps of these genes (1283 genes, Figure \ref{fig:heatmapCluster8}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{layout}\NormalTok{(}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{),}\DataTypeTok{nrow=}\DecValTok{1}\NormalTok{), }\DataTypeTok{widths=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{, }\DecValTok{2}\NormalTok{))}
 
-\NormalTok{data_to_plot =}\StringTok{ }\NormalTok{data[genes_to_plot, ]}
-\NormalTok{submeta =}\StringTok{ }\NormalTok{meta}
+\CommentTok{# order the observations by Group, then time, then replicate}
+\NormalTok{orderedMeta<-}\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{colData}\NormalTok{(moanin_model))}
 \NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(}
-\NormalTok{  submeta}\OperatorTok{$}\NormalTok{Group,}
-\NormalTok{  submeta}\OperatorTok{$}\NormalTok{Timepoint,}
-\NormalTok{  submeta}\OperatorTok{$}\NormalTok{Replicate)}
-\NormalTok{submeta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(submeta}\OperatorTok{$}\NormalTok{Timepoint)}
+\NormalTok{  orderedMeta}\OperatorTok{$}\NormalTok{Group,}
+\NormalTok{  orderedMeta}\OperatorTok{$}\NormalTok{Timepoint,}
+\NormalTok{  orderedMeta}\OperatorTok{$}\NormalTok{Replicate)}
+\NormalTok{orderedMeta}\OperatorTok{$}\NormalTok{Timepoint =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(orderedMeta}\OperatorTok{$}\NormalTok{Timepoint)}
 
-\NormalTok{data_to_plot =}\StringTok{ }\NormalTok{data_to_plot[, ord]}
-\NormalTok{submeta =}\StringTok{ }\NormalTok{submeta[ord, ]}
+\NormalTok{orderedMeta =}\StringTok{ }\NormalTok{orderedMeta[ord, ]}
 
 \NormalTok{res =}\StringTok{ }\KeywordTok{aheatmap}\NormalTok{(}
-\NormalTok{    data_to_plot,}
+    \KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{assay}\NormalTok{(moanin_model[genes_to_plot,ord])),}
     \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
     \DataTypeTok{color=}\StringTok{"YlGnBu"}\NormalTok{,}
-    \DataTypeTok{annCol=}\NormalTok{submeta[,}
-                \KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
+    \DataTypeTok{annCol=}\NormalTok{orderedMeta[,}\KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
     \DataTypeTok{annLegend=}\OtherTok{FALSE}\NormalTok{,}
     \DataTypeTok{annColors=}\NormalTok{ann_colors,}
     \DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"Cluster"}\NormalTok{, cluster_to_plot, }\StringTok{"(raw)"}\NormalTok{),}
     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{)}
 
 \CommentTok{# Now use the results of the previous call to aheatmap to reorder the genes.}
-\KeywordTok{aheatmap}\NormalTok{(}
-\NormalTok{    moanin}\OperatorTok{::}\KeywordTok{rescale_values}\NormalTok{(data_to_plot)[res}\OperatorTok{$}\NormalTok{rowInd,],}
-    \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
-    \DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
-    \DataTypeTok{annCol=}\NormalTok{submeta[,}
-                \KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
-    \DataTypeTok{annLegend=}\OtherTok{TRUE}\NormalTok{,}
-    \DataTypeTok{annColors=}\NormalTok{ann_colors,}
-    \DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"Cluster"}\NormalTok{, cluster_to_plot, }\StringTok{"(rescaled)"}\NormalTok{),}
-    \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
+\CommentTok{# }\AlertTok{FIXME}\CommentTok{ this line doesn't work}
+\CommentTok{# aheatmap(}
+\CommentTok{#    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],}
+\CommentTok{#    Colv=NA,}
+\CommentTok{#    Rowv=NA,}
+\CommentTok{#    annCol=orderedMeta[, c("Group", "Timepoint")],}
+\CommentTok{#    annLegend=TRUE,}
+\CommentTok{#    annColors=ann_colors,}
+\CommentTok{#    main=paste("Cluster", cluster_to_plot, "(rescaled)"),}
+\CommentTok{#    treeheight=0)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1311,10 +1369,9 @@ WCSS.
 
 \NormalTok{i =}\StringTok{ }\DecValTok{1}
 \ControlFlowTok{for}\NormalTok{(n_cluster }\ControlFlowTok{in}\NormalTok{ all_possible_n_clusters)\{}
-\NormalTok{    clustering_results =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(}
-\NormalTok{    y, moanin_model,}
-    \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
-    \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
+\NormalTok{    clustering_results =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(de_moanin_model,}
+        \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
+        \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
 \NormalTok{    wss_values[i] =}\StringTok{ }\KeywordTok{sum}\NormalTok{(clustering_results}\OperatorTok{$}\NormalTok{WCSS_per_cluster)}
 \NormalTok{    all_clustering[[i]] =}\StringTok{ }\NormalTok{clustering_results}\OperatorTok{$}\NormalTok{clusters}
 \NormalTok{    i =}\StringTok{ }\NormalTok{i }\OperatorTok{+}\StringTok{ }\DecValTok{1}
@@ -1365,7 +1422,7 @@ cluster (cohesion) compared to other clusters (separation), shown in Figure \ref
 \begin{Highlighting}[]
 \CommentTok{# function to compute average silhouette for k clusters}
 \NormalTok{average_silhouette =}\StringTok{ }\ControlFlowTok{function}\NormalTok{(labels, y) \{}
-\NormalTok{    silhouette_results =}\StringTok{ }\KeywordTok{silhouette}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(labels[}\DecValTok{1}\NormalTok{]), }\KeywordTok{dist}\NormalTok{(y))}
+\NormalTok{    silhouette_results =}\StringTok{ }\KeywordTok{silhouette}\NormalTok{(}\KeywordTok{unlist}\NormalTok{(labels[}\DecValTok{1}\NormalTok{]),}\KeywordTok{dist}\NormalTok{(y))}
     \KeywordTok{return}\NormalTok{(}\KeywordTok{mean}\NormalTok{(silhouette_results[, }\DecValTok{3}\NormalTok{]))}
 \NormalTok{\}}
 
@@ -1374,7 +1431,8 @@ cluster (cohesion) compared to other clusters (separation), shown in Figure \ref
 \NormalTok{i =}\StringTok{ }\DecValTok{1}
 \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{length}\NormalTok{(all_clustering))\{}
 \NormalTok{    clustering_results =}\StringTok{ }\NormalTok{all_clustering[i]}
-\NormalTok{    average_silhouette_values[i] =}\StringTok{ }\KeywordTok{average_silhouette}\NormalTok{(clustering_results, y)}
+\NormalTok{    average_silhouette_values[i] =}\StringTok{ }\KeywordTok{average_silhouette}\NormalTok{(clustering_results,}
+        \KeywordTok{assay}\NormalTok{(de_moanin_model))}
 \NormalTok{    i =}\StringTok{ }\NormalTok{i }\OperatorTok{+}\StringTok{ }\DecValTok{1}
 \NormalTok{\}}
 
@@ -1422,14 +1480,14 @@ To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
 Using the bootstrapping strategy, we sample with replacement a sample of the
-same size as our original clustering (i.e.~3950 genes):
+same size as our original clustering (i.e.~5521 genes):
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{n_genes =}\StringTok{ }\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{]}
-\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes, }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{n_genes =}\StringTok{ }\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{], n_genes, }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{)}
 
-\NormalTok{bootstrapped_y =}\StringTok{ }\NormalTok{y[indices, ]}
+\NormalTok{bootstrapped_y =}\StringTok{ }\NormalTok{de_moanin_model[indices, ]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1438,9 +1496,9 @@ Using the subsampling strategy, we take a unique subset of the genes, keeping 80
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{subsample_proportion =}\StringTok{ }\FloatTok{0.8}
-\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion, }\DataTypeTok{replace=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{], n_genes }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion, }\DataTypeTok{replace=}\OtherTok{FALSE}\NormalTok{)}
 
-\NormalTok{subsampled_y =}\StringTok{ }\NormalTok{y[indices, ]}
+\NormalTok{subsampled_y =}\StringTok{ }\NormalTok{de_moanin_model[indices, ]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1455,18 +1513,17 @@ results in separate files (one per \(k\)) for users to explore more quickly.
 \CommentTok{# You may want to set the random seed of the experiment so that the results}
 \CommentTok{# don't vary if you rerun the experiment.}
 \CommentTok{# set.seed(random_seed)}
-\NormalTok{n_genes =}\StringTok{ }\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\NormalTok{sample_proportion}
-\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(y)[}\DecValTok{1}\NormalTok{], n_genes, }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{n_genes =}\StringTok{ }\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{], n_genes, }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{)}
 
-\NormalTok{random_subsample_y =}\StringTok{ }\NormalTok{y[indices, ]}
-\NormalTok{kmeans_clusters =}\StringTok{ }\NormalTok{moanin}\OperatorTok{::}\KeywordTok{splines_kmeans}\NormalTok{(}
-\NormalTok{    random_subsample_y, splines_model, }\DataTypeTok{n_clusters=}\NormalTok{n_clusters,}
-    \DataTypeTok{random_seed=}\NormalTok{random_seed,}
+\NormalTok{kmeans_clusters =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(de_moanin_model[indices,],}
+    \DataTypeTok{n_clusters=}\NormalTok{n_clusters,}
+    \DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
     \DataTypeTok{n_init=}\DecValTok{20}\NormalTok{)}
 
 \CommentTok{# Perform prediction on the whole set of data.}
-\NormalTok{kmeans_clusters =}\StringTok{ }\NormalTok{moanin}\OperatorTok{:::}\KeywordTok{splines_kmeans_prediction}\NormalTok{(}
-\NormalTok{    y, kmeans_clusters)}
+\NormalTok{kmeans_clusters =}\StringTok{ }\KeywordTok{splines_kmeans_predict}\NormalTok{(de_moanin_model, kmeans_clusters, }
+    \DataTypeTok{method=}\StringTok{"distance"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1523,7 +1580,7 @@ matrices for \(k=5\) and \(k=20\).
 
 }
 
-\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus1}
+\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus-1}
 \end{figure}
 
 \begin{Shaded}
@@ -1542,7 +1599,7 @@ matrices for \(k=5\) and \(k=20\).
 
 }
 
-\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus2}
+\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus-2}
 \end{figure}
 
 We can see (Figure \ref{fig:bootstrapConsensus}) that the choice of \(K=5\) seems much more stable across resampling runs than that of \(K=20\).
@@ -1749,17 +1806,8 @@ Then we use the function \texttt{find\_enriched\_pathway} in the \texttt{KEGGpro
 \toprule
   & Pathway & Percentage & Adj. p-value\\
 \midrule
-04060 & Cytokine-cytokine receptor interaction & 34 & 0\\
-04620 & Toll-like receptor signaling pathway & 40 & 0\\
-04630 & Jak-STAT signaling pathway & 33 & 0\\
-03050 & Proteasome & 53 & 0\\
-04621 & NOD-like receptor signaling pathway & 47 & 0\\
-\addlinespace
-04380 & Osteoclast differentiation & 34 & 0\\
-04623 & Cytosolic DNA-sensing pathway & 45 & 0\\
-04210 & Apoptosis & 37 & 0\\
-04622 & RIG-I-like receptor signaling pathway & 39 & 0\\
-05160 & Hepatitis C & 29 & 0\\
+04740 & Olfactory transduction & 8 & 0\\
+04080 & Neuroactive ligand-receptor interaction & 10 & 0\\
 \bottomrule
 \end{tabular}
 
@@ -1825,23 +1873,23 @@ enrichment on the ``Biological process'' ontology (BP).
 \toprule
 GO ID & Description & Annotated & Significant & Expected & P-value & Adj. p-value\\
 \midrule
-GO:0003002 & regionalization & 171 & 153 & 133.53 & 0.00012 & 0.123\\
-GO:0007224 & smoothened signaling pathway & 75 & 70 & 58.56 & 0.00033 & 0.282\\
-GO:0010970 & transport along microtubule & 84 & 77 & 65.59 & 0.00044 & 0.322\\
-GO:0006805 & xenobiotic metabolic process & 49 & 47 & 38.26 & 0.00057 & 0.365\\
-GO:0048562 & embryonic organ morphogenesis & 154 & 136 & 120.25 & 0.00073 & 0.374\\
+GO:0044260 & cellular macromolecule metabolic process & 3762 & 3607 & 3540.21 & 0.00031 & 0.276\\
+GO:0043603 & cellular amide metabolic process & 467 & 458 & 439.47 & 0.00036 & 0.276\\
+GO:0043161 & proteasome-mediated ubiquitin-dependent ... & 201 & 199 & 189.15 & 0.00042 & 0.276\\
+GO:0016071 & mRNA metabolic process & 285 & 280 & 268.20 & 0.00052 & 0.276\\
+GO:0070925 & organelle assembly & 427 & 417 & 401.83 & 0.00052 & 0.276\\
 \addlinespace
-GO:0055114 & oxidation-reduction process & 530 & 457 & 413.85 & 0.00086 & 0.374\\
-GO:0060173 & limb development & 90 & 82 & 70.28 & 0.00090 & 0.374\\
-GO:0060070 & canonical Wnt signaling pathway & 152 & 134 & 118.69 & 0.00095 & 0.374\\
-GO:0006635 & fatty acid beta-oxidation & 38 & 37 & 29.67 & 0.00095 & 0.374\\
-GO:0090596 & sensory organ morphogenesis & 138 & 122 & 107.76 & 0.00124 & 0.453\\
+GO:0019058 & viral life cycle & 123 & 123 & 115.75 & 0.00054 & 0.276\\
+GO:0018130 & heterocycle biosynthetic process & 1809 & 1733 & 1702.35 & 0.00093 & 0.348\\
+GO:0019438 & aromatic compound biosynthetic process & 1810 & 1734 & 1703.29 & 0.00098 & 0.348\\
+GO:0042110 & T cell activation & 273 & 268 & 256.91 & 0.00102 & 0.348\\
+GO:0006954 & inflammatory response & 410 & 398 & 385.83 & 0.00104 & 0.348\\
 \addlinespace
-GO:0010811 & positive regulation of cell-substrate ad... & 79 & 72 & 61.69 & 0.00184 & 0.628\\
-GO:0060411 & cardiac septum morphogenesis & 33 & 32 & 25.77 & 0.00289 & 0.903\\
-GO:0060078 & regulation of postsynaptic membrane pote... & 69 & 63 & 53.88 & 0.00319 & 0.903\\
-GO:0042738 & exogenous drug catabolic process & 23 & 23 & 17.96 & 0.00335 & 0.903\\
-GO:0021515 & cell differentiation in spinal cord & 23 & 23 & 17.96 & 0.00335 & 0.903\\
+GO:0006163 & purine nucleotide metabolic process & 199 & 198 & 187.27 & 0.00108 & 0.348\\
+GO:0051301 & cell division & 300 & 294 & 282.31 & 0.00109 & 0.348\\
+GO:0070507 & regulation of microtubule cytoskeleton o... & 110 & 110 & 103.51 & 0.00120 & 0.361\\
+GO:0006091 & generation of precursor metabolites and ... & 222 & 220 & 208.91 & 0.00138 & 0.392\\
+GO:0006364 & rRNA processing & 106 & 106 & 99.75 & 0.00153 & 0.412\\
 \bottomrule
 \end{tabular}
 
@@ -1881,13 +1929,13 @@ this pipeline and their version numbers.
 \end{Shaded}
 
 \begin{verbatim}
-## R version 3.6.0 (2019-04-26)
+## R version 4.0.2 (2020-06-22)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Ubuntu 19.04
+## Running under: Ubuntu 20.04 LTS
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.8.0
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.8.0
+## BLAS:   /usr/local/lib/R/lib/libRblas.so
+## LAPACK: /usr/local/lib/R/lib/libRlapack.so
 ## 
 ## locale:
 ## [1] C
@@ -1897,58 +1945,60 @@ this pipeline and their version numbers.
 ##  [8] datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] RColorBrewer_1.1-2      moanin_0.0.0           
-##  [3] BiocWorkflowTools_1.6.2 ggfortify_0.4.6        
-##  [5] timecoursedata_0.0.0    topGO_2.32.0           
-##  [7] SparseM_1.77            GO.db_3.6.0            
-##  [9] AnnotationDbi_1.42.1    IRanges_2.14.12        
-## [11] S4Vectors_0.18.3        graph_1.58.2           
-## [13] viridis_0.5.1           viridisLite_0.3.0      
-## [15] KEGGprofile_1.22.0      RCurl_1.95-4.12        
-## [17] bitops_1.0-6            NMF_0.21.0             
-## [19] Biobase_2.40.0          BiocGenerics_0.26.0    
-## [21] cluster_2.0.9           rngtools_1.3.1.1       
-## [23] pkgmaker_0.27           registry_0.5-1         
-## [25] ggplot2_3.1.1           kableExtra_1.1.0       
-## [27] biomaRt_2.36.1          BiocStyle_2.8.2        
-## [29] knitr_1.22              limma_3.36.5           
-## [31] usethis_1.5.0           devtools_2.0.2         
-## [33] rmarkdown_1.12         
+##  [1] RColorBrewer_1.1-2          BiocWorkflowTools_1.14.0   
+##  [3] ggfortify_0.4.10            timecoursedata_0.99.0      
+##  [5] moanin_0.99.0-901           SummarizedExperiment_1.18.2
+##  [7] DelayedArray_0.14.1         matrixStats_0.56.0         
+##  [9] GenomicRanges_1.40.0        GenomeInfoDb_1.24.2        
+## [11] topGO_2.40.0                SparseM_1.78               
+## [13] GO.db_3.11.4                AnnotationDbi_1.50.1       
+## [15] IRanges_2.22.2              S4Vectors_0.26.1           
+## [17] graph_1.66.0                viridis_0.5.1              
+## [19] viridisLite_0.3.0           KEGGprofile_1.30.0         
+## [21] NMF_0.22.0                  Biobase_2.48.0             
+## [23] BiocGenerics_0.34.0         cluster_2.1.0              
+## [25] rngtools_1.5                pkgmaker_0.31.1            
+## [27] registry_0.5-1              ggplot2_3.3.2              
+## [29] kableExtra_1.1.0            biomaRt_2.44.1             
+## [31] BiocStyle_2.16.0            knitr_1.29                 
+## [33] limma_3.44.3                devtools_2.3.0             
+## [35] usethis_1.6.1               rmarkdown_2.3              
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] colorspace_1.4-1   rprojroot_1.3-2    XVector_0.20.0    
-##  [4] fs_1.3.1           rstudioapi_0.10    remotes_2.0.4     
-##  [7] bit64_0.9-7        ClusterR_1.1.9     KEGG.db_3.2.3     
-## [10] xml2_1.3.2         codetools_0.2-16   doParallel_1.0.14 
-## [13] pkgload_1.0.2      ade4_1.7-13        gridBase_0.4-7    
-## [16] png_0.1-7          FD_1.0-12          readr_1.3.1       
-## [19] compiler_3.6.0     httr_1.4.0         backports_1.1.4   
-## [22] Matrix_1.2-17      assertthat_0.2.1   lazyeval_0.2.2    
-## [25] cli_1.1.0          htmltools_0.3.6    prettyunits_1.0.2 
-## [28] tools_3.6.0        gmp_0.5-13.5       gtable_0.3.0      
-## [31] glue_1.3.1         reshape2_1.4.3     dplyr_0.8.0.1     
-## [34] Rcpp_1.0.1         Biostrings_2.48.0  NMI_2.0           
-## [37] ape_5.3            nlme_3.1-139       iterators_1.0.10  
-## [40] xfun_0.6           stringr_1.4.0      ps_1.3.0          
-## [43] testthat_2.1.1     rvest_0.3.3        gtools_3.8.1      
-## [46] XML_3.98-1.19      zlibbioc_1.26.0    MASS_7.3-51.4     
-## [49] scales_1.0.0       hms_0.4.2          curl_3.3          
-## [52] yaml_2.2.0         memoise_1.1.0      gridExtra_2.3     
-## [55] TeachingDemos_2.10 stringi_1.4.3      RSQLite_2.1.1     
-## [58] desc_1.2.0         foreach_1.4.4      permute_0.9-5     
-## [61] pkgbuild_1.0.3     bibtex_0.4.2       geometry_0.4.1    
-## [64] rlang_0.4.6        pkgconfig_2.0.2    matrixStats_0.54.0
-## [67] evaluate_0.13      lattice_0.20-38    purrr_0.3.2       
-## [70] bit_1.1-14         processx_3.3.1     tidyselect_0.2.5  
-## [73] plyr_1.8.4         magrittr_1.5       bookdown_0.9      
-## [76] R6_2.4.0           DBI_1.0.0          mgcv_1.8-28       
-## [79] pillar_1.3.1       withr_2.1.2        abind_1.4-5       
-## [82] KEGGREST_1.20.2    tibble_2.1.1       crayon_1.3.4      
-## [85] progress_1.2.0     grid_3.6.0         vegan_2.5-4       
-## [88] blob_1.1.1         callr_3.2.0        git2r_0.25.2      
-## [91] digest_0.6.18      webshot_0.5.1      xtable_1.8-4      
-## [94] tidyr_0.8.3        munsell_0.5.0      magic_1.5-9       
-## [97] sessioninfo_1.1.1
+##   [1] colorspace_1.4-1       ellipsis_0.3.1         rprojroot_1.3-2       
+##   [4] XVector_0.28.0         fs_1.4.2               rstudioapi_0.11       
+##   [7] remotes_2.1.1          bit64_0.9-7.1          fansi_0.4.1           
+##  [10] ClusterR_1.2.2         KEGG.db_3.2.4          xml2_1.3.2            
+##  [13] codetools_0.2-16       doParallel_1.0.15      pkgload_1.1.0         
+##  [16] gridBase_0.4-7         dbplyr_1.4.4           png_0.1-7             
+##  [19] BiocManager_1.30.10    readr_1.3.1            compiler_4.0.2        
+##  [22] httr_1.4.1             backports_1.1.8        Matrix_1.2-18         
+##  [25] assertthat_0.2.1       cli_2.0.2              htmltools_0.5.0       
+##  [28] prettyunits_1.1.1      tools_4.0.2            gmp_0.6-0             
+##  [31] GenomeInfoDbData_1.2.3 gtable_0.3.0           glue_1.4.1            
+##  [34] reshape2_1.4.4         dplyr_1.0.0            rappdirs_0.3.1        
+##  [37] Rcpp_1.0.5             vctrs_0.3.1            Biostrings_2.56.0     
+##  [40] NMI_2.0                iterators_1.0.12       xfun_0.15             
+##  [43] stringr_1.4.0          ps_1.3.3               testthat_2.3.2        
+##  [46] rvest_0.3.5            lifecycle_0.2.0        gtools_3.8.2          
+##  [49] XML_3.99-0.4           edgeR_3.30.3           MASS_7.3-51.6         
+##  [52] zlibbioc_1.34.0        scales_1.1.1           hms_0.5.3             
+##  [55] yaml_2.2.1             curl_4.3               memoise_1.1.0         
+##  [58] gridExtra_2.3          TeachingDemos_2.12     stringi_1.4.6         
+##  [61] RSQLite_2.2.0          desc_1.2.0             foreach_1.5.0         
+##  [64] pkgbuild_1.1.0         bibtex_0.4.2.2         rlang_0.4.7           
+##  [67] pkgconfig_2.0.3        bitops_1.0-6           lattice_0.20-41       
+##  [70] evaluate_0.14          purrr_0.3.4            bit_1.1-15.2          
+##  [73] processx_3.4.3         tidyselect_1.1.0       plyr_1.8.6            
+##  [76] magrittr_1.5           bookdown_0.20          R6_2.4.1              
+##  [79] generics_0.0.2         DBI_1.1.0              pillar_1.4.6          
+##  [82] withr_2.2.0            KEGGREST_1.28.0        RCurl_1.98-1.2        
+##  [85] tibble_3.0.3           crayon_1.3.4           BiocFileCache_1.12.0  
+##  [88] progress_1.2.2         locfit_1.5-9.4         grid_4.0.2            
+##  [91] blob_1.2.1             callr_3.4.3            git2r_0.27.1          
+##  [94] digest_0.6.25          webshot_0.5.2          xtable_1.8-4          
+##  [97] tidyr_1.1.0            openssl_1.4.2          munsell_0.5.0         
+## [100] sessioninfo_1.1.1      askpass_1.1
 \end{verbatim}
 
 \hypertarget{author-contributions}{%
