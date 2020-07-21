@@ -156,17 +156,6 @@ If Bioconductor is installed, the CRAN and Bioconductor packages above can be in
 BiocManager::install(c("NMF","ggfortify","topGO","biomaRt","KEGGprofile","BiocWorkflowTools"))
 ```
 
-**EAP**: Why is this list not the same as the (hidden via echo=FALSE) list at
-the beginning of the document? I also needed to install `BiocWorkflowTools`,
-`KEGGprofile` to run the .Rmd
-**NV**: I think some of the libraries above are not needed anymore. Some are
-also only used in hidden elements. I just checked that the whole pipeline
-works, by executing all command lines the reader will see, and the libraries
-are all loaded fine. I think BiocWorkflowTools is only need in the compilation
-of the Rmd file.
-
-
-
 # Analysis of the dynamical response of mouse lung tissue to influenza
 
 This workflow is illustrated using data from a micro-array time-course
@@ -404,15 +393,15 @@ we are interested in.
 these types of approaches, though our focus is on the global approach, specifically by fitting spline models to the genes. 
 
 In both
-situations, we first need to set up a object (a `moanin_model` object) to
+situations, we first need to set up a object (a `Moanin` object) to
 hold the meta data, as well as information for fitting the spline model
-(formula, number of degrees of freedom of the splines, ...). The `moanin_model` object
+(formula, number of degrees of freedom of the splines, ...). The `Moanin` object
 will contain information used
 throughout this analysis, in particular the condition and timepoints of each sample and the
 the basis matrix for fitting splines models. 
 
 
-We start by creating the `moanin_model` object using the `create_moanin_model`
+We start by creating the `Moanin` object using the `create_moanin_model`
 function. We need to provide two things to the function: a `data.frame` with
 the metadata, and the number of degrees of freedom of the splines to be used in the
 functional modeling. The metadata `data.frame` object should contain at least
@@ -423,10 +412,11 @@ second one named `Timepoint` containing the timepoint information.
 kable(head(meta))
 ```
 
-We create a `moanin_model` for our data:
+We create a `Moanin` object for our data:
 
 ```{r}
-moanin_model = create_moanin_model(meta, degrees_of_freedom=6)
+moanin_model = create_moanin_model(data=data, meta=meta,
+    degrees_of_freedom=6)
 ```
 
 The main operation of the `create_moanin_model` function, in addition to holding the necessary meta data of the samples,
@@ -442,9 +432,16 @@ Alternatively, the user can provide a formula of their own, or simply provide th
 We can see this information when we print the object:
 
 ```{r basis_matrix}
-print(moanin_model)
+show(moanin_model)
 ```
 
+
+The `Moanin` class extends the `SummarizedExperiment` class of Bioconductor, so that the data as well as the meta data and our spline information are all held in one object. This means that the object can be subsetted just like the data matrix, and the corresponding meta data and basis function evaluations will be similarly subsetted:
+
+```{r demonstrateSubsetting}
+dim(moanin_model)
+moanin_model[1:10,1:3]
+```
 
 ### Weekly differential expression analysis
 
@@ -467,7 +464,7 @@ interest:
 
 ```{r make_timepoints_contarts}
 # Define contrasts	
-contrasts = create_timepoints_contrasts("M", "VL", moanin_model)
+contrasts = create_timepoints_contrasts(moanin_model,"M", "VL")
 ```
 
 This creates a character vector of contrasts to be tested, one for each timepoint, in the format required by `limma`:
@@ -480,8 +477,7 @@ Then `moanin` will run the differential expression analysis on all of those time
 jointly using the function `DE_timepoints`.
 
 ```{r weekly_differential_analysis}
-weekly_de_analysis = DE_timepoints(
-     data, moanin_model, contrasts,
+weekly_de_analysis = DE_timepoints( moanin_model, contrasts,
      use_voom_weights=FALSE)
 ```
 
@@ -504,19 +500,19 @@ control ("M") (code not printed here, as it is a replicate of the above, see
 accompanying Rmarkdown document). 
 
 ```{r echo=FALSE, results="hide"}
-contrasts = create_timepoints_contrasts("M", "K", moanin_model)
+contrasts = create_timepoints_contrasts(moanin_model,"M", "K")
 K_weekly_de_analysis =  DE_timepoints(
-     data, moanin_model, contrasts,
+     moanin_model, contrasts,
      use_voom_weights=FALSE)
 
-contrasts = create_timepoints_contrasts("M", "C", moanin_model)
+contrasts = create_timepoints_contrasts(moanin_model,"M", "C")
 C_weekly_de_analysis =  DE_timepoints(
-     data, moanin_model, contrasts,
+     moanin_model, contrasts,
      use_voom_weights=FALSE)
 
-contrasts = create_timepoints_contrasts("M", "VH", moanin_model)
+contrasts = create_timepoints_contrasts( moanin_model,"M", "VH")
 VH_weekly_de_analysis =  DE_timepoints(
-     data, moanin_model, contrasts,
+     moanin_model, contrasts,
      use_voom_weights=FALSE)
 	 
 ```
@@ -526,34 +522,14 @@ week between control and each of the influenza strains. Such an analysis can dem
 being differentially expressed at later time points, and the Vietnam high-dose
 showing perhaps an earlier onset than the low-dose.
 
-
-
 ```{r timeSignifPerTime,fig.width=6, fig.height=6, echo=FALSE, fig.cap="Number of genes found DE in each timepoint when comparing the influenza strains to control."}
-timely_barplot = function(de_analysis, 
-    labels=NULL, qval_threshold=0.05,
-    xlab="Timepoint", ylab="Number of DE genes", main="", ylim=c(0, 20000), col="black", ...){
-
-    qval_colnames = colnames(de_analysis)[
-	grepl("qval", colnames(de_analysis))]
-    if(is.null(labels)){
-	labels = sapply(
-	    strsplit(gsub("-qval", "", qval_colnames), "\\."), .subset2, 3)
-    }
-    number_de_genes_per_time = colSums(de_analysis[, qval_colnames] < 0.05)
-
-    barplot(number_de_genes_per_time, 
-            names.arg=labels, xlab=xlab,ylab=ylab,
-            col=col, main=main, ylim=ylim,...)  
-}
-
 par(mfrow=c(2, 2))
 time = names(time_colors)
-timely_barplot(K_weekly_de_analysis, labels=time, main="Kawasaki", las=3)
-timely_barplot(C_weekly_de_analysis, labels=time, main="California", las=3)
-timely_barplot(weekly_de_analysis, labels=time, main="Vietnam low-dose", las=3)
-timely_barplot(VH_weekly_de_analysis, labels=time, main="Vietnam high-dose", las=3)
+perWeek_barplot(K_weekly_de_analysis, labels=time, main="Kawasaki", las=3)
+perWeek_barplot(C_weekly_de_analysis, labels=time, main="California", las=3)
+perWeek_barplot(weekly_de_analysis, labels=time, main="Vietnam low-dose", las=3)
+perWeek_barplot(VH_weekly_de_analysis, labels=time, main="Vietnam high-dose", las=3)
 ```
-
 
 However, the distribution of the number of genes found differentially
 expressed by considering each time-point independently highlights the
@@ -594,7 +570,7 @@ a single replicate that is different or increased variability at 72H that result
 
 ```{r showMissingDEGenes, echo=FALSE, fig.cap="The expression values over time for 10 genes found significant DE in timepoints 48,60,120,168H, but not in the 72H timepoint."}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
-plot_splines_data(data, moanin_model, subset_data=exampleGenes,
+plot_splines_data(moanin_model, subset_data=exampleGenes,
 		  colors=ann_colors$Group, smooth=TRUE)
 ```
 
@@ -625,8 +601,7 @@ timecourse_contrasts = c("M-K", "M-C", "M-VL", "M-VH")
 # (data.frame containing a timepoint and group column, the first corresponding
 # to the time-course information, the latter corresponding to the
 # treatment).
-DE_results = DE_timecourse(
-    data, moanin_model, timecourse_contrasts,
+DE_results = DE_timecourse( moanin_model, timecourse_contrasts,
     use_voom_weights=FALSE)
 ```
 
@@ -671,14 +646,14 @@ cumulative log-fold change. Sometimes a gene can be over-expressed at the
 beginning of the time-course data, and then under-expressed at the end of the
 experiment. As a result, `moanin` provides a number of possible ways to
 compute the log fold change across the whole time-course. This is done via the function `estimate_log_fold_change` which takes as
-arguments the data, the `moanin_model` object, the contrasts to evaluate, and the method to use to estimate the log-fold change.
+arguments the data, the `Moanin` object, the contrasts to evaluate, and the method to use to estimate the log-fold change.
 
 **Individual Timepoints** The first method ("timely") gives a simple interface to compute the log-fold change
 for each individual timepoints.
 
 ```{r}
 log_fold_change_timepoints = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts,  method="timely")
+    moanin_model, timecourse_contrasts,  method="timely")
 ```
 
 ```{r echo=FALSE}
@@ -717,16 +692,16 @@ We demonstrate several of these methods on our data.
 
 ```{r}
 log_fold_change_timecourse = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts,  method="timecourse")
+    moanin_model, timecourse_contrasts,  method="timecourse")
 
 log_fold_change_sum = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts,  method="sum")
+    moanin_model, timecourse_contrasts,  method="sum")
 
 log_fold_change_max = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts, method="max")
+    moanin_model, timecourse_contrasts, method="max")
 
 log_fold_change_min = estimate_log_fold_change(
-    data, moanin_model, timecourse_contrasts, method="min")
+    moanin_model, timecourse_contrasts, method="min")
 ```
 
 The returning object is a matrix, where each row corresponds to a gene,
@@ -778,7 +753,7 @@ genes with the smallest p-values.
 
 ```{r topPvalueGenes, fig.height=6, fig.width=6}
 top_DE_genes_pval = names(sort(pvalue)[1:10])
-plot_splines_data(data[top_DE_genes_pval, ], moanin_model,
+plot_splines_data(moanin_model,subset_data=top_DE_genes_pval, 
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 ```
@@ -792,7 +767,7 @@ change.
 top_DE_genes_lfc = names(
     sort(abs(lfc_timecourse),
 	 decreasing=TRUE)[1:10])
-plot_splines_data(data[top_DE_genes_lfc, ], moanin_model,
+plot_splines_data(moanin_model, subset_data=top_DE_genes_lfc, 
     colors=ann_colors$Group, smooth=TRUE,
     mar=c(1.5,2.5,2,0.1))
 
@@ -838,19 +813,20 @@ genes_to_keep = row.names(
 	(rowSums(log_fold_change_max > 2) > 0) &
 	(fishers_qval < 0.05), ])
 # Keep the data corresponding to the genes of interest in another variable.
-y = as.matrix(data[genes_to_keep, ])
+# by subsetting the `moanin_model`, which contains the data.
+de_moanin_model = moanin_model[genes_to_keep,]
 ```
 
 ### Clustering Based on Spline Fits
 
-After filtering, we are left with `r dim(y)[1]` genes. We can then apply a
+After filtering, we are left with `r dim(de_moanin_model)[1]` genes. We can then apply a
 clustering routine. As observed by looking at genes found differentially expressed, 
 many genes share a similar gene expression pattern, but on different scale. 
 
 We thus propose the following adaptation of k-means:
 
 - **Splines estimation**: for each gene, fit the splines function with the basis
-  of your choice (as contained in the `moanin_model` object).
+  of your choice (as contained in the `Moanin` object).
 - **Rescaling splines**: for each gene, rescale the estimated splines function
   such that the values are bounded between 0 and 1 and thus comparable between genes.
 - **K-means**: apply k-means on the rescaled fitted values of the splines to estimate the
@@ -864,8 +840,7 @@ will return to the question of picking the best number of clusters below.
 
 ```{r clustering}
 # First fit the kmeans clusters
-kmeans_clusters = splines_kmeans(
-    y, moanin_model, n_clusters=8,
+kmeans_clusters = splines_kmeans(de_moanin_model, n_clusters=8,
     random_seed=42,
     n_init=20)
 ```
@@ -880,8 +855,8 @@ We then use the `plot_splines_data`  function, only now applied to the centroids
 each cluster obtained with the splines k-means model. 
 
 ```{r fig.height=6, fig.width=6}
-plot_splines_data(
-    kmeans_clusters$centroids, moanin_model,
+plot_splines_data(de_moanin_model,
+    data=kmeans_clusters$centroids, 
     colors=ann_colors$Group,
     smooth=TRUE)
 ```
@@ -894,16 +869,32 @@ of the actual genes assigned to cluster 2 to see the difference:
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
-dataToPlot=rbind(y[cluster2Genes[3:6], ],"Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
-plot_splines_data(dataToPlot, moanin_model,
-    colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
-    mar=c(1.5,2.5,2,0.1))
+# FIXME This line fails
+# dataToPlot = rbind(
+#     assay(de_moanin_model[cluster2Genes[3:6],]), 
+#    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
+# plot_splines_data(de_moanin_model, data=dataToPlot, 
+#     colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
+#    mar=c(1.5,2.5,2,0.1))
 ```
 
 The spline plots are fitted per gene in the above plot and illustrate that
 the genes assigned to a cluster have differing degrees to which their data
 fits that of the cluster centroid, and indeed fits that of their individual
 spline fits. 
+
+We can also overlay the centroid on the data, after rescaling the data to be between 0-1, like the centroids
+
+```{r}
+de_moanin_rescale = de_moanin_model
+assay(de_moanin_rescale) = rescale_values(data=assay(de_moanin_model))
+plot_splines_data(de_moanin_rescale,  
+    centroid=kmeans_clusters$centroids[cluster_of_interest,], 
+    colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
+    subset_data=cluster2Genes[3:6],
+    mar=c(1.5,2.5,2,0.1))
+```
+**EAP** I added the functionality to plot centroid over data, rather than just fit to data, but I'm not sure it makes much sense to include this. The `rescale_values` function is too sensitive to outliers. Would be better to rescale each centroid to scale of gene. If we had a helper function to do that, could easily add that to plot_splines_data (made issue on moanin), but probably right now should remove this. 
 
 ### Assigning genes to clusters
 
@@ -933,21 +924,23 @@ cluster centroid and gives a cluster label to the gene if they have a sufficient
 
 
 ```{r assigning_scores_and_labels}
-# Then assign scores and labels to all the data, using a goodness-of-fit
+# Then assign scores and labels to *all* the data, using a goodness-of-fit
 # scoring function.
 scores_and_labels = splines_kmeans_score_and_label(
-    data, kmeans_clusters)
+    moanin_model, kmeans_clusters)
 ```
 
-The `scores_and_labels` list contains two elements:
+The `scores_and_labels` list contains three elements:
 
     - `scores`: the matrix of shape `n_cluster` x `n_genes`,
       containing for each gene and each cluster, the goodness of fit as
       described above.
     - `labels`: the labels for all of the genes with a
       sufficiently good goodness-of-fit score.
+    - `score_cutoff`: the cutoff used on `scores` to determine whether to 
+      assign a label
 
-**Assigning cluster labels:** We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, `splines_kmeans_score_and_label` does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being "sufficiently low" is based on looking at the distribution of the scores of all genes on all clusters (i.e. the entire `scores` matrix returned by `splines_kmeans_score_and_label`). A gene is then assigned to a cluster only if their best score is above the 50% percentile of that distribution, with the remaining genes getting `NA` as their assignment. Note that because the distribution of scores of genes across *all* clusters are used, this is not equivalent to assigning 50% of genes to a cluster -- it is possible that all genes are assigned to a cluster. 
+**Assigning cluster labels:** We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, `splines_kmeans_score_and_label` does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being "sufficiently low" is based on looking at the distribution of the scores of all genes on all clusters (i.e. the entire `scores` matrix returned by `splines_kmeans_score_and_label`). A gene is then assigned to a cluster only if their best score is above the 50% percentile of that distribution, with the remaining genes getting `NA` as their assignment (this choice can be changed by `proportion_genes_to_label`). Note that because the distribution of scores of genes across *all* clusters are used, this is not equivalent to assigning 50% of genes to a cluster -- it is possible that all genes are assigned to a cluster. 
 
 ```{r scores_and_labels}
 labels = scores_and_labels$labels
@@ -964,23 +957,24 @@ are assigned to a cluster.
 
 We can visualize the impact of this filtering process by considering the distribution of goodness-of-fit scores for each
 cluster if we did not have the filtering cutoff of `splines_kmeans_score_and_label`, i.e. if we simply assign every gene to a cluster based on which gives them their minimum score.
-We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure.
+We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning `splines_kmeans_score_and_label` and setting the filter `percentage_genes_to_label=1` (and we can speed up the calculation by giving our previously calculated score via the argument `previous_scores`)
 
 ```{r visualizeScores, fig.height=6, fix.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
 # Get the best score and best label for all of the genes
-# This is different from output of `splines_kmeans_score_and_label`, 
-# which filters the genes
-scores = rowMin(scores_and_labels$scores)
-labels = apply(scores_and_labels$scores, 1, which.min)
-max_score = quantile(scores, 0.5)
+# This time without filtering labels
+# We can give the previous calculated scores to `previous_scores` to save time
+unfiltered_scores<-splines_kmeans_score_and_label(moanin_model,kmeans_clusters,proportion_genes_to_label=1, previous_scores=scores_and_labels$scores)
+best_score = rowMin(scores_and_labels$scores)
+best_label = unfiltered_scores$labels
+
 par(mfrow=c(3, 3))
 n_clusters = dim(kmeans_clusters$centroids)[1]
 for(cluster_id in 1:n_clusters){
-    hist(scores[labels == cluster_id],
+    hist(best_score[best_label==cluster_id],
 	 breaks=(1:50/50), xlim=c(0, 1),
 	 col="black", main=paste("C", cluster_id, sep=""),
 	 xlab="score", ylab="Num. genes")
-    abline(v=max_score, col="red", lwd=3, lty=2)
+    abline(v=scores_and_labels$score_cutoff, col="red", lwd=3, lty=2)
 }
 
 ```
@@ -988,12 +982,6 @@ for(cluster_id in 1:n_clusters){
 Note that for some of the genes, their scores in all clusters is 1. Such genes fit
 poorly to all clusters and the assignment we did above to one cluster is done arbitrarily to the first matching cluster.
 This underlines the importance of filtering genes that fit poorly to clusters.
-
-**EAP** In fact, `which.min` which you used above, picks the first match, so actually a preference to assign into first cluster in this plot.
-**NV** Fair point… maybe this should be fixed somehow by adding a random
-perturbation to the scores when the scores are equal? Although I think the
-text is still appropriate: those genes should definitely be filtered out.
-
 
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
@@ -1035,6 +1023,8 @@ dim(text) = dim(confusion_matrix)
 aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
 	      border_color="black", txt=text, legend=FALSE, Rowv=NA,
 	      Colv=NA, sub="Goodness-of-fit assignments")
+
+# recreate, so in same order, etc as before
 labels = scores_and_labels$labels
 labels = unlist(labels[!is.na(labels)])
 
@@ -1049,11 +1039,12 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
                      cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind(data[cluster2Score[1:4], ],
-    "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
-plot_splines_data(dataToPlot, moanin_model,
-    colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
-    mar=c(1.5,2.5,2,0.1))
+# FIXME this lines failes.
+# dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
+#     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
+# plot_splines_data(moanin_model, data=dataToPlot, 
+#     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
+#     mar=c(1.5,2.5,2,0.1))
 ```
 
 
@@ -1094,45 +1085,39 @@ Now we will create the heatmaps of these genes (`r length(genes_to_plot)` genes,
 ```{r heatmapCluster8, fig.width=6, fig.height=8, fig.cap="Heatmap of genes in Cluster 8"}
 layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 
-data_to_plot = data[genes_to_plot, ]
-submeta = meta
+# order the observations by Group, then time, then replicate
+orderedMeta<-data.frame(colData(moanin_model))
 ord = order(
-  submeta$Group,
-  submeta$Timepoint,
-  submeta$Replicate)
-submeta$Timepoint = as.factor(submeta$Timepoint)
+  orderedMeta$Group,
+  orderedMeta$Timepoint,
+  orderedMeta$Replicate)
+orderedMeta$Timepoint = as.factor(orderedMeta$Timepoint)
 
-data_to_plot = data_to_plot[, ord]
-submeta = submeta[ord, ]
+orderedMeta = orderedMeta[ord, ]
 
 res = aheatmap(
-    data_to_plot,
+    as.matrix(assay(moanin_model[genes_to_plot,ord])),
     Colv=NA,
     color="YlGnBu",
-    annCol=submeta[,
-                c("Group", "Timepoint")],
+    annCol=orderedMeta[,c("Group", "Timepoint")],
     annLegend=FALSE,
     annColors=ann_colors,
     main=paste("Cluster", cluster_to_plot, "(raw)"),
     treeheight=0, legend=FALSE)
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
-aheatmap(
-    moanin::rescale_values(data_to_plot)[res$rowInd,],
-    Colv=NA,
-    Rowv=NA,
-    annCol=submeta[,
-                c("Group", "Timepoint")],
-    annLegend=TRUE,
-    annColors=ann_colors,
-    main=paste("Cluster", cluster_to_plot, "(rescaled)"),
-    treeheight=0)
+# FIXME this line doesn't work
+# aheatmap(
+#    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
+#    Colv=NA,
+#    Rowv=NA,
+#    annCol=orderedMeta[, c("Group", "Timepoint")],
+#    annLegend=TRUE,
+#    annColors=ann_colors,
+#    main=paste("Cluster", cluster_to_plot, "(rescaled)"),
+#    treeheight=0)
 
 ```
-
-**EAP:** We shouldn't use any hidden functions (i.e. that use `:::` as in `moanin:::rescale_values`). We should make it a exported function if use it in workflow.  
-
-**EAP** actually, why do we need to rescale them between 0-1 rather than just a normal call to `scale`? Would it really make a difference?
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
 genes that are on different scales, and yet share the same dynamical response
@@ -1182,10 +1167,9 @@ wss_values = list()
 
 i = 1
 for(n_cluster in all_possible_n_clusters){
-    clustering_results = splines_kmeans(
-	y, moanin_model,
-	n_clusters=n_cluster, random_seed=42,
-	n_init=10)
+    clustering_results = splines_kmeans(de_moanin_model,
+	    n_clusters=n_cluster, random_seed=42,
+	    n_init=10)
     wss_values[i] = sum(clustering_results$WCSS_per_cluster)
     all_clustering[[i]] = clustering_results$clusters
     i = i + 1
@@ -1222,7 +1206,7 @@ cluster (cohesion) compared to other clusters (separation), shown in Figure \ref
 ```{r averageSilhouetteMethod, fig.width=6, fig.height=4, fig.cap="Plot of silhouette values as a function of k"}
 # function to compute average silhouette for k clusters
 average_silhouette = function(labels, y) {
-    silhouette_results = silhouette(unlist(labels[1]), dist(y))
+    silhouette_results = silhouette(unlist(labels[1]),dist(y))
     return(mean(silhouette_results[, 3]))
 }
 
@@ -1231,7 +1215,8 @@ average_silhouette_values = list()
 i = 1
 for(i in 1:length(all_clustering)){
     clustering_results = all_clustering[i]
-    average_silhouette_values[i] = average_silhouette(clustering_results, y)
+    average_silhouette_values[i] = average_silhouette(clustering_results,
+        assay(de_moanin_model))
     i = i + 1
 }
 
@@ -1268,22 +1253,22 @@ To perform such analysis, the first step is run the clustering several times
 on a resampled dataset--either using bootstrap or subsampling.
 
 Using the bootstrapping strategy, we sample with replacement a sample of the
-same size as our original clustering (i.e. `r dim(y)[1]` genes):
+same size as our original clustering (i.e. `r dim(de_moanin_model)[1]` genes):
 
 ```{r}
-n_genes = dim(y)[1]
-indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
+n_genes = dim(de_moanin_model)[1]
+indices = sample(1:dim(de_moanin_model)[1], n_genes, replace=TRUE)
 
-bootstrapped_y = y[indices, ]
+bootstrapped_y = de_moanin_model[indices, ]
 ```
 
 Using the subsampling strategy, we take a unique subset of the genes, keeping 80% of the genes:
 
 ```{r}
 subsample_proportion = 0.8
-indices = sample(1:dim(y)[1], n_genes * subsample_proportion, replace=FALSE)
+indices = sample(1:dim(de_moanin_model)[1], n_genes * subsample_proportion, replace=FALSE)
 
-subsampled_y = y[indices, ]
+subsampled_y = de_moanin_model[indices, ]
 ```
 
 We run the bootstrap method on all genes differentially expressed and with a
@@ -1297,18 +1282,17 @@ results in separate files (one per $k$) for users to explore more quickly.
 # You may want to set the random seed of the experiment so that the results
 # don't vary if you rerun the experiment.
 # set.seed(random_seed)
-n_genes = dim(y)[1] * sample_proportion
-indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
+n_genes = dim(de_moanin_model)[1] * subsample_proportion
+indices = sample(1:dim(de_moanin_model)[1], n_genes, replace=TRUE)
 
-random_subsample_y = y[indices, ]
-kmeans_clusters = moanin::splines_kmeans(
-    random_subsample_y, splines_model, n_clusters=n_clusters,
-    random_seed=random_seed,
+kmeans_clusters = splines_kmeans(de_moanin_model[indices,],
+    n_clusters=n_clusters,
+    random_seed=42,
     n_init=20)
 
 # Perform prediction on the whole set of data.
-kmeans_clusters = moanin::: splines_kmeans_predict(
-    y, kmeans_clusters)
+kmeans_clusters = splines_kmeans_predict(de_moanin_model, kmeans_clusters, 
+    method="distance")
 ```
 
 For now, we bring in the results for $k=5$ and $k=20$. 
@@ -1632,6 +1616,7 @@ sessionInfo()
 NV and EP wrote the workflow.
 
 # Competing interests
+
 The authors declare that they have no competing interests.
 
 # Grant information
