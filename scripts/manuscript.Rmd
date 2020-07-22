@@ -869,13 +869,12 @@ of the actual genes assigned to cluster 2 to see the difference:
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
-# FIXME This line fails
-# dataToPlot = rbind(
-#     assay(de_moanin_model[cluster2Genes[3:6],]), 
-#    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
-# plot_splines_data(de_moanin_model, data=dataToPlot, 
-#     colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
-#    mar=c(1.5,2.5,2,0.1))
+dataToPlot = rbind(
+    assay(de_moanin_model[cluster2Genes[3:6],]), 
+    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
+plot_splines_data(de_moanin_model, data=dataToPlot, 
+    colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
+    mar=c(1.5,2.5,2,0.1))
 ```
 
 The spline plots are fitted per gene in the above plot and illustrate that
@@ -1039,12 +1038,11 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
                      cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-# FIXME this lines failes.
-# dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
-#     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
-# plot_splines_data(moanin_model, data=dataToPlot, 
-#     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
-#     mar=c(1.5,2.5,2,0.1))
+dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
+    "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
+plot_splines_data(moanin_model, data=dataToPlot, 
+     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
+     mar=c(1.5,2.5,2,0.1))
 ```
 
 
