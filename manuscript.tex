@@ -117,7 +117,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-07-21 17:59:44.
+The manuscript was last compile on 2020-07-22 10:25:43.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -1054,15 +1054,16 @@ of the actual genes assigned to cluster 2 to see the difference:
 \NormalTok{cluster_of_interest =}\StringTok{ }\DecValTok{2}
 \NormalTok{cluster2Genes =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
 \NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{clusters[kmeans_clusters}\OperatorTok{$}\NormalTok{clusters}\OperatorTok{==}\NormalTok{cluster_of_interest])}
-\CommentTok{# }\AlertTok{FIXME}\CommentTok{ This line fails}
-\CommentTok{# dataToPlot = rbind(}
-\CommentTok{#     assay(de_moanin_model[cluster2Genes[3:6],]), }
-\CommentTok{#    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])}
-\CommentTok{# plot_splines_data(de_moanin_model, data=dataToPlot, }
-\CommentTok{#     colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,}
-\CommentTok{#    mar=c(1.5,2.5,2,0.1))}
+\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}
+    \KeywordTok{assay}\NormalTok{(de_moanin_model[cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{],]), }
+    \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,])}
+\KeywordTok{plot_splines_data}\NormalTok{(de_moanin_model, }\DataTypeTok{data=}\NormalTok{dataToPlot, }
+    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{simpleY=}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/genesVsCentroids-1} \end{center}
 
 The spline plots are fitted per gene in the above plot and illustrate that
 the genes assigned to a cluster have differing degrees to which their data
@@ -1229,14 +1230,22 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 \NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[genes_in_cluster2,}
 \NormalTok{                     cluster_of_interest])}
 \NormalTok{cluster2Score =}\StringTok{ }\NormalTok{genes_in_cluster2[ord]}
-\CommentTok{# }\AlertTok{FIXME}\CommentTok{ this lines failes.}
-\CommentTok{# dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),}
-\CommentTok{#     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])}
-\CommentTok{# plot_splines_data(moanin_model, data=dataToPlot, }
-\CommentTok{#     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,}
-\CommentTok{#     mar=c(1.5,2.5,2,0.1))}
+\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}\KeywordTok{assay}\NormalTok{(moanin_model[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ]),}
+    \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
+\KeywordTok{plot_splines_data}\NormalTok{(moanin_model, }\DataTypeTok{data=}\NormalTok{dataToPlot, }
+     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
+     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/topScoreInCluster2-1} 
+
+}
+
+\caption{Top scoring genes in Cluster 2}\label{fig:topScoreInCluster2}
+\end{figure}
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
@@ -1291,16 +1300,15 @@ Now we will create the heatmaps of these genes (1283 genes, Figure \ref{fig:heat
     \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{legend=}\OtherTok{FALSE}\NormalTok{)}
 
 \CommentTok{# Now use the results of the previous call to aheatmap to reorder the genes.}
-\CommentTok{# }\AlertTok{FIXME}\CommentTok{ this line doesn't work}
-\CommentTok{# aheatmap(}
-\CommentTok{#    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],}
-\CommentTok{#    Colv=NA,}
-\CommentTok{#    Rowv=NA,}
-\CommentTok{#    annCol=orderedMeta[, c("Group", "Timepoint")],}
-\CommentTok{#    annLegend=TRUE,}
-\CommentTok{#    annColors=ann_colors,}
-\CommentTok{#    main=paste("Cluster", cluster_to_plot, "(rescaled)"),}
-\CommentTok{#    treeheight=0)}
+\KeywordTok{aheatmap}\NormalTok{(}
+    \KeywordTok{rescale_values}\NormalTok{(moanin_model[genes_to_plot,ord])[res}\OperatorTok{$}\NormalTok{rowInd,],}
+    \DataTypeTok{Colv=}\OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{Rowv=}\OtherTok{NA}\NormalTok{,}
+    \DataTypeTok{annCol=}\NormalTok{orderedMeta[, }\KeywordTok{c}\NormalTok{(}\StringTok{"Group"}\NormalTok{, }\StringTok{"Timepoint"}\NormalTok{)],}
+    \DataTypeTok{annLegend=}\OtherTok{TRUE}\NormalTok{,}
+    \DataTypeTok{annColors=}\NormalTok{ann_colors,}
+    \DataTypeTok{main=}\KeywordTok{paste}\NormalTok{(}\StringTok{"Cluster"}\NormalTok{, cluster_to_plot, }\StringTok{"(rescaled)"}\NormalTok{),}
+    \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1946,7 +1954,7 @@ this pipeline and their version numbers.
 ## 
 ## other attached packages:
 ##  [1] RColorBrewer_1.1-2          BiocWorkflowTools_1.14.0   
-##  [3] ggfortify_0.4.10            timecoursedata_0.99.0      
+##  [3] ggfortify_0.4.10            timecoursedata_0.99.13     
 ##  [5] moanin_0.99.0-901           SummarizedExperiment_1.18.2
 ##  [7] DelayedArray_0.14.1         matrixStats_0.56.0         
 ##  [9] GenomicRanges_1.40.0        GenomeInfoDb_1.24.2        
