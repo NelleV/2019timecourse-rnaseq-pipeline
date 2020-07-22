@@ -1104,16 +1104,15 @@ res = aheatmap(
     treeheight=0, legend=FALSE)
 
 # Now use the results of the previous call to aheatmap to reorder the genes.
-# FIXME this line doesn't work
-# aheatmap(
-#    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
-#    Colv=NA,
-#    Rowv=NA,
-#    annCol=orderedMeta[, c("Group", "Timepoint")],
-#    annLegend=TRUE,
-#    annColors=ann_colors,
-#    main=paste("Cluster", cluster_to_plot, "(rescaled)"),
-#    treeheight=0)
+aheatmap(
+    rescale_values(moanin_model[genes_to_plot,ord])[res$rowInd,],
+    Colv=NA,
+    Rowv=NA,
+    annCol=orderedMeta[, c("Group", "Timepoint")],
+    annLegend=TRUE,
+    annColors=ann_colors,
+    main=paste("Cluster", cluster_to_plot, "(rescaled)"),
+    treeheight=0)
 
 ```
 
