@@ -107,7 +107,7 @@
 \thispagestyle{front}
 
 \begin{abstract}
-The phenotypic diversity of cells is governed by a complex equilibrium between their genetic identity and their environmental interactions: Understanding the dynamics of gene expression is a fundamental question of biology. However, analysing time-course transcriptomic data raises unique challenging statistical and computational questions, requiring the development of novel methods and software. Using as case study time-course transcriptomics data from mice exposed to different strains of influenza, this workflow provides a step-by-step tutorial of the methodology used to analyse time-course data: (1) quality control and normalization of the data set; (2) differential expression analysis using functional data analysis; (3) clustering of time-course data; (4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
+The phenotypic diversity of cells is governed by a complex equilibrium between their genetic identity and their environmental interactions: Understanding the dynamics of gene expression is a fundamental question of biology. However, analysing time-course transcriptomic data raises unique challenging statistical and computational questions, requiring the development of novel methods and software. Using as case study time-course transcriptomics data from mice exposed to different strains of influenza, this workflow provides a step-by-step tutorial of the methodology used to analyse time-course data: (1) quality control and normalization of the dataset; (2) differential expression analysis using functional data analysis; (3) clustering of time-course data; (4) interpreting clusters with GO term and KEGG pathway enrichment analysis.
 \end{abstract}
 
 \section*{Keywords}
@@ -117,7 +117,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-07-26 18:03:56.
+The manuscript was last compile on 2020-07-27 16:08:41.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -151,7 +151,7 @@ changing over time (differential expression analysis), examples being \texttt{ed
 \citep{storey:significance}, functional component analysis based models \citep{wu:more},
 time-course permutation tests \citep{park:statistical}, and multiple testing
 strategies to combine single time point differential expression analysis
-\citep{sun:multiple}. However, with long time course data sets, particularly in
+\citep{sun:multiple}. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show \emph{some} change. For
 example, in a study of mice lung tissues infected with influenza that we
 consider in this workflow, over 50\% of genes
@@ -253,7 +253,8 @@ threshold is exceeded, a strong inflammatory and cytokin production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
-While we showcase this pipeline on micro-array data, \citep{varoquaux:lifecycle}
+While we showcase this pipeline on micro-array data,
+\citep{varoquaux:transcriptomic}
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop \emph{S. bicolor} to drought.
 
@@ -444,7 +445,7 @@ reserved for particularly interesting comparisons of individual time-points.
 
 Time course data can either be on a single condition (to identify genes
 changing over time) or on multiple conditions (such as the influenza
-data set we are considering), which will alter slightly the types of questions
+dataset we are considering), which will alter slightly the types of questions
 we are interested in.
 
 \textbf{DE Analysis in \texttt{moanin}} Our package \texttt{moanin} provides functionality for performing both of
@@ -919,7 +920,14 @@ genes with the smallest p-values.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/topPvalueGenes-1} \end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/topPvalueGenes-1} 
+
+}
+
+\caption{Top 10 genes with the smallest p-values}\label{fig:topPvalueGenes}
+\end{figure}
 
 For each gene, the individual data points are plotted against time and color coded by their condition. Further, a fitted spline function for each group is plotted to aid in comparing global trends across conditions.
 
@@ -937,7 +945,14 @@ change.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/topLogFold-1} \end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/topLogFold-1} 
+
+}
+
+\caption{Top 10 genes with largest absolute timecourse log-fold change}\label{fig:topLogFold}
+\end{figure}
 
 In examining these visualizations, we can see that genes often follow similar
 patterns of expression, although on a different scale for each gene. We can
@@ -1043,7 +1058,14 @@ each cluster obtained with the splines k-means model.
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} \end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} 
+
+}
+
+\caption{K-means centroids}\label{fig:unnamed-chunk-18}
+\end{figure}
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. In Figure \ref{fig:genesVsCentroids}, we plot a few
@@ -1063,7 +1085,14 @@ of the actual genes assigned to cluster 2 to see the difference:
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/genesVsCentroids-1} \end{center}
+\begin{figure}[H]
+
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/genesVsCentroids-1} 
+
+}
+
+\caption{Genes from cluster 2}\label{fig:genesVsCentroids}
+\end{figure}
 
 The spline plots are fitted per gene in the above plot and illustrate that
 the genes assigned to a cluster have differing degrees to which their data
@@ -1136,7 +1165,19 @@ The \texttt{scores\_and\_labels} list contains three elements:
   assign a label
 \end{verbatim}
 
-\textbf{Assigning cluster labels:} We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, \texttt{splines\_kmeans\_score\_and\_label} does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being ``sufficiently low'' is based on looking at the distribution of the scores of all genes on all clusters (i.e.~the entire \texttt{scores} matrix returned by \texttt{splines\_kmeans\_score\_and\_label}). A gene is then assigned to a cluster only if their best score is above the 50\% percentile of that distribution, with the remaining genes getting \texttt{NA} as their assignment (this choice can be changed by \texttt{proportion\_genes\_to\_label}). Note that because the distribution of scores of genes across \emph{all} clusters are used, this is not equivalent to assigning 50\% of genes to a cluster -- it is possible that all genes are assigned to a cluster.
+\textbf{Assigning cluster labels:} We could just assign each gene to a cluster
+based on which cluster gave the minimum score. By default,
+\texttt{splines\_kmeans\_score\_and\_label} does not do that, but rather requires a
+sufficiently low enough goodness-of-fit score. The criteria for being
+``sufficiently low'' is based on looking at the distribution of the scores of
+all genes on all clusters (i.e.~the entire \texttt{scores} matrix returned by
+\texttt{splines\_kmeans\_score\_and\_label}). A gene is then assigned to a cluster only
+if their best score is above the 50\% percentile of that distribution, with the
+remaining genes getting \texttt{NA} as their assignment (this choice can be changed
+by \texttt{proportion\_genes\_to\_label}). Note that because the distribution of scores
+of genes across \emph{all} clusters are used, this is not equivalent to assigning
+50\% of genes to a cluster -- it is possible that all genes are assigned to a
+cluster.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1153,9 +1194,16 @@ The \texttt{scores\_and\_labels} list contains three elements:
 After running \texttt{scores\_and\_labels} on our data, we now have 19772 genes that
 are assigned to a cluster.
 
-We can visualize the impact of this filtering process by considering the distribution of goodness-of-fit scores for each
-cluster if we did not have the filtering cutoff of \texttt{splines\_kmeans\_score\_and\_label}, i.e.~if we simply assign every gene to a cluster based on which gives them their minimum score.
-We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning \texttt{splines\_kmeans\_score\_and\_label} and setting the filter \texttt{percentage\_genes\_to\_label=1} (and we can speed up the calculation by giving our previously calculated score via the argument \texttt{previous\_scores})
+We can visualize the impact of this filtering process by considering the
+distribution of goodness-of-fit scores for each cluster if we did not have the
+filtering cutoff of \texttt{splines\_kmeans\_score\_and\_label}, i.e.~if we simply assign
+every gene to a cluster based on which gives them their minimum score. We
+display for each cluster, the scores of the genes assigned to that cluster
+(Figure \ref{fig:visualizeScores}), as compared to the cutoff value for what
+that score must be under our filtering procedure. We can do this by rerunning
+\texttt{splines\_kmeans\_score\_and\_label} and setting the filter
+\texttt{percentage\_genes\_to\_label=1} (and we can speed up the calculation by giving
+our previously calculated score via the argument \texttt{previous\_scores})
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1193,7 +1241,7 @@ This underlines the importance of filtering genes that fit poorly to clusters.
 
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
-scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}.
+scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}).
 
 \begin{figure}[H]
 
@@ -1230,11 +1278,13 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 \NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[genes_in_cluster2,}
 \NormalTok{                     cluster_of_interest])}
 \NormalTok{cluster2Score =}\StringTok{ }\NormalTok{genes_in_cluster2[ord]}
-\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}\KeywordTok{assay}\NormalTok{(moanin_model[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ]),}
+\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}
+    \KeywordTok{assay}\NormalTok{(moanin_model[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ]),}
     \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
-\KeywordTok{plot_splines_data}\NormalTok{(moanin_model, }\DataTypeTok{data=}\NormalTok{dataToPlot, }
-     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
-     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
+\KeywordTok{plot_splines_data}\NormalTok{(}
+\NormalTok{    moanin_model, }\DataTypeTok{data=}\NormalTok{dataToPlot, }
+    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{simpleY=}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{, }\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1250,7 +1300,7 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
 
-Now, let us look more in detail some specific clusters. Cluster 8 seems
+Now, let us look more in detail some specific clusters. Cluster 6 seems
 particularly interesting: it captures genes with strong differences between
 the different influenza treatments and the control, while the control remains
 relatively flat.
@@ -1263,17 +1313,17 @@ Heatmaps are useful to investigate the range of expression patterns for
 specific genes. Here, we are going to plot heatmaps of the normalized gene
 expression patterns and the rescaled gene expression patterns side by side.
 
-First, we select the genes of interest, namely those in cluster 8, based on
+First, we select the genes of interest, namely those in cluster 6, based on
 our goodness-of-fit assignment.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cluster_to_plot =}\StringTok{ }\DecValTok{8}
+\NormalTok{cluster_to_plot =}\StringTok{ }\DecValTok{6}
 \NormalTok{genes_to_plot =}\StringTok{  }\KeywordTok{names}\NormalTok{(labels[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster_to_plot])}
 \end{Highlighting}
 \end{Shaded}
 
-Now we will create the heatmaps of these genes (1283 genes, Figure \ref{fig:heatmapCluster8}).
+Now we will create the heatmaps of these genes (3746 genes, Figure \ref{fig:heatmapCluster8}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1378,8 +1428,8 @@ WCSS.
 \NormalTok{i =}\StringTok{ }\DecValTok{1}
 \ControlFlowTok{for}\NormalTok{(n_cluster }\ControlFlowTok{in}\NormalTok{ all_possible_n_clusters)\{}
 \NormalTok{    clustering_results =}\StringTok{ }\KeywordTok{splines_kmeans}\NormalTok{(de_moanin_model,}
-        \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
-        \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
+    \DataTypeTok{n_clusters=}\NormalTok{n_cluster, }\DataTypeTok{random_seed=}\DecValTok{42}\NormalTok{,}
+    \DataTypeTok{n_init=}\DecValTok{10}\NormalTok{)}
 \NormalTok{    wss_values[i] =}\StringTok{ }\KeywordTok{sum}\NormalTok{(clustering_results}\OperatorTok{$}\NormalTok{WCSS_per_cluster)}
 \NormalTok{    all_clustering[[i]] =}\StringTok{ }\NormalTok{clustering_results}\OperatorTok{$}\NormalTok{clusters}
 \NormalTok{    i =}\StringTok{ }\NormalTok{i }\OperatorTok{+}\StringTok{ }\DecValTok{1}
@@ -1396,7 +1446,7 @@ cluster sum of squares (WCSS) as a function of the number of clusters. At some
 point, the WCSS will start decreasing more slowly, giving an angle or ``elbow''
 in the graph. The number of cluster is chosen at this ``Elbow point.''
 
-We plot the WCSS for \(k=2-20\) here (Figure \ref{fig:elbow_method}).
+We plot the WCSS for \(k=2-20\) here (Figure \ref{fig:elbowMethod}).
 We see that as expected the WCSS continues
 to drop, but there is no clear drop in the decrease, except for very small
 values of \(k\) (3-4 clusters). However, 3-4 seems a very small number of gene
@@ -1424,7 +1474,7 @@ clusters to find, given the complexity
 \paragraph{Average silhouette method}\label{average-silhouette-method}}
 
 The silhouette value is a measure of how similar a data point is to its own
-cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:average_silhouette_method}.
+cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:averageSilhouetteMethod}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1574,25 +1624,13 @@ matrices for \(k=5\) and \(k=20\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
 \NormalTok{consensus_matrix_stability_}\DecValTok{5}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{5}\NormalTok{,}
                         \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
 \KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{5}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
      \DataTypeTok{Colv=}\OtherTok{FALSE}\NormalTok{,}
      \DataTypeTok{treeheight=}\DecValTok{0}\NormalTok{, }\DataTypeTok{main=}\StringTok{"K=5"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
 
-\begin{figure}[H]
-
-{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/bootstrapConsensus-1} 
-
-}
-
-\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus-1}
-\end{figure}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \NormalTok{consensus_matrix_stability_}\DecValTok{20}\NormalTok{ =}\StringTok{ }\KeywordTok{consensus_matrix}\NormalTok{(stability_}\DecValTok{20}\NormalTok{,}
                          \DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)}
 \KeywordTok{aheatmap}\NormalTok{(consensus_matrix_stability_}\DecValTok{20}\NormalTok{[}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{, }\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{], }\DataTypeTok{Rowv=}\OtherTok{FALSE}\NormalTok{,}
@@ -1603,11 +1641,11 @@ matrices for \(k=5\) and \(k=20\).
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/bootstrapConsensus-2} 
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/bootstrapConsensus-1} 
 
 }
 
-\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus-2}
+\caption{Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20.}\label{fig:bootstrapConsensus}
 \end{figure}
 
 We can see (Figure \ref{fig:bootstrapConsensus}) that the choice of \(K=5\) seems much more stable across resampling runs than that of \(K=20\).
@@ -1653,10 +1691,10 @@ results for all labels.
 \caption{Plot of the cumulative density of similarity of clusterings of data for different k}\label{fig:plotModelExplorer}
 \end{figure}
 
-From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that \(k=5\) is more stable than \(k=3\) and \(k=4\),
-but not as stable as \(k=2\). The model explorer strategy, in addition to
-visualizing the diversity of the centroids, can thus help assessing an
-adequate number of clusters.
+From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that \(k=5\)
+is more stable than \(k=3\) and \(k=4\), but not as stable as \(k=2\). The model
+explorer strategy, in addition to visualizing the diversity of the centroids,
+can thus help assessing an adequate number of clusters.
 
 Now, replot the same model explorer, but only for the clustering experiments
 \(k=6\), \(k=7\), \(k=8\), \(k=9\) and \(k=10\) so that we can see more clearly the stability
@@ -1679,7 +1717,9 @@ measures in that range (Figure \ref{fig:plotModelExplorerZoom}).
 \caption{Plot of the cumulative density of similarity of clusterings of data for different k, restricted to k=6-10}\label{fig:plotModelExplorerZoom}
 \end{figure}
 
-This analysis doesn't necessarily pick a particular \(k\), but can help decide between \(k\) within a desired range, for example, or to avoid \(k\) that degrade the stability.
+This analysis doesn't necessarily pick a particular \(k\), but can help decide
+between \(k\) within a desired range, for example, or to avoid \(k\) that degrade
+the stability.
 
 \hypertarget{consensus-clustering-as-a-way-to-find-k}{%
 \paragraph{\texorpdfstring{Consensus clustering as a way to find \(k\)}{Consensus clustering as a way to find k}}\label{consensus-clustering-as-a-way-to-find-k}}
@@ -1763,22 +1803,25 @@ on the gene set defined by each cluster. Examples include KEGG pathway enrichmen
 GO term enrichment analysis, and motif enrichment analysis.
 
 First, let us clean up the genes we work with and only select the genes we are
-going to use in the enrichment analysis. One can either all genes assigned to the cluster, only the set of differentially expressed genes in each cluster, or the
-subset of genes that fit well to a cluster (based on some criterion).
+going to use in the enrichment analysis. One can either all genes assigned to
+the cluster, only the set of differentially expressed genes in each cluster,
+or the subset of genes that fit well to a cluster (based on some criterion).
 
 \hypertarget{finding-enriched-pathways-using-biomart-and-keggprofile}{%
 \subsubsection{\texorpdfstring{Finding enriched pathways using \texttt{biomaRt} and \texttt{KEGGprofile}}{Finding enriched pathways using biomaRt and KEGGprofile}}\label{finding-enriched-pathways-using-biomart-and-keggprofile}}
 
 Let us first tackle the case of pathway enrichment analysis. We will leverage
-the packages \texttt{biomaRt} \citep{durinck:biomart} and \texttt{KEGGprofile} \citep{zhao:keggprofile}
-for this step. \texttt{KEGGprofile} is a
-package that facilitates enrichment analysis on a set of
-genes labeled with the Ensembl annotation \citep{ensembl2020} based on the set of biological pathways described in the KEGG database\citep{KEGG}.
+the packages \texttt{biomaRt} \citep{durinck:biomart} and \texttt{KEGGprofile}
+\citep{zhao:keggprofile} for this step. \texttt{KEGGprofile} is a package that facilitates
+enrichment analysis on a set of genes labeled with the Ensembl annotation
+\citep{ensembl2020} based on the set of biological pathways described in the KEGG
+database\citep{KEGG}.
 
-We thus need to convert the gene
-names, which are given in the Refseq annotation, into the corresponding Ensembl name. This is where \texttt{biomaRt} comes in handy: it
-enables easy conversion from one gene annotation to another. Here, we will use the function \texttt{getBM}
-in \texttt{biomaRt} to convert the gene names from cluster 8.
+We thus need to convert the gene names, which are given in the Refseq
+annotation, into the corresponding Ensembl name. This is where \texttt{biomaRt} comes
+in handy: it enables easy conversion from one gene annotation to another.
+Here, we will use the function \texttt{getBM} in \texttt{biomaRt} to convert the gene names
+from cluster 8.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1787,19 +1830,21 @@ in \texttt{biomaRt} to convert the gene names from cluster 8.
 \NormalTok{ensembl =}\StringTok{ }\KeywordTok{useDataset}\NormalTok{(}\StringTok{"mmusculus_gene_ensembl"}\NormalTok{, }\DataTypeTok{mart=}\NormalTok{ensembl)}
 
 \CommentTok{## Get gene names of genes in Cluster 8}
-\NormalTok{cluster =}\StringTok{ }\DecValTok{8}
-\NormalTok{labels =}\StringTok{ }\KeywordTok{unlist}\NormalTok{(labels)}
+\NormalTok{cluster =}\StringTok{ }\DecValTok{6}
 \NormalTok{gene_names =}\StringTok{ }\KeywordTok{names}\NormalTok{(labels)}
 \NormalTok{genes =}\StringTok{ }\NormalTok{gene_names[labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster]}
 
 \CommentTok{## Convert gene names}
 \NormalTok{genes =}\StringTok{ }\KeywordTok{getBM}\NormalTok{(}\DataTypeTok{attributes=}\KeywordTok{c}\NormalTok{(}\StringTok{"ensembl_gene_id"}\NormalTok{, }\StringTok{"entrezgene_id"}\NormalTok{),}
-        \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{, }\DataTypeTok{values=}\NormalTok{genes,}
-        \DataTypeTok{mart=}\NormalTok{ensembl)[}\StringTok{"entrezgene_id"}\NormalTok{]}
+          \DataTypeTok{filters=}\StringTok{"refseq_mrna"}\NormalTok{, }\DataTypeTok{values=}\NormalTok{genes,}
+          \DataTypeTok{mart=}\NormalTok{ensembl)[}\StringTok{"entrezgene_id"}\NormalTok{]}
 \end{Highlighting}
 \end{Shaded}
 
-Then we use the function \texttt{find\_enriched\_pathway} in the \texttt{KEGGprofile} package to determine whether any KEGG pathways are enriched in cluster 8, i.e.~whether a higher percentage of genes from a single pathway are found in cluster 8 than we would expect by simply proportional assignment of genes to clusters.
+Then we use the function \texttt{find\_enriched\_pathway} in the \texttt{KEGGprofile} package
+to determine whether any KEGG pathways are enriched in cluster 6, i.e.~whether
+a higher percentage of genes from a single pathway are found in cluster 6 than
+we would expect by simply proportional assignment of genes to clusters.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1814,17 +1859,27 @@ Then we use the function \texttt{find\_enriched\_pathway} in the \texttt{KEGGpro
 \toprule
   & Pathway & Percentage & Adj. p-value\\
 \midrule
-04740 & Olfactory transduction & 8 & 0\\
-04080 & Neuroactive ligand-receptor interaction & 10 & 0\\
+04060 & Cytokine-cytokine receptor interaction & 31 & 0\\
+04620 & Toll-like receptor signaling pathway & 39 & 0\\
+04621 & NOD-like receptor signaling pathway & 45 & 0\\
+04623 & Cytosolic DNA-sensing pathway & 45 & 0\\
+04630 & Jak-STAT signaling pathway & 28 & 0\\
+\addlinespace
+04210 & Apoptosis & 35 & 0\\
+04380 & Osteoclast differentiation & 31 & 0\\
+04622 & RIG-I-like receptor signaling pathway & 38 & 0\\
+05160 & Hepatitis C & 28 & 0\\
+04940 & Type I diabetes mellitus & 35 & 0\\
 \bottomrule
 \end{tabular}
-
-\textbf{EAP: I changed this to be the min(10, nrow(pathways)) but wondering if there's a problem, since presumably there used to be more than 10 pathways found significant and on my machine there are only 2?}
 
 \hypertarget{finding-enriched-go-terms}{%
 \subsubsection{Finding enriched GO terms}\label{finding-enriched-go-terms}}
 
-The Gene Ontology (GO) database \citep{GO}, also categorizes genes into meaningful biological ontologies and can be used for enrichment analysis via the package \texttt{topGO} \citep{alexa:topgo}. We again use \texttt{biomaRt} to find the mapping between genes and the GO terms to which they match.
+The Gene Ontology (GO) database \citep{GO}, also categorizes genes into meaningful
+biological ontologies and can be used for enrichment analysis via the package
+\texttt{topGO} \citep{alexa:topgo}. We again use \texttt{biomaRt} to find the mapping between
+genes and the GO terms to which they match.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1868,7 +1923,7 @@ enrichment on the ``Biological process'' ontology (BP).
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Create logical vector of whether in cluster 8}
+\CommentTok{# Create logical vector of whether in cluster 6}
 \NormalTok{assignments =}\StringTok{ }\NormalTok{labels }\OperatorTok{==}\StringTok{ }\NormalTok{cluster}
 
 \NormalTok{go_terms_enriched =}\StringTok{ }\KeywordTok{find_enriched_go_terms}\NormalTok{(}
@@ -1881,23 +1936,23 @@ enrichment on the ``Biological process'' ontology (BP).
 \toprule
 GO ID & Description & Annotated & Significant & Expected & P-value & Adj. p-value\\
 \midrule
-GO:0044260 & cellular macromolecule metabolic process & 3762 & 3607 & 3540.21 & 0.00031 & 0.276\\
-GO:0043603 & cellular amide metabolic process & 467 & 458 & 439.47 & 0.00036 & 0.276\\
-GO:0043161 & proteasome-mediated ubiquitin-dependent ... & 201 & 199 & 189.15 & 0.00042 & 0.276\\
-GO:0016071 & mRNA metabolic process & 285 & 280 & 268.20 & 0.00052 & 0.276\\
-GO:0070925 & organelle assembly & 427 & 417 & 401.83 & 0.00052 & 0.276\\
+GO:0019395 & fatty acid oxidation & 55 & 54 & 44.78 & 0.00016 & 0.164\\
+GO:1905114 & cell surface receptor signaling pathway ... & 272 & 243 & 221.46 & 0.00021 & 0.179\\
+GO:0003002 & regionalization & 174 & 158 & 141.67 & 0.00049 & 0.358\\
+GO:0009755 & hormone-mediated signaling pathway & 82 & 77 & 66.76 & 0.00105 & 0.671\\
+GO:0048562 & embryonic organ morphogenesis & 154 & 139 & 125.39 & 0.00175 & 0.994\\
 \addlinespace
-GO:0019058 & viral life cycle & 123 & 123 & 115.75 & 0.00054 & 0.276\\
-GO:0018130 & heterocycle biosynthetic process & 1809 & 1733 & 1702.35 & 0.00093 & 0.348\\
-GO:0019438 & aromatic compound biosynthetic process & 1810 & 1734 & 1703.29 & 0.00098 & 0.348\\
-GO:0042110 & T cell activation & 273 & 268 & 256.91 & 0.00102 & 0.348\\
-GO:0006954 & inflammatory response & 410 & 398 & 385.83 & 0.00104 & 0.348\\
+GO:0006805 & xenobiotic metabolic process & 50 & 48 & 40.71 & 0.00257 & 1.000\\
+GO:0090596 & sensory organ morphogenesis & 138 & 124 & 112.36 & 0.00332 & 1.000\\
+GO:0035108 & limb morphogenesis & 74 & 69 & 60.25 & 0.00337 & 1.000\\
+GO:0030166 & proteoglycan biosynthetic process & 27 & 27 & 21.98 & 0.00385 & 1.000\\
+GO:0003206 & cardiac chamber morphogenesis & 72 & 67 & 58.62 & 0.00448 & 1.000\\
 \addlinespace
-GO:0006163 & purine nucleotide metabolic process & 199 & 198 & 187.27 & 0.00108 & 0.348\\
-GO:0051301 & cell division & 300 & 294 & 282.31 & 0.00109 & 0.348\\
-GO:0070507 & regulation of microtubule cytoskeleton o... & 110 & 110 & 103.51 & 0.00120 & 0.361\\
-GO:0006091 & generation of precursor metabolites and ... & 222 & 220 & 208.91 & 0.00138 & 0.392\\
-GO:0006364 & rRNA processing & 106 & 106 & 99.75 & 0.00153 & 0.412\\
+GO:0055114 & oxidation-reduction process & 536 & 472 & 436.41 & 0.00489 & 1.000\\
+GO:0021954 & central nervous system neuron developmen... & 36 & 35 & 29.31 & 0.00557 & 1.000\\
+GO:0006261 & DNA-dependent DNA replication & 70 & 64 & 56.99 & 0.00595 & 1.000\\
+GO:0006633 & fatty acid biosynthetic process & 78 & 70 & 63.51 & 0.00686 & 1.000\\
+GO:0006790 & sulfur compound metabolic process & 154 & 136 & 125.39 & 0.00710 & 1.000\\
 \bottomrule
 \end{tabular}
 
@@ -1954,7 +2009,7 @@ this pipeline and their version numbers.
 ## 
 ## other attached packages:
 ##  [1] RColorBrewer_1.1-2          BiocWorkflowTools_1.14.0   
-##  [3] ggfortify_0.4.10            timecoursedata_0.99.13     
+##  [3] ggfortify_0.4.10            timecoursedata_0.99.15     
 ##  [5] moanin_0.99.0-901           SummarizedExperiment_1.18.2
 ##  [7] DelayedArray_0.14.1         matrixStats_0.56.0         
 ##  [9] GenomicRanges_1.40.0        GenomeInfoDb_1.24.2        
