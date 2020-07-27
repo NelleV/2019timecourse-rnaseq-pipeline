@@ -16,7 +16,7 @@ abstract: >
     time-course transcriptomics data from mice exposed to different strains of
     influenza, this workflow provides a step-by-step tutorial of the
     methodology used to analyse time-course data: (1) quality control and normalization of the
-    data set; (2) differential expression analysis using functional
+    dataset; (2) differential expression analysis using functional
     data analysis; (3) clustering of time-course data; (4) interpreting
     clusters with GO term and KEGG pathway enrichment analysis.
 
@@ -93,7 +93,7 @@ changing over time (differential expression analysis), examples being `edge`
 [@storey:significance], functional component analysis based models [@wu:more],
 time-course permutation tests [@park:statistical], and multiple testing
 strategies to combine single time point differential expression analysis
-[@sun:multiple]. However, with long time course data sets, particularly in
+[@sun:multiple]. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show *some* change. For
 example, in a study of mice lung tissues infected with influenza that we
 consider in this workflow, over 50% of genes
@@ -177,7 +177,8 @@ threshold is exceeded, a strong inflammatory and cytokin production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
-While we showcase this pipeline on micro-array data, [@varoquaux:lifecycle]
+While we showcase this pipeline on micro-array data,
+[@varoquaux:transcriptomic]
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop *S. bicolor* to drought.
 
@@ -386,7 +387,7 @@ reserved for particularly interesting comparisons of individual time-points.
 
 Time course data can either be on a single condition (to identify genes
 changing over time) or on multiple conditions (such as the influenza
-data set we are considering), which will alter slightly the types of questions
+dataset we are considering), which will alter slightly the types of questions
 we are interested in. 
 
 **DE Analysis in `moanin`** Our package `moanin` provides functionality for performing both of
@@ -751,7 +752,7 @@ The package `moanin` also provides a simple utility function (`plot_splines_data
 visualize gene time-course data from different conditions. In Figure \ref{fig:topPvalueGenes}, we plot the 10
 genes with the smallest p-values.
 
-```{r topPvalueGenes, fig.height=6, fig.width=6}
+```{r topPvalueGenes, fig.height=6, fig.width=6, fig.cap="Top 10 genes with the smallest p-values"}
 top_DE_genes_pval = names(sort(pvalue)[1:10])
 plot_splines_data(moanin_model,subset_data=top_DE_genes_pval, 
     colors=ann_colors$Group, smooth=TRUE,
@@ -763,7 +764,7 @@ For each gene, the individual data points are plotted against time and color cod
 Figure \ref{fig:topLogFold}, we visualize the genes with the largest absolute timecourse log-fold
 change.
 
-```{r topLogFold,fig.height=6, fig.width=6}
+```{r topLogFold,fig.height=6, fig.width=6, fig.cap="Top 10 genes with largest absolute timecourse log-fold change"}
 top_DE_genes_lfc = names(
     sort(abs(lfc_timecourse),
 	 decreasing=TRUE)[1:10])
@@ -854,7 +855,7 @@ The `splines_kmeans` function returns a named list with:
 We then use the `plot_splines_data`  function, only now applied to the centroids, to visualize the centroids of
 each cluster obtained with the splines k-means model. 
 
-```{r fig.height=6, fig.width=6}
+```{r fig.height=6, fig.width=6, fig.cap="K-means centroids"}
 plot_splines_data(de_moanin_model,
     data=kmeans_clusters$centroids, 
     colors=ann_colors$Group,
@@ -865,7 +866,7 @@ These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. In Figure \ref{fig:genesVsCentroids}, we plot a few
 of the actual genes assigned to cluster 2 to see the difference:
 
-```{r genesVsCentroids, fig.height=6, fig.width=6}
+```{r genesVsCentroids, fig.height=6, fig.width=6, fig.cap="Genes from cluster 2"}
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
@@ -956,9 +957,9 @@ are assigned to a cluster.
 
 We can visualize the impact of this filtering process by considering the distribution of goodness-of-fit scores for each
 cluster if we did not have the filtering cutoff of `splines_kmeans_score_and_label`, i.e. if we simply assign every gene to a cluster based on which gives them their minimum score.
-We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning `splines_kmeans_score_and_label` and setting the filter `percentage_genes_to_label=1` (and we can speed up the calculation by giving our previously calculated score via the argument `previous_scores`)
+We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{fig:visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning `splines_kmeans_score_and_label` and setting the filter `percentage_genes_to_label=1` (and we can speed up the calculation by giving our previously calculated score via the argument `previous_scores`)
 
-```{r visualizeScores, fig.height=6, fix.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
+```{r visualizeScores, fig.height=6, fig.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
 # Get the best score and best label for all of the genes
 # This time without filtering labels
 # We can give the previous calculated scores to `previous_scores` to save time
@@ -984,7 +985,7 @@ This underlines the importance of filtering genes that fit poorly to clusters.
 
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
-scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}.
+scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}).
 
 ```{r kmeansVsScore, echo=FALSE, fig.height=6, fig.width=6, warning=FALSE, fig.cap="Number of genes assigned to each cluster based on kmeans criteria of nearest centroid (top) versus our goodness-of-fit filtering strategy (bottom)"}
 par(mfrow=c(2, 1))
@@ -1181,7 +1182,7 @@ cluster sum of squares (WCSS) as a function of the number of clusters. At some
 point, the WCSS will start decreasing more slowly, giving an angle or "elbow"
 in the graph.  The number of cluster is chosen at this "Elbow point."
 
-We plot the WCSS for $k=2-20$ here (Figure \ref{fig:elbow_method}). 
+We plot the WCSS for $k=2-20$ here (Figure \ref{fig:elbowMethod}). 
 We see that as expected the WCSS continues
 to drop, but there is no clear drop in the decrease, except for very small
 values of $k$ (3-4 clusters). However, 3-4 seems a very small number of gene
@@ -1198,7 +1199,7 @@ plot(all_possible_n_clusters, wss_values,
 #### Average silhouette method
 
 The silhouette value is a measure of how similar a data point is to its own
-cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:average_silhouette_method}. 
+cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:averageSilhouetteMethod}. 
 
 ```{r averageSilhouetteMethod, fig.width=6, fig.height=4, fig.cap="Plot of silhouette values as a function of k"}
 # function to compute average silhouette for k clusters
@@ -1314,7 +1315,8 @@ calculate proportion of times each pair of samples was clustered together
 across the 25 resampling runs, and plot the heatmap of those consensus
 matrices for $k=5$ and $k=20$. 
 
-```{r bootstrapConsensus, fig.width=6, fig.height=4,fig.cap="Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20."}
+```{r bootstrapConsensus, fig.width=6, fig.height=4, fig.cap="Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20."}
+par(mfrow=c(2, 1))
 consensus_matrix_stability_5 = consensus_matrix(stability_5,
 						scale=FALSE)
 aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
