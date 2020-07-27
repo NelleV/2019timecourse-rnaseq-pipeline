@@ -16,7 +16,7 @@ abstract: >
     time-course transcriptomics data from mice exposed to different strains of
     influenza, this workflow provides a step-by-step tutorial of the
     methodology used to analyse time-course data: (1) quality control and normalization of the
-    data set; (2) differential expression analysis using functional
+    dataset; (2) differential expression analysis using functional
     data analysis; (3) clustering of time-course data; (4) interpreting
     clusters with GO term and KEGG pathway enrichment analysis.
 
@@ -93,7 +93,7 @@ changing over time (differential expression analysis), examples being `edge`
 [@storey:significance], functional component analysis based models [@wu:more],
 time-course permutation tests [@park:statistical], and multiple testing
 strategies to combine single time point differential expression analysis
-[@sun:multiple]. However, with long time course data sets, particularly in
+[@sun:multiple]. However, with long time course datasets, particularly in
 developmental systems, a massive number of genes will show *some* change. For
 example, in a study of mice lung tissues infected with influenza that we
 consider in this workflow, over 50% of genes
@@ -177,7 +177,8 @@ threshold is exceeded, a strong inflammatory and cytokin production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
-While we showcase this pipeline on micro-array data, [@varoquaux:lifecycle]
+While we showcase this pipeline on micro-array data,
+[@varoquaux:transcriptomic]
 leverages a similar set of steps to analyse RNA-seq data of the lifetime
 transcriptomic response of the crop *S. bicolor* to drought.
 
@@ -386,7 +387,7 @@ reserved for particularly interesting comparisons of individual time-points.
 
 Time course data can either be on a single condition (to identify genes
 changing over time) or on multiple conditions (such as the influenza
-data set we are considering), which will alter slightly the types of questions
+dataset we are considering), which will alter slightly the types of questions
 we are interested in. 
 
 **DE Analysis in `moanin`** Our package `moanin` provides functionality for performing both of
@@ -751,7 +752,7 @@ The package `moanin` also provides a simple utility function (`plot_splines_data
 visualize gene time-course data from different conditions. In Figure \ref{fig:topPvalueGenes}, we plot the 10
 genes with the smallest p-values.
 
-```{r topPvalueGenes, fig.height=6, fig.width=6}
+```{r topPvalueGenes, fig.height=6, fig.width=6, fig.cap="Top 10 genes with the smallest p-values"}
 top_DE_genes_pval = names(sort(pvalue)[1:10])
 plot_splines_data(moanin_model,subset_data=top_DE_genes_pval, 
     colors=ann_colors$Group, smooth=TRUE,
@@ -763,7 +764,7 @@ For each gene, the individual data points are plotted against time and color cod
 Figure \ref{fig:topLogFold}, we visualize the genes with the largest absolute timecourse log-fold
 change.
 
-```{r topLogFold,fig.height=6, fig.width=6}
+```{r topLogFold,fig.height=6, fig.width=6, fig.cap="Top 10 genes with largest absolute timecourse log-fold change"}
 top_DE_genes_lfc = names(
     sort(abs(lfc_timecourse),
 	 decreasing=TRUE)[1:10])
@@ -854,7 +855,7 @@ The `splines_kmeans` function returns a named list with:
 We then use the `plot_splines_data`  function, only now applied to the centroids, to visualize the centroids of
 each cluster obtained with the splines k-means model. 
 
-```{r fig.height=6, fig.width=6}
+```{r fig.height=6, fig.width=6, fig.cap="K-means centroids"}
 plot_splines_data(de_moanin_model,
     data=kmeans_clusters$centroids, 
     colors=ann_colors$Group,
@@ -865,7 +866,7 @@ These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. In Figure \ref{fig:genesVsCentroids}, we plot a few
 of the actual genes assigned to cluster 2 to see the difference:
 
-```{r genesVsCentroids, fig.height=6, fig.width=6}
+```{r genesVsCentroids, fig.height=6, fig.width=6, fig.cap="Genes from cluster 2"}
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
@@ -939,7 +940,19 @@ The `scores_and_labels` list contains three elements:
     - `score_cutoff`: the cutoff used on `scores` to determine whether to 
       assign a label
 
-**Assigning cluster labels:** We could just assign each gene to a cluster based on which cluster gave the minimum score. By default, `splines_kmeans_score_and_label` does not do that, but rather requires a sufficiently low enough goodness-of-fit score. The criteria for being "sufficiently low" is based on looking at the distribution of the scores of all genes on all clusters (i.e. the entire `scores` matrix returned by `splines_kmeans_score_and_label`). A gene is then assigned to a cluster only if their best score is above the 50% percentile of that distribution, with the remaining genes getting `NA` as their assignment (this choice can be changed by `proportion_genes_to_label`). Note that because the distribution of scores of genes across *all* clusters are used, this is not equivalent to assigning 50% of genes to a cluster -- it is possible that all genes are assigned to a cluster. 
+**Assigning cluster labels:** We could just assign each gene to a cluster
+based on which cluster gave the minimum score. By default,
+`splines_kmeans_score_and_label` does not do that, but rather requires a
+sufficiently low enough goodness-of-fit score. The criteria for being
+"sufficiently low" is based on looking at the distribution of the scores of
+all genes on all clusters (i.e. the entire `scores` matrix returned by
+`splines_kmeans_score_and_label`). A gene is then assigned to a cluster only
+if their best score is above the 50% percentile of that distribution, with the
+remaining genes getting `NA` as their assignment (this choice can be changed
+by `proportion_genes_to_label`). Note that because the distribution of scores
+of genes across *all* clusters are used, this is not equivalent to assigning
+50% of genes to a cluster -- it is possible that all genes are assigned to a
+cluster. 
 
 ```{r scores_and_labels}
 labels = scores_and_labels$labels
@@ -954,11 +967,18 @@ genes_in_cluster2 = names(labels[labels==cluster_of_interest])
 After running `scores_and_labels` on our data, we now have `r length(labels)` genes that
 are assigned to a cluster. 
 
-We can visualize the impact of this filtering process by considering the distribution of goodness-of-fit scores for each
-cluster if we did not have the filtering cutoff of `splines_kmeans_score_and_label`, i.e. if we simply assign every gene to a cluster based on which gives them their minimum score.
-We display for each cluster, the scores of the genes assigned to that cluster (Figure \ref{visualizeScores}), as compared to the cutoff value for what that score must be under our filtering procedure. We can do this by rerunning `splines_kmeans_score_and_label` and setting the filter `percentage_genes_to_label=1` (and we can speed up the calculation by giving our previously calculated score via the argument `previous_scores`)
+We can visualize the impact of this filtering process by considering the
+distribution of goodness-of-fit scores for each cluster if we did not have the
+filtering cutoff of `splines_kmeans_score_and_label`, i.e. if we simply assign
+every gene to a cluster based on which gives them their minimum score. We
+display for each cluster, the scores of the genes assigned to that cluster
+(Figure \ref{fig:visualizeScores}), as compared to the cutoff value for what
+that score must be under our filtering procedure. We can do this by rerunning
+`splines_kmeans_score_and_label` and setting the filter
+`percentage_genes_to_label=1` (and we can speed up the calculation by giving
+our previously calculated score via the argument `previous_scores`)
 
-```{r visualizeScores, fig.height=6, fix.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
+```{r visualizeScores, fig.height=6, fig.width=6, echo=TRUE, fig.cap="Distribution of goodness-of-fit scores for each cluster. The dashed red line indicates the scoring threshold: all genes with a score above this threshold will not be labeled."}
 # Get the best score and best label for all of the genes
 # This time without filtering labels
 # We can give the previous calculated scores to `previous_scores` to save time
@@ -984,7 +1004,7 @@ This underlines the importance of filtering genes that fit poorly to clusters.
 
 We can also investigate the
 differences between the labels provided by the splines k-means model and our
-scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}.
+scoring and labeling step, in terms of the number of genes assigned to each cluster (Figure \ref{fig:kmeansVsScore}).
 
 ```{r kmeansVsScore, echo=FALSE, fig.height=6, fig.width=6, warning=FALSE, fig.cap="Number of genes assigned to each cluster based on kmeans criteria of nearest centroid (top) versus our goodness-of-fit filtering strategy (bottom)"}
 par(mfrow=c(2, 1))
@@ -1020,8 +1040,8 @@ confusion_matrix = table(both_labels)
 text = as.matrix(as.character(confusion_matrix))
 dim(text) = dim(confusion_matrix)
 aheatmap(confusion_matrix, treeheight=0, main="Confusion matrix", 
-	      border_color="black", txt=text, legend=FALSE, Rowv=NA,
-	      Colv=NA, sub="Goodness-of-fit assignments")
+	 border_color="black", txt=text, legend=FALSE, Rowv=NA,
+	 Colv=NA, sub="Goodness-of-fit assignments")
 
 # recreate, so in same order, etc as before
 labels = scores_and_labels$labels
@@ -1036,17 +1056,19 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ```{r topScoreInCluster2, fig.height=6, fig.width=6, fig.cap=paste("Top scoring genes in Cluster",cluster_of_interest)}
 # order them by their score in cluster
 ord = order(scores_and_labels$scores[genes_in_cluster2,
-                     cluster_of_interest])
+				     cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind(assay(moanin_model[cluster2Score[1:4], ]),
+dataToPlot = rbind(
+    assay(moanin_model[cluster2Score[1:4], ]),
     "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
-plot_splines_data(moanin_model, data=dataToPlot, 
-     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
-     mar=c(1.5,2.5,2,0.1))
+plot_splines_data(
+    moanin_model, data=dataToPlot, 
+    colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
+    mar=c(1.5, 2.5, 2, 0.1))
 ```
 
 
-```{r results="hide", echo=FALSE}
+```{r saving_results, results="hide", echo=FALSE}
 # Save the clustering for the GO term and pathway enrichment on the whole set
 # of clusters.
 kmeans_labels = as.data.frame(labels[!is.na(labels)])
@@ -1057,7 +1079,7 @@ write.table(kmeans_labels,
 
 ### Looking at specific clusters in details.
 
-Now, let us look more in detail some specific clusters. Cluster 8 seems
+Now, let us look more in detail some specific clusters. Cluster 6 seems
 particularly interesting: it captures genes with strong differences between
 the different influenza treatments and the control, while the control remains
 relatively flat.
@@ -1070,11 +1092,11 @@ Heatmaps are useful to investigate the range of expression patterns for
 specific genes. Here, we are going to plot heatmaps of the normalized gene
 expression patterns and the rescaled gene expression patterns side by side.
 
-First, we select the genes of interest, namely those in cluster 8, based on
+First, we select the genes of interest, namely those in cluster 6, based on
 our goodness-of-fit assignment. 
 
 ```{r}
-cluster_to_plot = 8
+cluster_to_plot = 6
 genes_to_plot =  names(labels[labels == cluster_to_plot])
 ```
 
@@ -1165,8 +1187,8 @@ wss_values = list()
 i = 1
 for(n_cluster in all_possible_n_clusters){
     clustering_results = splines_kmeans(de_moanin_model,
-	    n_clusters=n_cluster, random_seed=42,
-	    n_init=10)
+	n_clusters=n_cluster, random_seed=42,
+	n_init=10)
     wss_values[i] = sum(clustering_results$WCSS_per_cluster)
     all_clustering[[i]] = clustering_results$clusters
     i = i + 1
@@ -1181,7 +1203,7 @@ cluster sum of squares (WCSS) as a function of the number of clusters. At some
 point, the WCSS will start decreasing more slowly, giving an angle or "elbow"
 in the graph.  The number of cluster is chosen at this "Elbow point."
 
-We plot the WCSS for $k=2-20$ here (Figure \ref{fig:elbow_method}). 
+We plot the WCSS for $k=2-20$ here (Figure \ref{fig:elbowMethod}). 
 We see that as expected the WCSS continues
 to drop, but there is no clear drop in the decrease, except for very small
 values of $k$ (3-4 clusters). However, 3-4 seems a very small number of gene
@@ -1198,7 +1220,7 @@ plot(all_possible_n_clusters, wss_values,
 #### Average silhouette method
 
 The silhouette value is a measure of how similar a data point is to its own
-cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:average_silhouette_method}. 
+cluster (cohesion) compared to other clusters (separation), shown in Figure \ref{fig:averageSilhouetteMethod}. 
 
 ```{r averageSilhouetteMethod, fig.width=6, fig.height=4, fig.cap="Plot of silhouette values as a function of k"}
 # function to compute average silhouette for k clusters
@@ -1314,7 +1336,8 @@ calculate proportion of times each pair of samples was clustered together
 across the 25 resampling runs, and plot the heatmap of those consensus
 matrices for $k=5$ and $k=20$. 
 
-```{r bootstrapConsensus, fig.width=6, fig.height=4,fig.cap="Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20."}
+```{r bootstrapConsensus, fig.width=6, fig.height=4, fig.cap="Consensus matrix of proportion of times samples were in the same cluster over bootstrap samples for k=5 and 20."}
+par(mfrow=c(1, 2))
 consensus_matrix_stability_5 = consensus_matrix(stability_5,
 						scale=FALSE)
 aheatmap(consensus_matrix_stability_5[1:1000, 1:1000], Rowv=FALSE,
@@ -1372,10 +1395,10 @@ results for all labels.
 plot_model_explorer(all_labels)
 ```
 
-From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that $k=5$ is more stable than $k=3$ and $k=4$,
-but not as stable as $k=2$. The model explorer strategy, in addition to
-visualizing the diversity of the centroids, can thus help assessing an
-adequate number of clusters.
+From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that $k=5$
+is more stable than $k=3$ and $k=4$, but not as stable as $k=2$. The model
+explorer strategy, in addition to visualizing the diversity of the centroids,
+can thus help assessing an adequate number of clusters.
 
 Now, replot the same model explorer, but only for the clustering experiments
 $k=6$, $k=7$, $k=8$, $k=9$ and $k=10$ so that we can see more clearly the stability
@@ -1387,7 +1410,9 @@ selected_labels = all_labels[clusters]
 plot_model_explorer(selected_labels)
 ```
 
-This analysis doesn't necessarily pick a particular $k$, but can help decide between $k$ within a desired range, for example, or to avoid $k$ that degrade the stability.
+This analysis doesn't necessarily pick a particular $k$, but can help decide
+between $k$ within a desired range, for example, or to avoid $k$ that degrade
+the stability.
 
 #### Consensus clustering as a way to find $k$
 
@@ -1450,21 +1475,24 @@ on the gene set defined by each cluster. Examples include KEGG pathway enrichmen
 GO term enrichment analysis, and motif enrichment analysis.
 
 First, let us clean up the genes we work with and only select the genes we are
-going to use in the enrichment analysis. One can either all genes assigned to the cluster, only the set of differentially expressed genes in each cluster, or the
-subset of genes that fit well to a cluster (based on some criterion).
+going to use in the enrichment analysis. One can either all genes assigned to
+the cluster, only the set of differentially expressed genes in each cluster,
+or the subset of genes that fit well to a cluster (based on some criterion).
 
 ### Finding enriched pathways using `biomaRt` and `KEGGprofile`
 
 Let us first tackle the case of pathway enrichment analysis. We will leverage
-the packages `biomaRt` [@durinck:biomart] and `KEGGprofile` [@zhao:keggprofile]
-for this step. `KEGGprofile` is a
-package that facilitates enrichment analysis on a set of
-genes labeled with the Ensembl annotation [@ensembl2020] based on the set of biological pathways described in the KEGG database[@KEGG].
+the packages `biomaRt` [@durinck:biomart] and `KEGGprofile`
+[@zhao:keggprofile] for this step. `KEGGprofile` is a package that facilitates
+enrichment analysis on a set of genes labeled with the Ensembl annotation
+[@ensembl2020] based on the set of biological pathways described in the KEGG
+database[@KEGG].
 
-We thus need to convert the gene
-names, which are given in the Refseq annotation, into the corresponding Ensembl name. This is where `biomaRt` comes in handy: it
-enables easy conversion from one gene annotation to another. Here, we will use the function `getBM`
-in `biomaRt` to convert the gene names from cluster 8.
+We thus need to convert the gene names, which are given in the Refseq
+annotation, into the corresponding Ensembl name. This is where `biomaRt` comes
+in handy: it enables easy conversion from one gene annotation to another.
+Here, we will use the function `getBM` in `biomaRt` to convert the gene names
+from cluster 8.
 
 ```{r ensemble_setup, results="hide"}
 ## Set up right ensembl database
@@ -1472,18 +1500,20 @@ ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
 
 ## Get gene names of genes in Cluster 8
-cluster = 8
-labels = unlist(labels)
+cluster = 6
 gene_names = names(labels)
 genes = gene_names[labels == cluster]
 
 ## Convert gene names
 genes = getBM(attributes=c("ensembl_gene_id", "entrezgene_id"),
-		filters="refseq_mrna", values=genes,
-		mart=ensembl)["entrezgene_id"]
+	      filters="refseq_mrna", values=genes,
+	      mart=ensembl)["entrezgene_id"]
 ```
 
-Then we use the function `find_enriched_pathway` in the `KEGGprofile` package to determine whether any KEGG pathways are enriched in cluster 8, i.e. whether a higher percentage of genes from a single pathway are found in cluster 8 than we would expect by simply proportional assignment of genes to clusters. 
+Then we use the function `find_enriched_pathway` in the `KEGGprofile` package
+to determine whether any KEGG pathways are enriched in cluster 6, i.e. whether
+a higher percentage of genes from a single pathway are found in cluster 6 than
+we would expect by simply proportional assignment of genes to clusters. 
 
 ```{r enrichment_analysis, results="hide", message=FALSE}
 genes = as.vector(unlist(genes))
@@ -1509,13 +1539,14 @@ pathways["Percentage"] = pathways["Percentage"] * 100
 kable(pathways[1:min(10,nrow(pathways)), ], format="latex", escape=F, digits=4, booktabs=TRUE)
 ```
 
-**EAP: I changed this to be the min(10, nrow(pathways)) but wondering if there's a problem, since presumably there used to be more than 10 pathways found significant and on my machine there are only 2?**
-
 
 
 ### Finding enriched GO terms
 
-The Gene Ontology (GO) database [@GO], also categorizes genes into meaningful biological ontologies and can be used for enrichment analysis via the package `topGO` [@alexa:topgo]. We again use `biomaRt` to find the mapping between genes and the GO terms to which they match. 
+The Gene Ontology (GO) database [@GO], also categorizes genes into meaningful
+biological ontologies and can be used for enrichment analysis via the package
+`topGO` [@alexa:topgo]. We again use `biomaRt` to find the mapping between
+genes and the GO terms to which they match. 
 
 ```{r get_go_mappings, message=FALSE}
 genes = getBM(attributes=c("go_id", "refseq_mrna"),
@@ -1555,7 +1586,7 @@ easy to use `data.frame` object. Here, we show an example of running a GO term
 enrichment on the "Biological process" ontology (BP).
 
 ```{r go_term_enrichment, results="hide", message=FALSE}
-# Create logical vector of whether in cluster 8
+# Create logical vector of whether in cluster 6
 assignments = labels == cluster
 
 go_terms_enriched = find_enriched_go_terms(

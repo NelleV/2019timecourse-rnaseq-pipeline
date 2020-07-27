@@ -1,4 +1,5 @@
 library(moanin)
+library(timecoursedata)
 
 ###############################################################################
 # Options
@@ -35,8 +36,9 @@ pval_col_to_keep = colnames(de_analysis)[
     grepl("-pval", colnames(de_analysis))]
 pvalues = de_analysis[, pval_col_to_keep]
 
-splines_model = moanin::create_moanin_model(meta, degrees_of_freedom=6)
-fishers_pval = moanin:::pvalues_fisher_method(pvalues)
+splines_model = moanin::create_moanin_model(
+    data=data, meta=meta, degrees_of_freedom=6)
+fishers_pval = moanin::pvalues_fisher_method(pvalues)
 fishers_qval = stats::p.adjust(fishers_pval)
 
 genes_to_keep = row.names(
@@ -50,18 +52,17 @@ set.seed(random_seed)
 n_genes = dim(y)[1] * sample_proportion
 indices = sample(1:dim(y)[1], n_genes, replace=TRUE)
 
-random_subsample_y = y[indices, ]
-kmeans_clusters = moanin:::splines_kmeans(
-    random_subsample_y, splines_model, n_clusters=n_clusters,
+kmeans_clusters = moanin::splines_kmeans(
+    splines_model[indices, ], n_clusters=n_clusters,
     random_seed=random_seed,
     n_init=20)
 
 # Perform prediction on the whole set of data.
-kmeans_clusters = moanin::: splines_kmeans_predict(
-    y, kmeans_clusters)
+kmeans_clusters = moanin::splines_kmeans_predict(
+    splines_model, kmeans_clusters)
 
 # Let's save only the labels here.
-labels = kmeans_clusters$clusters
+labels = kmeans_clusters
 if(!dir.exists(dirname(outname))){
     dir.create(dirname(outname))
 }

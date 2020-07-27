@@ -8,6 +8,8 @@ library(viridis)
 
 library(moanin)
 library(biomaRt)
+library(timecoursedata)
+
 df = 6
 
 # Preprocessing & filtering
@@ -25,7 +27,7 @@ data("shoemaker2015")
 data = shoemaker2015$data
 meta = shoemaker2015$meta
 
-labels = read.table(".results/clustering_labels.txt", sep="\t",
+labels = read.table("results/clustering_labels.txt", sep="\t",
                     check.names=FALSE)
 
 gene_names = row.names(labels)
@@ -36,14 +38,6 @@ labels = labels[!is.na(labels)]
 # FIXME move this to the package
 ensembl = useMart("ensembl")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
-
-genes = getBM(attributes=c("go_id", "refseq_mrna"),
-              values=gene_names,
-              filters="refseq_mrna",
-              mart=ensembl)
-
-# Create gene to GO id mapping
-gene_id_go_mapping = create_go_term_mapping(genes)
 
 clusters = sort(as.vector(unlist(unique(labels))))
 all_pathways = data.frame()
@@ -56,17 +50,17 @@ for(cluster in clusters){
 		  mart=ensembl)["entrezgene_id"]
     genes = as.vector(unlist(genes))
     pathways = KEGGprofile::find_enriched_pathway(
-	genes, species="mmu",
-	download_latest=TRUE)
+	    genes, species="mmu",
+	    download_latest=TRUE)
 
     if((dim(all_pathways)[1] == 0) & (dim(pathways$stastic)[1] != 0)){
-	print("Initialize")
-	pathways$stastic["Cluster"] = cluster
-	all_pathways = pathways$stastic
+    	print("Initialize")
+	    pathways$stastic["Cluster"] = cluster
+	    all_pathways = pathways$stastic
     }else if(dim(pathways$stastic)[1] != 0) {
-	print("Merge")
-	pathways$stastic["Cluster"] = cluster
-	all_pathways = merge(all_pathways, pathways$stastic, all=TRUE)
+	    print("Merge")
+	    pathways$stastic["Cluster"] = cluster
+	    all_pathways = merge(all_pathways, pathways$stastic, all=TRUE)
     }
 }
 
