@@ -2,7 +2,7 @@
 title: "[Normalization] A pipeline to analyse time-course gene expression data"
 author:
     - name: Nelle Varoquaux
-      affiliation: Department of Statistics and Berkeley Institute for Data Science, University of California, Berkeley, Berkeley, CA 
+      affiliation: CNRS, University Grenoble Alpes, TIMC-IMAG, Grenoble, France 
     - name: Elizabeth Purdom
       affiliation: Department of Statistics, University of California, Berkeley, Berkeley, CA
 
