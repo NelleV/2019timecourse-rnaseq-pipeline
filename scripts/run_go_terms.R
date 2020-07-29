@@ -9,6 +9,7 @@ library(viridis)
 library(moanin)
 library(biomaRt)
 library(topGO)
+library(timecoursedata)
 
 df = 6
 
@@ -30,7 +31,7 @@ data("shoemaker2015")
 data = shoemaker2015$data
 meta = shoemaker2015$meta
 
-labels = read.table(".results/clustering_labels.txt", sep="\t",
+labels = read.table("results/clustering_labels.txt", sep="\t",
                     check.names=FALSE)
 
 gene_names = row.names(labels)

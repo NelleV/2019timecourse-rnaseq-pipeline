@@ -19,6 +19,15 @@ install_github_dependencies() {
     # install_github keeps failing because of the Github API rate limit. So
     # we're just going to do this by hand…
     pushd /tmp
+    wget -P . https://github.com/NelleV/timecoursedata/archive/master.zip
+    unzip /tmp/master.zip
+    cd timecoursedata-master
+    make install-extra
+    make install
+    popd
+    rm -rf /tmp/master.zip
+
+    pushd /tmp
     wget -P . https://github.com/NelleV/moanin/archive/master.zip
     unzip /tmp/master.zip
     cd moanin-master
