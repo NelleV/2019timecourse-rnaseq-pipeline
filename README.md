@@ -57,5 +57,5 @@
 	```
     - Compute the GO term enrichment analysis for all clusters
 	```bash
-	Rscript run_got_terms.R
+	Rscript run_go_terms.R
 	```
