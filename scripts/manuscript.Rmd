@@ -26,8 +26,13 @@ keywords: >
 vignette: >
     %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
     %\VignetteEngine{knitr::rmarkdown}
-output: BiocWorkflowTools::f1000_article
+header-includes:
+   - \usepackage{float}
+output:
+    BiocWorkflowTools::f1000_article: default
+    ms_document: default
 bibliography: bibliography.bib
+always_allow_html: yes
 ---
 
 ```{r echo=FALSE, results="hide", message=FALSE}
@@ -39,7 +44,7 @@ library(stats)
 library(knitr)
 library(BiocStyle)
 library(biomaRt)
-library(kableExtra)
+library(pander)
 
 library(ggplot2)
 library(NMF)
@@ -47,7 +52,8 @@ library(KEGGprofile)
 library(viridis)
 
 library(topGO)
-
+library(moanin)
+if(!packageVersion("moanin")>="0.99.0-902") stop("Must have version 0.99.0-902 to compile the manuscript")
 ```
 
 ```{r echo=FALSE, include=FALSE}
@@ -57,8 +63,6 @@ knitr::opts_chunk$set(
   duplicate.label="allow", fig.pos = "H", out.extra = "")
 ```
 
-
-The manuscript was last compile on `r Sys.time()`.
 
 # Introduction
 
@@ -124,12 +128,18 @@ knitr::include_graphics("images/fig1_schemas.png",dpi=30 )
 
 ## Installation and setup
 
- `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`, along with the corresponding package that contains time course datasets we will use:
+`moanin` and `timecoursedata` are available from bioconductor, and can be
+installed using the `install` function in the package `BiocManager`, along
+with the corresponding package that contains time course datasets we will use:
 
 ```{r eval=FALSE}
-library(devtools)
-install_github("NelleV/moanin")
-install_github("NelleV/timecoursedata")
+library(BiocManager)
+# Need to use the development version for now.
+BiocManager::install(version="devel")
+BiocManager::valid()
+
+BiocManager::install("timecoursedata")
+BiocManager::install("moanin")
 ```
 
 The following additional packages are needed for this workflow:
@@ -153,7 +163,9 @@ library(BiocWorkflowTools) #Needed for compiling the .Rmd script
 If Bioconductor is installed, the CRAN and Bioconductor packages above can be installed via
 
 ```{r eval=FALSE}
-BiocManager::install(c("NMF","ggfortify","topGO","biomaRt","KEGGprofile","BiocWorkflowTools"))
+BiocManager::install(
+    c("NMF", "ggfortify", "topGO", "biomaRt",
+      "KEGGprofile", "BiocWorkflowTools", "timecoursedata", ))
 ```
 
 # Analysis of the dynamical response of mouse lung tissue to influenza
@@ -167,13 +179,13 @@ study are (1) a low pathogenicity seasonal H1N1 influenza virus
 (A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009
 pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1
 avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
-$10^5$ PFU of each virus. An adidtional 42 mice were injected with a lower dose
+$10^5$ PFU of each virus. An additional 42 mice were injected with a lower dose
 of the Vietnam avian influenza virus ($10^3$ PFU).
 
 By combining gene expression time-course data with virus growth data, the
 authors show that the inflammatory response of lung tissue is gated until a
 threshold of the virus concentration is  exceeded in the lung. Once this
-threshold is exceeded, a strong inflammatory and cytokin production occurs.
+threshold is exceeded, a strong inflammatory and cytokine production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
@@ -198,14 +210,16 @@ The meta data contains information about the treatment group, the replicate,
 and the timepoint for each observation:
 
 ```{r echo=FALSE}
-kable(head(meta))
+pander(head(meta))
 ```
 
 Before we dive into the exploratory analysis and quality control, let us
 define color schemes for our data that we will use across the whole analysis.
 We define color schemes for groups and time points as named vectors. We also
 define a series of markers (or plotting symbols) to distinguish replicate
-samples in scatter plots. We also reorder the factor `Group` which describes the treatments so that the treatments are order from low to high pathogeny (with Control being first). 
+samples in scatter plots. We also reorder the factor `Group` which describes
+the treatments so that the treatments are ordered from low to high pathogeny
+(with Control being first). 
 
 ```{r}
 group_colors = c(
@@ -261,6 +275,8 @@ clustered or correlated with one another.
 
 Before performing any additional exploratory analysis, let us only keep highly
 variable genes: for this step, we keep only the top 50% most variable genes.
+In Figure \ref{fig:geneVarHist}, we plot the distribution of variance across
+all genes.
 
 ```{r}
 variance_cutoff = 0.5
@@ -347,7 +363,7 @@ aheatmap(
 ```
 
 We can already see interesting patterns emerging from the correlation plot.
-First, the cross-correlation amongst samples taking from the control mice is
+First, the cross-correlation amongst samples taken from the control mice is
 higher than the cross correlation amongst the rest of the treatments. Second,
 the influenza-infected mice mildly react until time point 36. Third, the less
 pathogenic the strain is, the closer the samples are to the control condition.
@@ -393,24 +409,23 @@ we are interested in.
 **DE Analysis in `moanin`** Our package `moanin` provides functionality for performing both of
 these types of approaches, though our focus is on the global approach, specifically by fitting spline models to the genes. 
 
-In both
-situations, we first need to set up a object (a `Moanin` object) to
+In both situations, we first need to set up an object (a `Moanin` object) to
 hold the meta data, as well as information for fitting the spline model
-(formula, number of degrees of freedom of the splines, ...). The `Moanin` object
-will contain information used
-throughout this analysis, in particular the condition and timepoints of each sample and the
-the basis matrix for fitting splines models. 
+(formula, number of degrees of freedom of the splines, ...). The `Moanin`
+object will contain information used throughout this analysis, in particular
+the condition and timepoints of each sample and the basis matrix for
+fitting splines models. 
 
 
 We start by creating the `Moanin` object using the `create_moanin_model`
 function. We need to provide two things to the function: a `data.frame` with
 the metadata, and the number of degrees of freedom of the splines to be used in the
 functional modeling. The metadata `data.frame` object should contain at least
-two columns: one named `Group`, containing the  treatement effect, and a
+two columns: one named `Group`, containing the  treatment effect, and a
 second one named `Timepoint` containing the timepoint information.
 
 ```{r echo=FALSE}
-kable(head(meta))
+pander(head(meta))
 ```
 
 We create a `Moanin` object for our data:
@@ -490,7 +505,7 @@ first timepoint (i.e. first three columns of the output) and the first ten
 genes: 
 
 ```{r echo=FALSE}
-kable(weekly_de_analysis[1:10, 1:3 ], "latex", digits=3, booktabs=TRUE)
+pander(weekly_de_analysis[1:10, 1:3 ])
 
 ```
 
@@ -540,8 +555,8 @@ of the Kawasaki strain). While there may be biological differences at those
 time points for some genes, it seems unlikely that the large majority of genes
 differentially expressed at timepoint 3H stop being differentially expressed
 at 6H and then jump back to being differentially expressed at 9H. A more
-likely explanation is that there is are some technical or biological artifact
-about the samples for 6H that is creating higher variation and thus less
+likely explanation is that there are some technical or biological artifacts
+about the samples for 6H that are creating higher variation and thus less
 ability to detect significance.
 
 ```{r calculateCombos, echo=FALSE, results="hide"}
@@ -624,7 +639,8 @@ qvalues = DE_results[, qval_columns]
 ```
 
 The number of genes found differentially expressed ranges from around 12000 to
-29000 depending on the strain and dosage of influenza virus given to the mice.
+29000 depending on the strain and dosage of influenza virus given to the mice
+(Figure \ref{deTimeDist}).
 This corresponds to between 30% to 70% of the genes found differentially
 expressed in this time-course experiment.
 
@@ -658,10 +674,9 @@ log_fold_change_timepoints = estimate_log_fold_change(
 ```
 
 ```{r echo=FALSE}
-kable(
-    head(log_fold_change_timepoints[, colnames(log_fold_change_timepoints)[1:5]]),
-    format="latex",
-    booktabs=TRUE)
+pander(
+    head(log_fold_change_timepoints[,
+    colnames(log_fold_change_timepoints)[1:5]]))
 ```
 
 This matrix can then be used to visualize the log-fold change for each
@@ -685,8 +700,9 @@ following formula:
 
 $$\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T \text{lfc}(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {\text{lfc}(t)} \lvert \right)$$
 
-Note, however, that when a gene is not consistently up or down-regulated the estimation
-of the direction will not represent accurately the changes observed.
+Note, however, that when a gene is not consistently up- or down-regulated the
+estimation of the direction will not accurately represent the changes
+observed.
 
 
 We demonstrate several of these methods on our data. 
@@ -710,11 +726,13 @@ each column to a contrasts, and each entry to the log-fold change for this
 pair of contrast and gene.
 
 ```{r display_lfc, echo=FALSE}
-kable(log_fold_change_timecourse[1:5, ], digits=3, booktabs=TRUE)
+pander(log_fold_change_timecourse[1:5, ])
 ``` 
 
-In Figure \ref{fig:compareLogFoldChange} we plot the log-fold change summary of each of these methods against each other. We see that each methods captures different elements of
-the time-course data, for example, overall change versus the largest change.
+In Figure \ref{fig:compareLogFoldChange} we plot the log-fold change summary
+of each of these methods against each other. We see that each method captures
+different elements of the time-course data, for example, overall change versus
+the largest change.
 
 ```{r compareLogFoldChange, echo=FALSE, fig.height=6, fig.width=6, message=FALSE, fig.cap="Comparison of the different methods of calculating log-fold change per gene"}
 par(mfrow=c(2, 2))
@@ -732,9 +750,10 @@ plot(log_fold_change_max[, "M-C"],
      xlab="max", ylab="sum")
 ```
 
-With a single measure of log-fold change and the p-value, we can now look
-at the traditional volcano plot. In Figure \ref{fig:volcano}, we show the example of a volcano plot for the comparaison
-of the control to the Kawasaki strain, using the "timecourse" method of calculating log fold change.
+With a single measure of log-fold change and the p-value, we can now look at
+the traditional volcano plot. In Figure \ref{fig:volcano}, we show the example
+of a volcano plot for the comparison of the control to the Kawasaki strain,
+using the "timecourse" method of calculating log fold change.
 
 ```{r volcano, fig.height=4, fig.width=4, fig.cap="Volcano plot for the comparison of the Kawasaki strain to control, where fold-change is calculated with the timecourse method"}
 pvalue = DE_results[, "M-K_pval"]
@@ -783,7 +802,7 @@ of transcriptomic response.
 ## Clustering of time-course data
 
 
-The very large number of genes found differentially expressed impair any
+The very large number of genes found differentially expressed impairs any
 interpretation one would attempt: with 70\% of the genome found differentially
 expressed, all pathways are affected by the treatment. Hence the next step of
 the workflow to cluster gene expression according to their dynamical response
@@ -795,7 +814,7 @@ expressed; (2) a large-fold change between conditions. Reducing the set of genes
 estimate the centroids of the clusters with more stability.
 
 To do this, we first
-aggregate all p-values obtained during the time-course differential expresison
+aggregate all p-values obtained during the time-course differential expression
 step in a single p-value using Fisher's method [@fisher:statistical] (`pvalues_fisher_method`).
 Next we
 select all the genes which have a Fisher-adjusted p-value below 0.05 and a log-fold 
@@ -822,7 +841,7 @@ de_moanin_model = moanin_model[genes_to_keep,]
 
 After filtering, we are left with `r dim(de_moanin_model)[1]` genes. We can then apply a
 clustering routine. As observed by looking at genes found differentially expressed, 
-many genes share a similar gene expression pattern, but on different scale. 
+many genes share a similar gene expression pattern, but on different scales. 
 
 We thus propose the following adaptation of k-means:
 
@@ -852,10 +871,11 @@ The `splines_kmeans` function returns a named list with:
   shape (`n_centroid`, `n_samples`).
 - `clusters`: a vector of size `n_genes`, containing the cluster assignments given by the `kmeans` step of each gene
 
-We then use the `plot_splines_data`  function, only now applied to the centroids, to visualize the centroids of
-each cluster obtained with the splines k-means model. 
+We then use the `plot_splines_data`  function, only now applied to the
+centroids, to visualize the centroids of each cluster obtained with the
+splines k-means model (Figure \ref{fig:centroids}). 
 
-```{r fig.height=6, fig.width=6, fig.cap="K-means centroids"}
+```{r centroids, fig.height=6, fig.width=6, fig.cap="K-means centroids"}
 plot_splines_data(de_moanin_model,
     data=kmeans_clusters$centroids, 
     colors=ann_colors$Group,
@@ -864,41 +884,29 @@ plot_splines_data(de_moanin_model,
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. In Figure \ref{fig:genesVsCentroids}, we plot a few
-of the actual genes assigned to cluster 2 to see the difference:
+of the actual genes assigned to cluster 2 with the estimated centroid overlaid:
 
 ```{r genesVsCentroids, fig.height=6, fig.width=6, fig.cap="Genes from cluster 2"}
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
-dataToPlot = rbind(
-    assay(de_moanin_model[cluster2Genes[3:6],]), 
-    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
-plot_splines_data(de_moanin_model, data=dataToPlot, 
-    colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
-    mar=c(1.5,2.5,2,0.1))
-```
-
-The spline plots are fitted per gene in the above plot and illustrate that
-the genes assigned to a cluster have differing degrees to which their data
-fits that of the cluster centroid, and indeed fits that of their individual
-spline fits. 
-
-We can also overlay the centroid on the data, after rescaling the data to be between 0-1, like the centroids
-
-```{r}
-de_moanin_rescale = de_moanin_model
-assay(de_moanin_rescale) = rescale_values(data=assay(de_moanin_model))
-plot_splines_data(de_moanin_rescale,  
+plot_splines_data(de_moanin_model,  
     centroid=kmeans_clusters$centroids[cluster_of_interest,], 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     subset_data=cluster2Genes[3:6],
     mar=c(1.5,2.5,2,0.1))
 ```
-**EAP** I added the functionality to plot centroid over data, rather than just fit to data, but I'm not sure it makes much sense to include this. The `rescale_values` function is too sensitive to outliers. Would be better to rescale each centroid to scale of gene. If we had a helper function to do that, could easily add that to plot_splines_data (made issue on moanin), but probably right now should remove this. 
+
 
 ### Assigning genes to clusters
 
-Because there is variability in how well the genes fit a cluster, we would like to be able to score how well a gene fits a cluster. Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
+As we can see, while these genes have some similarity with the pattern of the
+cluster centroids, these particular genes are not the best examples of the
+cluster, in the sense of matching the centroid estimates. Because of this
+variability in how well the genes fit a cluster, we would like to be able to
+score how well a gene fits a cluster. 
+
+Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
 like to have a mechanism to assign all genes to a cluster. 
 
 Thus, the next step in the clustering portion of the workflow is a scoring and label step. Each gene is given a score that
@@ -932,13 +940,13 @@ scores_and_labels = splines_kmeans_score_and_label(
 
 The `scores_and_labels` list contains three elements:
 
-    - `scores`: the matrix of shape `n_cluster` x `n_genes`,
-      containing for each gene and each cluster, the goodness of fit as
-      described above.
-    - `labels`: the labels for all of the genes with a
-      sufficiently good goodness-of-fit score.
-    - `score_cutoff`: the cutoff used on `scores` to determine whether to 
-      assign a label
+- `scores`: the matrix of shape `n_cluster` x `n_genes`,
+  containing for each gene and each cluster, the goodness of fit as
+  described above.
+- `labels`: the labels for all of the genes with a
+  sufficiently good goodness-of-fit score.
+- `score_cutoff`: the cutoff used on `scores` to determine whether to 
+  assign a label
 
 **Assigning cluster labels:** We could just assign each gene to a cluster
 based on which cluster gave the minimum score. By default,
@@ -950,7 +958,7 @@ all genes on all clusters (i.e. the entire `scores` matrix returned by
 if their best score is above the 50% percentile of that distribution, with the
 remaining genes getting `NA` as their assignment (this choice can be changed
 by `proportion_genes_to_label`). Note that because the distribution of scores
-of genes across *all* clusters are used, this is not equivalent to assigning
+of genes across *all* clusters is used, this is not equivalent to assigning
 50% of genes to a cluster -- it is possible that all genes are assigned to a
 cluster. 
 
@@ -982,7 +990,10 @@ our previously calculated score via the argument `previous_scores`)
 # Get the best score and best label for all of the genes
 # This time without filtering labels
 # We can give the previous calculated scores to `previous_scores` to save time
-unfiltered_scores<-splines_kmeans_score_and_label(moanin_model,kmeans_clusters,proportion_genes_to_label=1, previous_scores=scores_and_labels$scores)
+unfiltered_scores = splines_kmeans_score_and_label(
+    moanin_model, kmeans_clusters,
+    proportion_genes_to_label=1,
+    previous_scores=scores_and_labels$scores)
 best_score = rowMin(scores_and_labels$scores)
 best_label = unfiltered_scores$labels
 
@@ -1050,7 +1061,7 @@ labels = unlist(labels[!is.na(labels)])
 ```
 
 Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in%
-genes_in_cluster2)` of them remained assigned to cluster `r cluster_of_interest`. We can again look at a
+genes_in_cluster2)` of them remained assigned to cluster `r cluster_of_interest` after our scoring. We can again look at a
 few genes in cluster `r cluster_of_interest`, only now pick the best scoring genes (Figure \ref{fig:topScoreInCluster2})
 
 ```{r topScoreInCluster2, fig.height=6, fig.width=6, fig.cap=paste("Top scoring genes in Cluster",cluster_of_interest)}
@@ -1058,15 +1069,13 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
 				     cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind(
-    assay(moanin_model[cluster2Score[1:4], ]),
-    "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(
-    moanin_model, data=dataToPlot, 
+    moanin_model, subset_data=cluster2Score[1:4], 
+    centroid=kmeans_clusters$centroids[cluster_of_interest,], 
     colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
     mar=c(1.5, 2.5, 2, 0.1))
 ```
-
+We see that, as expected, these genes are a much better match to the cluster centroids. 
 
 ```{r saving_results, results="hide", echo=FALSE}
 # Save the clustering for the GO term and pathway enrichment on the whole set
@@ -1077,9 +1086,9 @@ write.table(kmeans_labels,
 	    sep="\t")
 ```
 
-### Looking at specific clusters in details.
+### Looking at specific clusters in detail.
 
-Now, let us look more in detail some specific clusters. Cluster 6 seems
+Now, let us look more in detail at some specific clusters. Cluster 6 seems
 particularly interesting: it captures genes with strong differences between
 the different influenza treatments and the control, while the control remains
 relatively flat.
@@ -1102,7 +1111,7 @@ genes_to_plot =  names(labels[labels == cluster_to_plot])
 
 Now we will create the heatmaps of these genes (`r length(genes_to_plot)` genes, Figure \ref{fig:heatmapCluster8}).
 
-```{r heatmapCluster8, fig.width=6, fig.height=8, fig.cap="Heatmap of genes in Cluster 8"}
+```{r heatmapCluster8, fig.width=6, fig.height=8, fig.cap="Heatmap of genes in Cluster 6"}
 layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 
 # order the observations by Group, then time, then replicate
@@ -1137,9 +1146,9 @@ aheatmap(
     treeheight=0)
 ```
 
-Those two heatmaps demonstrate that the clustering method successfully cluster
-genes that are on different scales, and yet share the same dynamical response
-to the treatments.
+Those two heatmaps demonstrate that the clustering method successfully
+clusters genes that are on different scales, and yet share the same dynamical
+response to the treatments.
 
 ### How to choose the number of clusters.
 
@@ -1155,7 +1164,7 @@ Once the maximum number of clusters is set, several strategies allow to
 identify the number of clusters:
 
 - **Elbow method**. First introduced in 1953 by Thorndike [@thorndike:who],
-  the elbow methods looks at the total with cluster sum of squares 
+  the elbow method looks at the total within cluster sum of squares 
   as a function of the number of clusters (WCSS). When adding clusters
   doesn't decrease the WCSS by a sufficient
   amount, one can consider stopping. This method thus provides visual aid to
@@ -1167,12 +1176,12 @@ identify the number of clusters:
 - **Stability methods** Stability methods are more computationally intensive
   than any other method, as they rely on assessing the stability of the
   clustering for every $k$ to a small randomization of the data. The user is
-  then invited to choose the number of cluster based on a number of similarity
+  then invited to choose the number of clusters based on a number of similarity
   measures.
 
 First, let us run the clustering for all values of $k$ of interest. We
 will, for each clustering, conserve (1) with within cluster sum of
-squares; (2) the clustering assignement (or label) for each gene. 
+squares; (2) the clustering assignment (or label) for each gene. 
 
 Below we run the clustering for $k$ equal to $2-20$. The `splines_kmeans`
 function returns the WCSS for each cluster, which we sum to get the total
@@ -1200,7 +1209,7 @@ The Elbow method to choose the number of clusters relies on visualization aid
 to choose the number of clusters. The method relies on plotting the within
 cluster sum of squares (WCSS) as a function of the number of clusters. At some
 point, the WCSS will start decreasing more slowly, giving an angle or "elbow"
-in the graph.  The number of cluster is chosen at this "Elbow point."
+in the graph.  The number of clusters is chosen at this "Elbow point."
 
 We plot the WCSS for $k=2-20$ here (Figure \ref{fig:elbowMethod}). 
 We see that as expected the WCSS continues
@@ -1255,15 +1264,15 @@ perturbations.
 
 Methods that rely on the stability of the clustering results to choose $k$
 thus ensure that the biological interpretation of the clusters hold with
-perturbtation to the data. In addition, simulation where the data is generated
+perturbations to the data. In addition, simulation where the data is generated
 with a well defined $k$ show that the clustering is more stable for the
 correct of number of the clusters.
 
-Most methods method to find the number of clusters with stability measures
+Most methods to find the number of clusters with stability measures
 only provide visual aids to guide the user. The first element often visualized
 is the consensus matrix: the consensus matrix is an $n \times n$ matrix that
 stores the proportion of clustering in which two items are clustered together.
-A perfect consensus matrix ordered such as each elements that belong to the
+A perfect consensus matrix ordered such as all elements that belong to the
 same cluster are adjacent to one another which show blocks along the diagonal
 close to 1.
 
@@ -1284,7 +1293,9 @@ Using the subsampling strategy, we take a unique subset of the genes, keeping 80
 
 ```{r}
 subsample_proportion = 0.8
-indices = sample(1:dim(de_moanin_model)[1], n_genes * subsample_proportion, replace=FALSE)
+indices = sample(1:dim(de_moanin_model)[1],
+		 n_genes * subsample_proportion,
+		 replace=FALSE)
 
 subsampled_y = de_moanin_model[indices, ]
 ```
@@ -1320,13 +1331,13 @@ stability_5 = read.table("results/stability_5.tsv", sep="\t")
 stability_20 = read.table("results/stability_20.tsv", sep="\t")
 ```
 
-Each column correspond to a bootstrap sample, each row to a gene, and each
+Each column corresponds to a bootstrap sample, each row to a gene, and each
 entry to the label found for that particular clustering. Thus, for each gene,
-we have an assignment to a cluster over the 20 resampling runs. For example,
-for $k=5$: 
+we have an assignment to a cluster over the 25 resampling runs. For example,
+for the first 10 bootstrap samples and $k=5$:
 
 ```{r,echo=FALSE}
-kable(head(stability_5))
+pander(head(stability_5[, 1:10]))
 ```
 
 
@@ -1359,7 +1370,7 @@ We can see (Figure \ref{fig:bootstrapConsensus}) that the choice of $K=5$ seems 
 The model explorer algorithm [@ben-hur:stability] proposes to estimate the
 number of clusters exploiting the observation that if the number of clusters
 is correct, the clustering results are stable to bootstrap resampling, as
-described above.  The distribution of similaries between bootstrapped results
+described above.  The distribution of similarities between bootstrapped results
 for each $k$ can thus be compared for different values of $k$ and guide the
 user in the choice of number of clusters.
 
@@ -1397,10 +1408,10 @@ plot_model_explorer(all_labels)
 From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that $k=5$
 is more stable than $k=3$ and $k=4$, but not as stable as $k=2$. The model
 explorer strategy, in addition to visualizing the diversity of the centroids,
-can thus help assessing an adequate number of clusters.
+can thus help assess an adequate number of clusters.
 
 Now, replot the same model explorer, but only for the clustering experiments
-$k=6$, $k=7$, $k=8$, $k=9$ and $k=10$ so that we can see more clearly the stability
+$k=6$, $k=7$, $k=8$, $k=9$, and $k=10$ so that we can see more clearly the stability
 measures in that range (Figure \ref{fig:plotModelExplorerZoom}).
 
 ```{r  plotModelExplorerZoom, fig.width=6, fig.height=6,fig.cap="Plot of the cumulative density of similarity of clusterings of data for different k, restricted to k=6-10"}
@@ -1418,7 +1429,7 @@ the stability.
 
 The  consensus clustering [@monti:consensus] relies on a similar idea but
 instead of looking at the cumulative density of similarity measures of
-bootstrapped clustering, the authors suggests plotting the cumulative density
+bootstrapped clustering, the authors suggest plotting the cumulative density
 of elements of the consensus matrix. We provide a function
 `plot_cdf_consensus` in `moanin` to do this
 
@@ -1433,9 +1444,9 @@ knitr::include_graphics("images/clustering_CDF_consensus.png")
 The stability of the clustering based on the consensus matrix can then be
 measured via a single number by looking at the area under the curve: the more
 stable the clustering, the closer to 0 or 1 will be the entries of consensus
-matrix. The consensus clustering strategy thus suggest at looking at either
+matrix. The consensus clustering strategy thus suggests at looking at either
 the AUC as a function of the number of the clusters or the "improvement" in
-the AUC as a function of the number of cluster.
+the AUC as a function of the number of clusters.
 
 Here we calculate the AUC (Figure \ref{fig:plotAUC}).
 
@@ -1462,7 +1473,7 @@ knitr::include_graphics("images/clustering_delta_AUC_consensus.png")
 The consensus clustering method suggest that the most stable is $k=2$, which
 separates over-expressed genes from under-expressed genes. While it is indeed
 a very stable clustering, it does not capture the range of gene expression
-patterns present in the data. This shows the limitation of such method on real
+patterns present in the data. This shows the limitation of such methods on real
 data, where the number of clusters is not clearly defined.
 
 
@@ -1485,7 +1496,7 @@ the packages `biomaRt` [@durinck:biomart] and `KEGGprofile`
 [@zhao:keggprofile] for this step. `KEGGprofile` is a package that facilitates
 enrichment analysis on a set of genes labeled with the Ensembl annotation
 [@ensembl2020] based on the set of biological pathways described in the KEGG
-database[@KEGG].
+database [@KEGG].
 
 We thus need to convert the gene names, which are given in the Refseq
 annotation, into the corresponding Ensembl name. This is where `biomaRt` comes
@@ -1535,7 +1546,7 @@ pathways = subset(
 	"pvalueAdj"))
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways[1:min(10,nrow(pathways)), ], format="latex", escape=F, digits=4, booktabs=TRUE)
+pander(pathways[1:min(10,nrow(pathways)), ])
 ```
 
 
@@ -1598,22 +1609,24 @@ go_terms_enriched = find_enriched_go_terms(
 go_terms_enriched = go_terms_enriched[
     order(go_terms_enriched[, "resultFisher_padj"]), ]
 colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
-"Significant", "Expected", "P-value", "Adj. p-value")
+    "Significant", "Expected", "P-value", "Adj. p-value")
 
-kable(go_terms_enriched[1:15, ], format="latex", escape=F,
-      digits=3, booktabs=TRUE, row.names=FALSE)
+pander(go_terms_enriched[1:15, ])
 ```
 
 
 # Conclusion
 
-This workflow provides a tutoral for the analysis of lengthy time-course gene
-expression data in R using the package `moanin`, which aids in implementing common timecourse analyses. We illustrate the workflow through the analysis of mice lung tissue
-exposed to different influenza strain and measured over time. 
-The proposed workflow covers consists of three common analysis main steps generally performed after quality
-control and normalization: (1) differential expression analysis; (2)
-clustering of time-course gene expression data; (3) downstream analysis of
-clusters. We demonstrate how the use of the package `moanin` allows for easy implementation of these procedures in the setting of time-course data.
+This workflow provides a tutorial for the analysis of lengthy time-course gene
+expression data in R using the package `moanin`, which aids in implementing
+common timecourse analyses. We illustrate the workflow through the analysis of
+mice lung tissue exposed to different influenza strains and measured over time.
+The proposed workflow consists of three common analysis main steps
+generally performed after quality control and normalization: (1) differential
+expression analysis; (2) clustering of time-course gene expression data; (3)
+downstream analysis of clusters. We demonstrate how the use of the package
+`moanin` allows for easy implementation of these procedures in the setting of
+time-course data.
 
 
 # Software and data availability
@@ -1622,12 +1635,12 @@ The source code for this workflow can be found at
 [https://github.com/NelleV/2019timecourse-rnaseq-pipeline](https://github.com/NelleV/2019timecourse-rnaseq-pipeline).
 Archived source code at the time of publication can be found at [XXX](XXX).
 
-All packages use in the workflow are available on GitHub, CRAN, or
+All packages used in the workflow are available on GitHub, CRAN, or
 Bioconductor.
 
 Data used in this workflow are available from NCBI GEO, accession
 [GSE63786](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63786).
-Normalized data can be found in `moanin`.  Normalization information is
+Normalized data can be found in `timecoursedata`.  Normalization information is
 provided as supplementary information.
 
 Last but not least, we use `sessionInfo()` to display all packages used in

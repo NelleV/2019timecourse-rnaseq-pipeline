@@ -1,10 +1,13 @@
 # A pipeline to analyse transcriptomic time-course data
 
+An automatically compiled version of the manuscript's Rmd with Travis-CI can
+be found here: https://nellev.github.io/2019timecourse-rnaseq-pipeline/
+
 1. Install the dependencies and the package.
 
     - Install all the dependances at once using the following command:
 	`Rscript scripts/install.R`
-    - Install timecoursedata via the install_github commend
+    - Install timecoursedata via the install_github commadd
 	install_github("NelleV/timecoursedata", dependencies=FALSE)
     - Install moanin via the install_github command
 	install_github("NelleV/moanin", dependencies=FALSE))
