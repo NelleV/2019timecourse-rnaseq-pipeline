@@ -47,7 +47,8 @@ library(KEGGprofile)
 library(viridis)
 
 library(topGO)
-
+library(moanin)
+if(!packageVersion("moanin")>="0.99.0-902") stop("Must have version 0.99.0-902 to compile the manuscript")
 ```
 
 ```{r echo=FALSE, include=FALSE}
