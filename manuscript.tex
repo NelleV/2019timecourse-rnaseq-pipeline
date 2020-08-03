@@ -117,7 +117,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-08-02 18:09:30.
+The manuscript was last compile on 2020-08-03 07:51:19.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -1069,18 +1069,17 @@ each cluster obtained with the splines k-means model.
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. In Figure \ref{fig:genesVsCentroids}, we plot a few
-of the actual genes assigned to cluster 2 to see the difference:
+of the actual genes assigned to cluster 2 with the estimated centroid overlaid:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{cluster_of_interest =}\StringTok{ }\DecValTok{2}
 \NormalTok{cluster2Genes =}\StringTok{ }\KeywordTok{names}\NormalTok{(}
 \NormalTok{    kmeans_clusters}\OperatorTok{$}\NormalTok{clusters[kmeans_clusters}\OperatorTok{$}\NormalTok{clusters}\OperatorTok{==}\NormalTok{cluster_of_interest])}
-\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}
-    \KeywordTok{assay}\NormalTok{(de_moanin_model[cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{],]), }
-    \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,])}
-\KeywordTok{plot_splines_data}\NormalTok{(de_moanin_model, }\DataTypeTok{data=}\NormalTok{dataToPlot, }
-    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{simpleY=}\OtherTok{FALSE}\NormalTok{,}
+\KeywordTok{plot_splines_data}\NormalTok{(de_moanin_model,  }
+    \DataTypeTok{centroid=}\NormalTok{kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,], }
+    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
+    \DataTypeTok{subset_data=}\NormalTok{cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{],}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -1094,33 +1093,12 @@ of the actual genes assigned to cluster 2 to see the difference:
 \caption{Genes from cluster 2}\label{fig:genesVsCentroids}
 \end{figure}
 
-The spline plots are fitted per gene in the above plot and illustrate that
-the genes assigned to a cluster have differing degrees to which their data
-fits that of the cluster centroid, and indeed fits that of their individual
-spline fits.
-
-We can also overlay the centroid on the data, after rescaling the data to be between 0-1, like the centroids
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{de_moanin_rescale =}\StringTok{ }\NormalTok{de_moanin_model}
-\KeywordTok{assay}\NormalTok{(de_moanin_rescale) =}\StringTok{ }\KeywordTok{rescale_values}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{assay}\NormalTok{(de_moanin_model))}
-\KeywordTok{plot_splines_data}\NormalTok{(de_moanin_rescale,  }
-    \DataTypeTok{centroid=}\NormalTok{kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,], }
-    \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{simpleY =}\OtherTok{FALSE}\NormalTok{,}
-    \DataTypeTok{subset_data=}\NormalTok{cluster2Genes[}\DecValTok{3}\OperatorTok{:}\DecValTok{6}\NormalTok{],}
-    \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,}\FloatTok{2.5}\NormalTok{,}\DecValTok{2}\NormalTok{,}\FloatTok{0.1}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{center}\includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/unnamed-chunk-19-1} \end{center}
-
-\textbf{EAP} I added the functionality to plot centroid over data, rather than just fit to data, but I'm not sure it makes much sense to include this. The \texttt{rescale\_values} function is too sensitive to outliers. Would be better to rescale each centroid to scale of gene. If we had a helper function to do that, could easily add that to plot\_splines\_data (made issue on moanin), but probably right now should remove this.
-
 \hypertarget{assigning-genes-to-clusters}{%
 \subsubsection{Assigning genes to clusters}\label{assigning-genes-to-clusters}}
 
-Because there is variability in how well the genes fit a cluster, we would like to be able to score how well a gene fits a cluster. Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
+As we can see, while these genes have some similarity with the pattern of the cluster centroids, these particularly genes are not the best examples of the cluster, in the sense of matching the centroid estimates. Because of this variability in how well the genes fit a cluster, we would like to be able to score how well a gene fits a cluster.
+
+Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
 like to have a mechanism to assign all genes to a cluster.
 
 Thus, the next step in the clustering portion of the workflow is a scoring and label step. Each gene is given a score that
@@ -1269,7 +1247,7 @@ the two clusters.
 \caption{Confusion matrix between the two sets of labels}\label{fig:confusionMatrix}
 \end{figure}
 
-Of the four genes we plotted before, 2 of them remained assigned to cluster 2. We can again look at a
+Of the four genes we plotted before, 2 of them remained assigned to cluster 2 after our scoring. We can again look at a
 few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:topScoreInCluster2})
 
 \begin{Shaded}
@@ -1278,11 +1256,9 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 \NormalTok{ord =}\StringTok{ }\KeywordTok{order}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores[genes_in_cluster2,}
 \NormalTok{                     cluster_of_interest])}
 \NormalTok{cluster2Score =}\StringTok{ }\NormalTok{genes_in_cluster2[ord]}
-\NormalTok{dataToPlot =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}
-    \KeywordTok{assay}\NormalTok{(moanin_model[cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], ]),}
-    \StringTok{"Centroid"}\NormalTok{=kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest, ])}
 \KeywordTok{plot_splines_data}\NormalTok{(}
-\NormalTok{    moanin_model, }\DataTypeTok{data=}\NormalTok{dataToPlot, }
+\NormalTok{    moanin_model, }\DataTypeTok{subset_data=}\NormalTok{cluster2Score[}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], }
+    \DataTypeTok{centroid=}\NormalTok{kmeans_clusters}\OperatorTok{$}\NormalTok{centroids[cluster_of_interest,], }
     \DataTypeTok{colors=}\NormalTok{ann_colors}\OperatorTok{$}\NormalTok{Group, }\DataTypeTok{smooth=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{simpleY=}\OtherTok{FALSE}\NormalTok{,}
     \DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{, }\FloatTok{2.5}\NormalTok{, }\DecValTok{2}\NormalTok{, }\FloatTok{0.1}\NormalTok{))}
 \end{Highlighting}
@@ -1296,6 +1272,8 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 
 \caption{Top scoring genes in Cluster 2}\label{fig:topScoreInCluster2}
 \end{figure}
+
+We see that, as expected, these genes are a much better match to the cluster centroids.
 
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
