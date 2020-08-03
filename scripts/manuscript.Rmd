@@ -47,7 +47,8 @@ library(KEGGprofile)
 library(viridis)
 
 library(topGO)
-
+library(moanin)
+if(!packageVersion("moanin")>="0.99.0-902") stop("Must have version 0.99.0-902 to compile the manuscript")
 ```
 
 ```{r echo=FALSE, include=FALSE}
@@ -864,41 +865,24 @@ plot_splines_data(de_moanin_model,
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
 fits, and do not represent the actual gene expression level. In Figure \ref{fig:genesVsCentroids}, we plot a few
-of the actual genes assigned to cluster 2 to see the difference:
+of the actual genes assigned to cluster 2 with the estimated centroid overlaid:
 
 ```{r genesVsCentroids, fig.height=6, fig.width=6, fig.cap="Genes from cluster 2"}
 cluster_of_interest = 2
 cluster2Genes = names(
     kmeans_clusters$clusters[kmeans_clusters$clusters==cluster_of_interest])
-dataToPlot = rbind(
-    assay(de_moanin_model[cluster2Genes[3:6],]), 
-    "Centroid"=kmeans_clusters$centroids[cluster_of_interest,])
-plot_splines_data(de_moanin_model, data=dataToPlot, 
-    colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
-    mar=c(1.5,2.5,2,0.1))
-```
-
-The spline plots are fitted per gene in the above plot and illustrate that
-the genes assigned to a cluster have differing degrees to which their data
-fits that of the cluster centroid, and indeed fits that of their individual
-spline fits. 
-
-We can also overlay the centroid on the data, after rescaling the data to be between 0-1, like the centroids
-
-```{r}
-de_moanin_rescale = de_moanin_model
-assay(de_moanin_rescale) = rescale_values(data=assay(de_moanin_model))
-plot_splines_data(de_moanin_rescale,  
+plot_splines_data(de_moanin_model,  
     centroid=kmeans_clusters$centroids[cluster_of_interest,], 
     colors=ann_colors$Group, smooth=TRUE,simpleY =FALSE,
     subset_data=cluster2Genes[3:6],
     mar=c(1.5,2.5,2,0.1))
 ```
-**EAP** I added the functionality to plot centroid over data, rather than just fit to data, but I'm not sure it makes much sense to include this. The `rescale_values` function is too sensitive to outliers. Would be better to rescale each centroid to scale of gene. If we had a helper function to do that, could easily add that to plot_splines_data (made issue on moanin), but probably right now should remove this. 
+
 
 ### Assigning genes to clusters
+As we can see, while these genes have some similarity with the pattern of the cluster centroids, these particularly genes are not the best examples of the cluster, in the sense of matching the centroid estimates. Because of this variability in how well the genes fit a cluster, we would like to be able to score how well a gene fits a cluster. 
 
-Because there is variability in how well the genes fit a cluster, we would like to be able to score how well a gene fits a cluster. Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
+Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
 like to have a mechanism to assign all genes to a cluster. 
 
 Thus, the next step in the clustering portion of the workflow is a scoring and label step. Each gene is given a score that
@@ -1050,7 +1034,7 @@ labels = unlist(labels[!is.na(labels)])
 ```
 
 Of the four genes we plotted before, `r sum(cluster2Genes[3:6] %in%
-genes_in_cluster2)` of them remained assigned to cluster `r cluster_of_interest`. We can again look at a
+genes_in_cluster2)` of them remained assigned to cluster `r cluster_of_interest` after our scoring. We can again look at a
 few genes in cluster `r cluster_of_interest`, only now pick the best scoring genes (Figure \ref{fig:topScoreInCluster2})
 
 ```{r topScoreInCluster2, fig.height=6, fig.width=6, fig.cap=paste("Top scoring genes in Cluster",cluster_of_interest)}
@@ -1058,15 +1042,13 @@ few genes in cluster `r cluster_of_interest`, only now pick the best scoring gen
 ord = order(scores_and_labels$scores[genes_in_cluster2,
 				     cluster_of_interest])
 cluster2Score = genes_in_cluster2[ord]
-dataToPlot = rbind(
-    assay(moanin_model[cluster2Score[1:4], ]),
-    "Centroid"=kmeans_clusters$centroids[cluster_of_interest, ])
 plot_splines_data(
-    moanin_model, data=dataToPlot, 
+    moanin_model, subset_data=cluster2Score[1:4], 
+    centroid=kmeans_clusters$centroids[cluster_of_interest,], 
     colors=ann_colors$Group, smooth=TRUE, simpleY=FALSE,
     mar=c(1.5, 2.5, 2, 0.1))
 ```
-
+We see that, as expected, these genes are a much better match to the cluster centroids. 
 
 ```{r saving_results, results="hide", echo=FALSE}
 # Save the clustering for the GO term and pathway enrichment on the whole set
