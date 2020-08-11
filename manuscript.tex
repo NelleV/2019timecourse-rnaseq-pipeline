@@ -117,7 +117,7 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-08-10 18:13:04.
+The manuscript was last compile on 2020-08-11 06:50:22.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -227,7 +227,9 @@ If Bioconductor is installed, the CRAN and Bioconductor packages above can be in
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"NMF"}\NormalTok{,}\StringTok{"ggfortify"}\NormalTok{,}\StringTok{"topGO"}\NormalTok{,}\StringTok{"biomaRt"}\NormalTok{,}\StringTok{"KEGGprofile"}\NormalTok{,}\StringTok{"BiocWorkflowTools"}\NormalTok{))}
+\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}
+    \KeywordTok{c}\NormalTok{(}\StringTok{"NMF"}\NormalTok{, }\StringTok{"ggfortify"}\NormalTok{, }\StringTok{"topGO"}\NormalTok{, }\StringTok{"biomaRt"}\NormalTok{,}
+      \StringTok{"KEGGprofile"}\NormalTok{, }\StringTok{"BiocWorkflowTools"}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1133,15 +1135,19 @@ cluster centroid and gives a cluster label to the gene if they have a sufficient
 
 The \texttt{scores\_and\_labels} list contains three elements:
 
-\begin{verbatim}
-- `scores`: the matrix of shape `n_cluster` x `n_genes`,
+\begin{itemize}
+\tightlist
+\item
+  \texttt{scores}: the matrix of shape \texttt{n\_cluster} x \texttt{n\_genes},
   containing for each gene and each cluster, the goodness of fit as
   described above.
-- `labels`: the labels for all of the genes with a
+\item
+  \texttt{labels}: the labels for all of the genes with a
   sufficiently good goodness-of-fit score.
-- `score_cutoff`: the cutoff used on `scores` to determine whether to 
+\item
+  \texttt{score\_cutoff}: the cutoff used on \texttt{scores} to determine whether to
   assign a label
-\end{verbatim}
+\end{itemize}
 
 \textbf{Assigning cluster labels:} We could just assign each gene to a cluster
 based on which cluster gave the minimum score. By default,
@@ -1188,7 +1194,10 @@ our previously calculated score via the argument \texttt{previous\_scores})
 \CommentTok{# Get the best score and best label for all of the genes}
 \CommentTok{# This time without filtering labels}
 \CommentTok{# We can give the previous calculated scores to `previous_scores` to save time}
-\NormalTok{unfiltered_scores<-}\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(moanin_model,kmeans_clusters,}\DataTypeTok{proportion_genes_to_label=}\DecValTok{1}\NormalTok{, }\DataTypeTok{previous_scores=}\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
+\NormalTok{unfiltered_scores =}\StringTok{ }\KeywordTok{splines_kmeans_score_and_label}\NormalTok{(}
+\NormalTok{    moanin_model, kmeans_clusters,}
+    \DataTypeTok{proportion_genes_to_label=}\DecValTok{1}\NormalTok{,}
+    \DataTypeTok{previous_scores=}\NormalTok{scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
 \NormalTok{best_score =}\StringTok{ }\KeywordTok{rowMin}\NormalTok{(scores_and_labels}\OperatorTok{$}\NormalTok{scores)}
 \NormalTok{best_label =}\StringTok{ }\NormalTok{unfiltered_scores}\OperatorTok{$}\NormalTok{labels}
 
@@ -1346,7 +1355,7 @@ Now we will create the heatmaps of these genes (3746 genes, Figure \ref{fig:heat
 
 }
 
-\caption{Heatmap of genes in Cluster 8}\label{fig:heatmapCluster8}
+\caption{Heatmap of genes in Cluster 6}\label{fig:heatmapCluster8}
 \end{figure}
 
 Those two heatmaps demonstrate that the clustering method successfully cluster
@@ -1371,7 +1380,7 @@ identify the number of clusters:
 \tightlist
 \item
   \textbf{Elbow method}. First introduced in 1953 by Thorndike \citep{thorndike:who},
-  the elbow methods looks at the total with cluster sum of squares
+  the elbow methods looks at the total within cluster sum of squares
   as a function of the number of clusters (WCSS). When adding clusters
   doesn't decrease the WCSS by a sufficient
   amount, one can consider stopping. This method thus provides visual aid to
@@ -1532,7 +1541,9 @@ Using the subsampling strategy, we take a unique subset of the genes, keeping 80
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{subsample_proportion =}\StringTok{ }\FloatTok{0.8}
-\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{], n_genes }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion, }\DataTypeTok{replace=}\OtherTok{FALSE}\NormalTok{)}
+\NormalTok{indices =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(de_moanin_model)[}\DecValTok{1}\NormalTok{],}
+\NormalTok{         n_genes }\OperatorTok{*}\StringTok{ }\NormalTok{subsample_proportion,}
+         \DataTypeTok{replace=}\OtherTok{FALSE}\NormalTok{)}
 
 \NormalTok{subsampled_y =}\StringTok{ }\NormalTok{de_moanin_model[indices, ]}
 \end{Highlighting}
@@ -1577,6 +1588,9 @@ entry to the label found for that particular clustering. Thus, for each gene,
 we have an assignment to a cluster over the 20 resampling runs. For example,
 for \(k=5\):
 
+\begin{table}[H]
+\centering\begingroup\fontsize{7}{9}\selectfont
+
 \begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
 \hline
   & B1 & B2 & B3 & B4 & B5 & B6 & B7 & B8 & B9 & B10 & B11 & B12 & B13 & B14 & B15 & B16 & B17 & B18 & B19 & B20 & B21 & B22 & B23 & B24 & B25\\
@@ -1594,6 +1608,8 @@ AB011473 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 4 & 4 & 2 & 5 & 2 & 5 & 5 & 1
 AB099518 & 2 & 1 & 2 & 1 & 3 & 3 & 2 & 5 & 5 & 2 & 4 & 4 & 2 & 5 & 2 & 5 & 5 & 1 & 1 & 1 & 2 & 5 & 1 & 2 & 1\\
 \hline
 \end{tabular}
+\endgroup{}
+\end{table}
 
 Now we will use the function \texttt{consensus\_matrix} in the \texttt{moanin} package to
 calculate proportion of times each pair of samples was clustered together
@@ -1833,6 +1849,9 @@ we would expect by simply proportional assignment of genes to clusters.
 \end{Highlighting}
 \end{Shaded}
 
+\begin{table}[H]
+\centering\begingroup\fontsize{7}{9}\selectfont
+
 \begin{tabular}{llrr}
 \toprule
   & Pathway & Percentage & Adj. p-value\\
@@ -1850,6 +1869,8 @@ we would expect by simply proportional assignment of genes to clusters.
 04940 & Type I diabetes mellitus & 35 & 0\\
 \bottomrule
 \end{tabular}
+\endgroup{}
+\end{table}
 
 \hypertarget{finding-enriched-go-terms}{%
 \subsubsection{Finding enriched GO terms}\label{finding-enriched-go-terms}}
