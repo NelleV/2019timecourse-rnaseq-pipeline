@@ -154,7 +154,9 @@ library(BiocWorkflowTools) #Needed for compiling the .Rmd script
 If Bioconductor is installed, the CRAN and Bioconductor packages above can be installed via
 
 ```{r eval=FALSE}
-BiocManager::install(c("NMF","ggfortify","topGO","biomaRt","KEGGprofile","BiocWorkflowTools"))
+BiocManager::install(
+    c("NMF", "ggfortify", "topGO", "biomaRt",
+      "KEGGprofile", "BiocWorkflowTools"))
 ```
 
 # Analysis of the dynamical response of mouse lung tissue to influenza
@@ -916,13 +918,13 @@ scores_and_labels = splines_kmeans_score_and_label(
 
 The `scores_and_labels` list contains three elements:
 
-    - `scores`: the matrix of shape `n_cluster` x `n_genes`,
-      containing for each gene and each cluster, the goodness of fit as
-      described above.
-    - `labels`: the labels for all of the genes with a
-      sufficiently good goodness-of-fit score.
-    - `score_cutoff`: the cutoff used on `scores` to determine whether to 
-      assign a label
+- `scores`: the matrix of shape `n_cluster` x `n_genes`,
+  containing for each gene and each cluster, the goodness of fit as
+  described above.
+- `labels`: the labels for all of the genes with a
+  sufficiently good goodness-of-fit score.
+- `score_cutoff`: the cutoff used on `scores` to determine whether to 
+  assign a label
 
 **Assigning cluster labels:** We could just assign each gene to a cluster
 based on which cluster gave the minimum score. By default,
@@ -966,7 +968,10 @@ our previously calculated score via the argument `previous_scores`)
 # Get the best score and best label for all of the genes
 # This time without filtering labels
 # We can give the previous calculated scores to `previous_scores` to save time
-unfiltered_scores<-splines_kmeans_score_and_label(moanin_model,kmeans_clusters,proportion_genes_to_label=1, previous_scores=scores_and_labels$scores)
+unfiltered_scores = splines_kmeans_score_and_label(
+    moanin_model, kmeans_clusters,
+    proportion_genes_to_label=1,
+    previous_scores=scores_and_labels$scores)
 best_score = rowMin(scores_and_labels$scores)
 best_label = unfiltered_scores$labels
 
@@ -1084,7 +1089,7 @@ genes_to_plot =  names(labels[labels == cluster_to_plot])
 
 Now we will create the heatmaps of these genes (`r length(genes_to_plot)` genes, Figure \ref{fig:heatmapCluster8}).
 
-```{r heatmapCluster8, fig.width=6, fig.height=8, fig.cap="Heatmap of genes in Cluster 8"}
+```{r heatmapCluster8, fig.width=6, fig.height=8, fig.cap="Heatmap of genes in Cluster 6"}
 layout(matrix(c(1,2),nrow=1), widths=c(1.5, 2))
 
 # order the observations by Group, then time, then replicate
@@ -1137,7 +1142,7 @@ Once the maximum number of clusters is set, several strategies allow to
 identify the number of clusters:
 
 - **Elbow method**. First introduced in 1953 by Thorndike [@thorndike:who],
-  the elbow methods looks at the total with cluster sum of squares 
+  the elbow methods looks at the total within cluster sum of squares 
   as a function of the number of clusters (WCSS). When adding clusters
   doesn't decrease the WCSS by a sufficient
   amount, one can consider stopping. This method thus provides visual aid to
@@ -1266,7 +1271,9 @@ Using the subsampling strategy, we take a unique subset of the genes, keeping 80
 
 ```{r}
 subsample_proportion = 0.8
-indices = sample(1:dim(de_moanin_model)[1], n_genes * subsample_proportion, replace=FALSE)
+indices = sample(1:dim(de_moanin_model)[1],
+		 n_genes * subsample_proportion,
+		 replace=FALSE)
 
 subsampled_y = de_moanin_model[indices, ]
 ```
@@ -1308,7 +1315,8 @@ we have an assignment to a cluster over the 20 resampling runs. For example,
 for $k=5$: 
 
 ```{r,echo=FALSE}
-kable(head(stability_5))
+kable(head(stability_5)) %>%
+  kable_styling(font_size = 7)
 ```
 
 
@@ -1517,7 +1525,12 @@ pathways = subset(
 	"pvalueAdj"))
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways[1:min(10,nrow(pathways)), ], format="latex", escape=F, digits=4, booktabs=TRUE)
+kable(pathways[1:min(10,nrow(pathways)), ],
+      format="latex",
+      escape=F,
+      digits=4,
+      booktabs=TRUE) %>%
+  kable_styling(font_size = 7)
 ```
 
 
@@ -1580,7 +1593,7 @@ go_terms_enriched = find_enriched_go_terms(
 go_terms_enriched = go_terms_enriched[
     order(go_terms_enriched[, "resultFisher_padj"]), ]
 colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
-"Significant", "Expected", "P-value", "Adj. p-value")
+    "Significant", "Expected", "P-value", "Adj. p-value")
 
 kable(go_terms_enriched[1:15, ], format="latex", escape=F,
       digits=3, booktabs=TRUE, row.names=FALSE)
