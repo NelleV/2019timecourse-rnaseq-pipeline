@@ -59,8 +59,6 @@ knitr::opts_chunk$set(
 ```
 
 
-The manuscript was last compile on `r Sys.time()`.
-
 # Introduction
 
 Gene expression studies provide simultaneous quantification of the level of
@@ -125,12 +123,17 @@ knitr::include_graphics("images/fig1_schemas.png",dpi=30 )
 
 ## Installation and setup
 
- `moanin` is available from GitHub, and can be installed using the `install_github` function in the package `devtools`, along with the corresponding package that contains time course datasets we will use:
+`moanin` and `timecoursedata` are available from bioconductor, and can be
+installed using the `install` function in the package `BiocManager`, along
+with the corresponding package that contains time course datasets we will use:
 
 ```{r eval=FALSE}
-library(devtools)
-install_github("NelleV/moanin")
-install_github("NelleV/timecoursedata")
+library(BiocManager)
+# Need to use the development version for now.
+BiocManager::install(version="devel")  BiocManager::valid()
+
+BiocManager::install("timecoursedata")
+BiocManager::install("moanin")
 ```
 
 The following additional packages are needed for this workflow:
@@ -156,7 +159,7 @@ If Bioconductor is installed, the CRAN and Bioconductor packages above can be in
 ```{r eval=FALSE}
 BiocManager::install(
     c("NMF", "ggfortify", "topGO", "biomaRt",
-      "KEGGprofile", "BiocWorkflowTools"))
+      "KEGGprofile", "BiocWorkflowTools", "timecoursedata", ))
 ```
 
 # Analysis of the dynamical response of mouse lung tissue to influenza
@@ -170,7 +173,7 @@ study are (1) a low pathogenicity seasonal H1N1 influenza virus
 (A/Kawasaki/UTK4/2009 [H1N1]), a mildly pathogenic virus from the 2009
 pandemic season (A/California/04/2009 [H1N1]), and a highly pathogenic H5N1
 avian influenza virus (A/Vietnam/1203/2004 [H5N1]. Mice were injected with
-$10^5$ PFU of each virus. An adidtional 42 mice were injected with a lower dose
+$10^5$ PFU of each virus. An additional 42 mice were injected with a lower dose
 of the Vietnam avian influenza virus ($10^3$ PFU).
 
 By combining gene expression time-course data with virus growth data, the
