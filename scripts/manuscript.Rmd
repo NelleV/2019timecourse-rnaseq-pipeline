@@ -26,8 +26,11 @@ keywords: >
 vignette: >
     %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
     %\VignetteEngine{knitr::rmarkdown}
-output: BiocWorkflowTools::f1000_article
+output:
+    BiocWorkflowTools::f1000_article: default
+    ms_document: default
 bibliography: bibliography.bib
+always_allow_html: yes
 ---
 
 ```{r echo=FALSE, results="hide", message=FALSE}
@@ -39,7 +42,7 @@ library(stats)
 library(knitr)
 library(BiocStyle)
 library(biomaRt)
-library(kableExtra)
+library(pander)
 
 library(ggplot2)
 library(NMF)
@@ -180,7 +183,7 @@ of the Vietnam avian influenza virus ($10^3$ PFU).
 By combining gene expression time-course data with virus growth data, the
 authors show that the inflammatory response of lung tissue is gated until a
 threshold of the virus concentration is  exceeded in the lung. Once this
-threshold is exceeded, a strong inflammatory and cytokin production occurs.
+threshold is exceeded, a strong inflammatory and cytokine production occurs.
 This results provides evidence that the pathology response is non-linearly
 regulated by virus concentration.
 
@@ -205,7 +208,7 @@ The meta data contains information about the treatment group, the replicate,
 and the timepoint for each observation:
 
 ```{r echo=FALSE}
-kable(head(meta))
+pander(head(meta))
 ```
 
 Before we dive into the exploratory analysis and quality control, let us
@@ -417,7 +420,7 @@ two columns: one named `Group`, containing the  treatement effect, and a
 second one named `Timepoint` containing the timepoint information.
 
 ```{r echo=FALSE}
-kable(head(meta))
+pander(head(meta))
 ```
 
 We create a `Moanin` object for our data:
@@ -497,7 +500,7 @@ first timepoint (i.e. first three columns of the output) and the first ten
 genes: 
 
 ```{r echo=FALSE}
-kable(weekly_de_analysis[1:10, 1:3 ], "latex", digits=3, booktabs=TRUE)
+pander(weekly_de_analysis[1:10, 1:3 ])
 
 ```
 
@@ -665,10 +668,9 @@ log_fold_change_timepoints = estimate_log_fold_change(
 ```
 
 ```{r echo=FALSE}
-kable(
-    head(log_fold_change_timepoints[, colnames(log_fold_change_timepoints)[1:5]]),
-    format="latex",
-    booktabs=TRUE)
+pander(
+    head(log_fold_change_timepoints[,
+    colnames(log_fold_change_timepoints)[1:5]]))
 ```
 
 This matrix can then be used to visualize the log-fold change for each
@@ -717,7 +719,7 @@ each column to a contrasts, and each entry to the log-fold change for this
 pair of contrast and gene.
 
 ```{r display_lfc, echo=FALSE}
-kable(log_fold_change_timecourse[1:5, ], digits=3, booktabs=TRUE)
+pander(log_fold_change_timecourse[1:5, ])
 ``` 
 
 In Figure \ref{fig:compareLogFoldChange} we plot the log-fold change summary of each of these methods against each other. We see that each methods captures different elements of
@@ -1319,8 +1321,7 @@ we have an assignment to a cluster over the 20 resampling runs. For example,
 for $k=5$: 
 
 ```{r,echo=FALSE}
-kable(head(stability_5)) %>%
-  kable_styling(font_size = 7)
+pander(head(stability_5))
 ```
 
 
@@ -1529,12 +1530,7 @@ pathways = subset(
 	"pvalueAdj"))
 colnames(pathways) = c("Pathway", "Percentage", "Adj. p-value")
 pathways["Percentage"] = pathways["Percentage"] * 100
-kable(pathways[1:min(10,nrow(pathways)), ],
-      format="latex",
-      escape=F,
-      digits=4,
-      booktabs=TRUE) %>%
-  kable_styling(font_size = 7)
+pander(pathways[1:min(10,nrow(pathways)), ])
 ```
 
 
@@ -1599,20 +1595,22 @@ go_terms_enriched = go_terms_enriched[
 colnames(go_terms_enriched) = c("GO ID", "Description", "Annotated",
     "Significant", "Expected", "P-value", "Adj. p-value")
 
-kable(go_terms_enriched[1:15, ], format="latex", escape=F,
-      digits=3, booktabs=TRUE, row.names=FALSE)
+pander(go_terms_enriched[1:15, ])
 ```
 
 
 # Conclusion
 
 This workflow provides a tutoral for the analysis of lengthy time-course gene
-expression data in R using the package `moanin`, which aids in implementing common timecourse analyses. We illustrate the workflow through the analysis of mice lung tissue
-exposed to different influenza strain and measured over time. 
-The proposed workflow covers consists of three common analysis main steps generally performed after quality
-control and normalization: (1) differential expression analysis; (2)
-clustering of time-course gene expression data; (3) downstream analysis of
-clusters. We demonstrate how the use of the package `moanin` allows for easy implementation of these procedures in the setting of time-course data.
+expression data in R using the package `moanin`, which aids in implementing
+common timecourse analyses. We illustrate the workflow through the analysis of
+mice lung tissue exposed to different influenza strain and measured over time.
+The proposed workflow covers consists of three common analysis main steps
+generally performed after quality control and normalization: (1) differential
+expression analysis; (2) clustering of time-course gene expression data; (3)
+downstream analysis of clusters. We demonstrate how the use of the package
+`moanin` allows for easy implementation of these procedures in the setting of
+time-course data.
 
 
 # Software and data availability
@@ -1626,7 +1624,7 @@ Bioconductor.
 
 Data used in this workflow are available from NCBI GEO, accession
 [GSE63786](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63786).
-Normalized data can be found in `moanin`.  Normalization information is
+Normalized data can be found in `timecoursedata`.  Normalization information is
 provided as supplementary information.
 
 Last but not least, we use `sessionInfo()` to display all packages used in

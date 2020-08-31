@@ -99,3 +99,5 @@ if(!require(BiocWorkflowTools)){
 }
 
 install_github("NelleV/moanin", dependencies=FALSE)
+
+install.packages('pander')
