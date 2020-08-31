@@ -117,8 +117,6 @@ time-course gene expression data, clustering, differential expression, workflow
 \clearpage
 \pagestyle{main}
 
-The manuscript was last compile on 2020-08-30 18:19:11.
-
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
@@ -193,13 +191,19 @@ functions in a R package called \texttt{moanin}.
 \hypertarget{installation-and-setup}{%
 \subsection{Installation and setup}\label{installation-and-setup}}
 
-\texttt{moanin} is available from GitHub, and can be installed using the \texttt{install\_github} function in the package \texttt{devtools}, along with the corresponding package that contains time course datasets we will use:
+\texttt{moanin} and \texttt{timecoursedata} are available from bioconductor, and can be
+installed using the \texttt{install} function in the package \texttt{BiocManager}, along
+with the corresponding package that contains time course datasets we will use:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(devtools)}
-\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/moanin"}\NormalTok{)}
-\KeywordTok{install_github}\NormalTok{(}\StringTok{"NelleV/timecoursedata"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(BiocManager)}
+\CommentTok{# Need to use the development version for now.}
+\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}\DataTypeTok{version=}\StringTok{"devel"}\NormalTok{)}
+\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{valid}\NormalTok{()}
+
+\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}\StringTok{"timecoursedata"}\NormalTok{)}
+\NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}\StringTok{"moanin"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -229,7 +233,7 @@ If Bioconductor is installed, the CRAN and Bioconductor packages above can be in
 \begin{Highlighting}[]
 \NormalTok{BiocManager}\OperatorTok{::}\KeywordTok{install}\NormalTok{(}
     \KeywordTok{c}\NormalTok{(}\StringTok{"NMF"}\NormalTok{, }\StringTok{"ggfortify"}\NormalTok{, }\StringTok{"topGO"}\NormalTok{, }\StringTok{"biomaRt"}\NormalTok{,}
-      \StringTok{"KEGGprofile"}\NormalTok{, }\StringTok{"BiocWorkflowTools"}\NormalTok{))}
+      \StringTok{"KEGGprofile"}\NormalTok{, }\StringTok{"BiocWorkflowTools"}\NormalTok{, }\StringTok{"timecoursedata"}\NormalTok{, ))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -245,7 +249,7 @@ study are (1) a low pathogenicity seasonal H1N1 influenza virus
 (A/Kawasaki/UTK4/2009 {[}H1N1{]}), a mildly pathogenic virus from the 2009
 pandemic season (A/California/04/2009 {[}H1N1{]}), and a highly pathogenic H5N1
 avian influenza virus (A/Vietnam/1203/2004 {[}H5N1{]}. Mice were injected with
-\(10^5\) PFU of each virus. An adidtional 42 mice were injected with a lower dose
+\(10^5\) PFU of each virus. An additional 42 mice were injected with a lower dose
 of the Vietnam avian influenza virus (\(10^3\) PFU).
 
 By combining gene expression time-course data with virus growth data, the
