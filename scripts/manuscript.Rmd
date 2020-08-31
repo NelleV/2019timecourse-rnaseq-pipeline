@@ -130,7 +130,8 @@ with the corresponding package that contains time course datasets we will use:
 ```{r eval=FALSE}
 library(BiocManager)
 # Need to use the development version for now.
-BiocManager::install(version="devel")  BiocManager::valid()
+BiocManager::install(version="devel")
+BiocManager::valid()
 
 BiocManager::install("timecoursedata")
 BiocManager::install("moanin")
