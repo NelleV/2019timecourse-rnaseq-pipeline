@@ -34,6 +34,8 @@ install_github_dependencies() {
     make install-extra
     make install
     popd
+
+    Rscript scripts/install.R
 }
 
 run_tests() {

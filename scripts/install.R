@@ -98,6 +98,6 @@ if(!require(BiocWorkflowTools)){
     BiocManager::install("BiocWorkflowTools")
 }
 
-install_github("NelleV/moanin", dependencies=FALSE)
-
-install.packages('pander')
+if(!require("pander")){
+    install.packages('pander')
+}
