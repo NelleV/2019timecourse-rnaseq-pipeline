@@ -357,7 +357,9 @@ Before we dive into the exploratory analysis and quality control, let us
 define color schemes for our data that we will use across the whole analysis.
 We define color schemes for groups and time points as named vectors. We also
 define a series of markers (or plotting symbols) to distinguish replicate
-samples in scatter plots. We also reorder the factor \texttt{Group} which describes the treatments so that the treatments are order from low to high pathogeny (with Control being first).
+samples in scatter plots. We also reorder the factor \texttt{Group} which describes
+the treatments so that the treatments are ordered from low to high pathogeny
+(with Control being first).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -462,7 +464,7 @@ samples by their Group (treatment) and Timepoint (the time of sampling).
 \end{figure}
 
 We can already see interesting patterns emerging from the correlation plot.
-First, the cross-correlation amongst samples taking from the control mice is
+First, the cross-correlation amongst samples taken from the control mice is
 higher than the cross correlation amongst the rest of the treatments. Second,
 the influenza-infected mice mildly react until time point 36. Third, the less
 pathogenic the strain is, the closer the samples are to the control condition.
@@ -512,19 +514,18 @@ we are interested in.
 \textbf{DE Analysis in \texttt{moanin}} Our package \texttt{moanin} provides functionality for performing both of
 these types of approaches, though our focus is on the global approach, specifically by fitting spline models to the genes.
 
-In both
-situations, we first need to set up a object (a \texttt{Moanin} object) to
+In both situations, we first need to set up an object (a \texttt{Moanin} object) to
 hold the meta data, as well as information for fitting the spline model
-(formula, number of degrees of freedom of the splines, \ldots{}). The \texttt{Moanin} object
-will contain information used
-throughout this analysis, in particular the condition and timepoints of each sample and the
-the basis matrix for fitting splines models.
+(formula, number of degrees of freedom of the splines, \ldots{}). The \texttt{Moanin}
+object will contain information used throughout this analysis, in particular
+the condition and timepoints of each sample and the basis matrix for
+fitting splines models.
 
 We start by creating the \texttt{Moanin} object using the \texttt{create\_moanin\_model}
 function. We need to provide two things to the function: a \texttt{data.frame} with
 the metadata, and the number of degrees of freedom of the splines to be used in the
 functional modeling. The metadata \texttt{data.frame} object should contain at least
-two columns: one named \texttt{Group}, containing the treatement effect, and a
+two columns: one named \texttt{Group}, containing the treatment effect, and a
 second one named \texttt{Timepoint} containing the timepoint information.
 
 \begin{longtable}[]{@{}ccccc@{}}
@@ -882,8 +883,8 @@ of the Kawasaki strain). While there may be biological differences at those
 time points for some genes, it seems unlikely that the large majority of genes
 differentially expressed at timepoint 3H stop being differentially expressed
 at 6H and then jump back to being differentially expressed at 9H. A more
-likely explanation is that there is are some technical or biological artifact
-about the samples for 6H that is creating higher variation and thus less
+likely explanation is that there are some technical or biological artifacts
+about the samples for 6H that are creating higher variation and thus less
 ability to detect significance.
 
 Another difficulty with such an approach is making sense of the general
@@ -1130,8 +1131,9 @@ following formula:
 
 \[\text{sign}\left(\frac{1}{T}\sum_{t = 1}^T \text{lfc}(t) \right) \times \left(\frac{1}{T}\sum_{t= 1}^T \lvert {\text{lfc}(t)} \lvert \right)\]
 
-Note, however, that when a gene is not consistently up or down-regulated the estimation
-of the direction will not represent accurately the changes observed.
+Note, however, that when a gene is not consistently up- or down-regulated the
+estimation of the direction will not accurately represent the changes
+observed.
 
 We demonstrate several of these methods on our data.
 
@@ -1228,8 +1230,10 @@ M-VH\strut
 \bottomrule
 \end{longtable}
 
-In Figure \ref{fig:compareLogFoldChange} we plot the log-fold change summary of each of these methods against each other. We see that each methods captures different elements of
-the time-course data, for example, overall change versus the largest change.
+In Figure \ref{fig:compareLogFoldChange} we plot the log-fold change summary
+of each of these methods against each other. We see that each method captures
+different elements of the time-course data, for example, overall change versus
+the largest change.
 
 \begin{figure}[H]
 
@@ -1240,9 +1244,10 @@ the time-course data, for example, overall change versus the largest change.
 \caption{Comparison of the different methods of calculating log-fold change per gene}\label{fig:compareLogFoldChange}
 \end{figure}
 
-With a single measure of log-fold change and the p-value, we can now look
-at the traditional volcano plot. In Figure \ref{fig:volcano}, we show the example of a volcano plot for the comparaison
-of the control to the Kawasaki strain, using the ``timecourse'' method of calculating log fold change.
+With a single measure of log-fold change and the p-value, we can now look at
+the traditional volcano plot. In Figure \ref{fig:volcano}, we show the example
+of a volcano plot for the comparison of the control to the Kawasaki strain,
+using the ``timecourse'' method of calculating log fold change.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1323,7 +1328,7 @@ of transcriptomic response.
 \hypertarget{clustering-of-time-course-data}{%
 \subsection{Clustering of time-course data}\label{clustering-of-time-course-data}}
 
-The very large number of genes found differentially expressed impair any
+The very large number of genes found differentially expressed impairs any
 interpretation one would attempt: with 70\% of the genome found differentially
 expressed, all pathways are affected by the treatment. Hence the next step of
 the workflow to cluster gene expression according to their dynamical response
@@ -1335,7 +1340,7 @@ expressed; (2) a large-fold change between conditions. Reducing the set of genes
 estimate the centroids of the clusters with more stability.
 
 To do this, we first
-aggregate all p-values obtained during the time-course differential expresison
+aggregate all p-values obtained during the time-course differential expression
 step in a single p-value using Fisher's method \citep{fisher:statistical} (\texttt{pvalues\_fisher\_method}).
 Next we
 select all the genes which have a Fisher-adjusted p-value below 0.05 and a log-fold
@@ -1364,7 +1369,7 @@ change of at least two for at least one condition and one time-point.
 
 After filtering, we are left with 5521 genes. We can then apply a
 clustering routine. As observed by looking at genes found differentially expressed,
-many genes share a similar gene expression pattern, but on different scale.
+many genes share a similar gene expression pattern, but on different scales.
 
 We thus propose the following adaptation of k-means:
 
@@ -1458,7 +1463,11 @@ of the actual genes assigned to cluster 2 with the estimated centroid overlaid:
 \hypertarget{assigning-genes-to-clusters}{%
 \subsubsection{Assigning genes to clusters}\label{assigning-genes-to-clusters}}
 
-As we can see, while these genes have some similarity with the pattern of the cluster centroids, these particularly genes are not the best examples of the cluster, in the sense of matching the centroid estimates. Because of this variability in how well the genes fit a cluster, we would like to be able to score how well a gene fits a cluster.
+As we can see, while these genes have some similarity with the pattern of the
+cluster centroids, these particular genes are not the best examples of the
+cluster, in the sense of matching the centroid estimates. Because of this
+variability in how well the genes fit a cluster, we would like to be able to
+score how well a gene fits a cluster.
 
 Furthermore, we arbitrarily chose a subset of genes based on our filter, and we would
 like to have a mechanism to assign all genes to a cluster.
@@ -1519,7 +1528,7 @@ all genes on all clusters (i.e.~the entire \texttt{scores} matrix returned by
 if their best score is above the 50\% percentile of that distribution, with the
 remaining genes getting \texttt{NA} as their assignment (this choice can be changed
 by \texttt{proportion\_genes\_to\_label}). Note that because the distribution of scores
-of genes across \emph{all} clusters are used, this is not equivalent to assigning
+of genes across \emph{all} clusters is used, this is not equivalent to assigning
 50\% of genes to a cluster -- it is possible that all genes are assigned to a
 cluster.
 
@@ -1647,7 +1656,7 @@ We see that, as expected, these genes are a much better match to the cluster cen
 \hypertarget{looking-at-specific-clusters-in-details.}{%
 \subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
 
-Now, let us look more in detail some specific clusters. Cluster 6 seems
+Now, let us look more in detail at some specific clusters. Cluster 6 seems
 particularly interesting: it captures genes with strong differences between
 the different influenza treatments and the control, while the control remains
 relatively flat.
@@ -1718,9 +1727,9 @@ Now we will create the heatmaps of these genes (3746 genes, Figure \ref{fig:heat
 \caption{Heatmap of genes in Cluster 6}\label{fig:heatmapCluster8}
 \end{figure}
 
-Those two heatmaps demonstrate that the clustering method successfully cluster
-genes that are on different scales, and yet share the same dynamical response
-to the treatments.
+Those two heatmaps demonstrate that the clustering method successfully
+clusters genes that are on different scales, and yet share the same dynamical
+response to the treatments.
 
 \hypertarget{how-to-choose-the-number-of-clusters.}{%
 \subsubsection{How to choose the number of clusters.}\label{how-to-choose-the-number-of-clusters.}}
@@ -1740,7 +1749,7 @@ identify the number of clusters:
 \tightlist
 \item
   \textbf{Elbow method}. First introduced in 1953 by Thorndike \citep{thorndike:who},
-  the elbow methods looks at the total within cluster sum of squares
+  the elbow method looks at the total within cluster sum of squares
   as a function of the number of clusters (WCSS). When adding clusters
   doesn't decrease the WCSS by a sufficient
   amount, one can consider stopping. This method thus provides visual aid to
@@ -1754,13 +1763,13 @@ identify the number of clusters:
   \textbf{Stability methods} Stability methods are more computationally intensive
   than any other method, as they rely on assessing the stability of the
   clustering for every \(k\) to a small randomization of the data. The user is
-  then invited to choose the number of cluster based on a number of similarity
+  then invited to choose the number of clusters based on a number of similarity
   measures.
 \end{itemize}
 
 First, let us run the clustering for all values of \(k\) of interest. We
 will, for each clustering, conserve (1) with within cluster sum of
-squares; (2) the clustering assignement (or label) for each gene.
+squares; (2) the clustering assignment (or label) for each gene.
 
 Below we run the clustering for \(k\) equal to \(2-20\). The \texttt{splines\_kmeans}
 function returns the WCSS for each cluster, which we sum to get the total
@@ -1791,7 +1800,7 @@ The Elbow method to choose the number of clusters relies on visualization aid
 to choose the number of clusters. The method relies on plotting the within
 cluster sum of squares (WCSS) as a function of the number of clusters. At some
 point, the WCSS will start decreasing more slowly, giving an angle or ``elbow''
-in the graph. The number of cluster is chosen at this ``Elbow point.''
+in the graph. The number of clusters is chosen at this ``Elbow point.''
 
 We plot the WCSS for \(k=2-20\) here (Figure \ref{fig:elbowMethod}).
 We see that as expected the WCSS continues
@@ -1869,7 +1878,7 @@ perturbations.
 
 Methods that rely on the stability of the clustering results to choose \(k\)
 thus ensure that the biological interpretation of the clusters hold with
-perturbtation to the data. In addition, simulation where the data is generated
+perturbations to the data. In addition, simulation where the data is generated
 with a well defined \(k\) show that the clustering is more stable for the
 correct of number of the clusters.
 
@@ -1877,7 +1886,7 @@ Most methods method to find the number of clusters with stability measures
 only provide visual aids to guide the user. The first element often visualized
 is the consensus matrix: the consensus matrix is an \(n \times n\) matrix that
 stores the proportion of clustering in which two items are clustered together.
-A perfect consensus matrix ordered such as each elements that belong to the
+A perfect consensus matrix ordered such as all elements that belong to the
 same cluster are adjacent to one another which show blocks along the diagonal
 close to 1.
 
@@ -1943,7 +1952,7 @@ For now, we bring in the results for \(k=5\) and \(k=20\).
 \end{Highlighting}
 \end{Shaded}
 
-Each column correspond to a bootstrap sample, each row to a gene, and each
+Each column corresponds to a bootstrap sample, each row to a gene, and each
 entry to the label found for that particular clustering. Thus, for each gene,
 we have an assignment to a cluster over the 20 resampling runs. For example,
 for \(k=5\):
@@ -2424,7 +2433,7 @@ We can see (Figure \ref{fig:bootstrapConsensus}) that the choice of \(K=5\) seem
 The model explorer algorithm \citep{ben-hur:stability} proposes to estimate the
 number of clusters exploiting the observation that if the number of clusters
 is correct, the clustering results are stable to bootstrap resampling, as
-described above. The distribution of similaries between bootstrapped results
+described above. The distribution of similarities between bootstrapped results
 for each \(k\) can thus be compared for different values of \(k\) and guide the
 user in the choice of number of clusters.
 
@@ -2494,7 +2503,7 @@ the stability.
 
 The consensus clustering \citep{monti:consensus} relies on a similar idea but
 instead of looking at the cumulative density of similarity measures of
-bootstrapped clustering, the authors suggests plotting the cumulative density
+bootstrapped clustering, the authors suggest plotting the cumulative density
 of elements of the consensus matrix. We provide a function
 \texttt{plot\_cdf\_consensus} in \texttt{moanin} to do this
 
@@ -2516,9 +2525,9 @@ of elements of the consensus matrix. We provide a function
 The stability of the clustering based on the consensus matrix can then be
 measured via a single number by looking at the area under the curve: the more
 stable the clustering, the closer to 0 or 1 will be the entries of consensus
-matrix. The consensus clustering strategy thus suggest at looking at either
+matrix. The consensus clustering strategy thus suggests at looking at either
 the AUC as a function of the number of the clusters or the ``improvement'' in
-the AUC as a function of the number of cluster.
+the AUC as a function of the number of clusters.
 
 Here we calculate the AUC (Figure \ref{fig:plotAUC}).
 
@@ -2559,7 +2568,7 @@ While here we calculate the improvement in the AUC (Figure \ref{fig:plotDeltaAUC
 The consensus clustering method suggest that the most stable is \(k=2\), which
 separates over-expressed genes from under-expressed genes. While it is indeed
 a very stable clustering, it does not capture the range of gene expression
-patterns present in the data. This shows the limitation of such method on real
+patterns present in the data. This shows the limitation of such methods on real
 data, where the number of clusters is not clearly defined.
 
 \hypertarget{downstream-analysis-of-clusters.}{%
@@ -3148,11 +3157,11 @@ Adj. p-value\strut
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
 
-This workflow provides a tutoral for the analysis of lengthy time-course gene
+This workflow provides a tutorial for the analysis of lengthy time-course gene
 expression data in R using the package \texttt{moanin}, which aids in implementing
 common timecourse analyses. We illustrate the workflow through the analysis of
-mice lung tissue exposed to different influenza strain and measured over time.
-The proposed workflow covers consists of three common analysis main steps
+mice lung tissue exposed to different influenza strains and measured over time.
+The proposed workflow consists of three common analysis main steps
 generally performed after quality control and normalization: (1) differential
 expression analysis; (2) clustering of time-course gene expression data; (3)
 downstream analysis of clusters. We demonstrate how the use of the package
@@ -3166,7 +3175,7 @@ The source code for this workflow can be found at
 \url{https://github.com/NelleV/2019timecourse-rnaseq-pipeline}.
 Archived source code at the time of publication can be found at \url{XXX}.
 
-All packages use in the workflow are available on GitHub, CRAN, or
+All packages used in the workflow are available on GitHub, CRAN, or
 Bioconductor.
 
 Data used in this workflow are available from NCBI GEO, accession
