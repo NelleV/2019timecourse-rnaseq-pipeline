@@ -26,6 +26,8 @@ keywords: >
 vignette: >
     %\VignetteIndexEntry{A worfklow for low-level analyses of scRNA-seq data}
     %\VignetteEngine{knitr::rmarkdown}
+header-includes:
+   - \usepackage{float}
 output:
     BiocWorkflowTools::f1000_article: default
     ms_document: default
