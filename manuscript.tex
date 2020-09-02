@@ -412,6 +412,8 @@ clustered or correlated with one another.
 
 Before performing any additional exploratory analysis, let us only keep highly
 variable genes: for this step, we keep only the top 50\% most variable genes.
+In Figure \ref{fig:geneVarHist}, we plot the distribution of variance across
+all genes.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -966,7 +968,8 @@ For convenience we will separate these into two matrices.
 \end{Shaded}
 
 The number of genes found differentially expressed ranges from around 12000 to
-29000 depending on the strain and dosage of influenza virus given to the mice.
+29000 depending on the strain and dosage of influenza virus given to the mice
+(Figure \ref{deTimeDist}).
 This corresponds to between 30\% to 70\% of the genes found differentially
 expressed in this time-course experiment.
 
@@ -1404,8 +1407,9 @@ The \texttt{splines\_kmeans} function returns a named list with:
   \texttt{clusters}: a vector of size \texttt{n\_genes}, containing the cluster assignments given by the \texttt{kmeans} step of each gene
 \end{itemize}
 
-We then use the \texttt{plot\_splines\_data} function, only now applied to the centroids, to visualize the centroids of
-each cluster obtained with the splines k-means model.
+We then use the \texttt{plot\_splines\_data} function, only now applied to the
+centroids, to visualize the centroids of each cluster obtained with the
+splines k-means model (Figure \ref{fig:centroids}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1418,11 +1422,11 @@ each cluster obtained with the splines k-means model.
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/unnamed-chunk-18-1} 
+{\centering \includegraphics[width=.5\textwidth,]{reports/manuscript_files/figure-latex/centroids-1} 
 
 }
 
-\caption{K-means centroids}\label{fig:unnamed-chunk-18}
+\caption{K-means centroids}\label{fig:centroids}
 \end{figure}
 
 These centroids are on a 0-1 scale, because of our rescaling of the spline
