@@ -1653,8 +1653,8 @@ few genes in cluster 2, only now pick the best scoring genes (Figure \ref{fig:to
 
 We see that, as expected, these genes are a much better match to the cluster centroids.
 
-\hypertarget{looking-at-specific-clusters-in-details.}{%
-\subsubsection{Looking at specific clusters in details.}\label{looking-at-specific-clusters-in-details.}}
+\hypertarget{looking-at-specific-clusters-in-detail.}{%
+\subsubsection{Looking at specific clusters in detail.}\label{looking-at-specific-clusters-in-detail.}}
 
 Now, let us look more in detail at some specific clusters. Cluster 6 seems
 particularly interesting: it captures genes with strong differences between
@@ -1882,7 +1882,7 @@ perturbations to the data. In addition, simulation where the data is generated
 with a well defined \(k\) show that the clustering is more stable for the
 correct of number of the clusters.
 
-Most methods method to find the number of clusters with stability measures
+Most methods to find the number of clusters with stability measures
 only provide visual aids to guide the user. The first element often visualized
 is the consensus matrix: the consensus matrix is an \(n \times n\) matrix that
 stores the proportion of clustering in which two items are clustered together.
@@ -1954,442 +1954,173 @@ For now, we bring in the results for \(k=5\) and \(k=20\).
 
 Each column corresponds to a bootstrap sample, each row to a gene, and each
 entry to the label found for that particular clustering. Thus, for each gene,
-we have an assignment to a cluster over the 20 resampling runs. For example,
-for \(k=5\):
+we have an assignment to a cluster over the 25 resampling runs. For example,
+for the first 10 bootstrap samples and \(k=5\):
 
-\begin{longtable}[]{@{}ccccccccccccc@{}}
-\caption{Table continues below}\tabularnewline
+\begin{longtable}[]{@{}ccccccccccc@{}}
 \toprule
-\begin{minipage}[b]{0.13\columnwidth}\centering
+\begin{minipage}[b]{0.15\columnwidth}\centering
 ~\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B1\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B2\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B3\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B4\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B5\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B6\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B7\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B8\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
 B9\strut
-\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
+\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\centering
 B10\strut
-\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
-B11\strut
-\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
-B12\strut
-\end{minipage}\tabularnewline
-\midrule
-\endfirsthead
-\toprule
-\begin{minipage}[b]{0.13\columnwidth}\centering
-~\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B1\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B2\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B3\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B4\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B5\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B6\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B7\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B8\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B9\strut
-\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
-B10\strut
-\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
-B11\strut
-\end{minipage} & \begin{minipage}[b]{0.05\columnwidth}\centering
-B12\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
-\begin{minipage}[t]{0.13\columnwidth}\centering
+\begin{minipage}[t]{0.15\columnwidth}\centering
 \textbf{AA204140}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-3\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\centering
 3\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering
+\begin{minipage}[t]{0.15\columnwidth}\centering
 \textbf{AB008911}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\centering
 3\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering
+\begin{minipage}[t]{0.15\columnwidth}\centering
 \textbf{AB010313}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+4\strut
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+3\strut
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-1\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering
+\begin{minipage}[t]{0.15\columnwidth}\centering
 \textbf{AB010342}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\centering
 3\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering
+\begin{minipage}[t]{0.15\columnwidth}\centering
 \textbf{AB011473}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+5\strut
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-4\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering
+\begin{minipage}[t]{0.15\columnwidth}\centering
 \textbf{AB099518}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-4\strut
+1\strut
 \end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
-4\strut
-\end{minipage}\tabularnewline
-\bottomrule
-\end{longtable}
-
-\begin{longtable}[]{@{}cccccccccccccc@{}}
-\toprule
-\begin{minipage}[b]{0.11\columnwidth}\centering
-~\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B13\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B14\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B15\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B16\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B17\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B18\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B19\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B20\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B21\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B22\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B23\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B24\strut
-\end{minipage} & \begin{minipage}[b]{0.04\columnwidth}\centering
-B25\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.11\columnwidth}\centering
-\textbf{AA204140}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+2\strut
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
+1\strut
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.11\columnwidth}\centering
-\textbf{AB008911}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.05\columnwidth}\centering
 5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
+\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\centering
 2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.11\columnwidth}\centering
-\textbf{AB010313}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.11\columnwidth}\centering
-\textbf{AB010342}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-4\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.11\columnwidth}\centering
-\textbf{AB011473}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.11\columnwidth}\centering
-\textbf{AB099518}\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.04\columnwidth}\centering
-1\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -2471,10 +2202,10 @@ results for all labels.
 From this plot (Figure \ref{fig:plotModelExplorer}), we can deduce that \(k=5\)
 is more stable than \(k=3\) and \(k=4\), but not as stable as \(k=2\). The model
 explorer strategy, in addition to visualizing the diversity of the centroids,
-can thus help assessing an adequate number of clusters.
+can thus help assess an adequate number of clusters.
 
 Now, replot the same model explorer, but only for the clustering experiments
-\(k=6\), \(k=7\), \(k=8\), \(k=9\) and \(k=10\) so that we can see more clearly the stability
+\(k=6\), \(k=7\), \(k=8\), \(k=9\), and \(k=10\) so that we can see more clearly the stability
 measures in that range (Figure \ref{fig:plotModelExplorerZoom}).
 
 \begin{Shaded}
@@ -2592,7 +2323,7 @@ the packages \texttt{biomaRt} \citep{durinck:biomart} and \texttt{KEGGprofile}
 \citep{zhao:keggprofile} for this step. \texttt{KEGGprofile} is a package that facilitates
 enrichment analysis on a set of genes labeled with the Ensembl annotation
 \citep{ensembl2020} based on the set of biological pathways described in the KEGG
-database\citep{KEGG}.
+database \citep{KEGG}.
 
 We thus need to convert the gene names, which are given in the Refseq
 annotation, into the corresponding Ensembl name. This is where \texttt{biomaRt} comes
