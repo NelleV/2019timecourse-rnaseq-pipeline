@@ -101,3 +101,7 @@ if(!require(BiocWorkflowTools)){
 if(!require("pander")){
     install.packages('pander')
 }
+
+if(!require(rticles)){
+    install.packages("rticles")
+}
