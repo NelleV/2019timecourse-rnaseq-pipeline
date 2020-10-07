@@ -28,12 +28,18 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
 header-includes:
    - \usepackage{float}
-output:
-    BiocWorkflowTools::f1000_article: default
-    ms_document: default
+output: rticles::arxiv_article
 bibliography: bibliography.bib
 always_allow_html: yes
 ---
+
+<!-- 
+
+Change output format to
+BiocWorkflowTools::f1000_article: default  for F1000Research layout
+ms_document: default for word document
+
+-->
 
 ```{r echo=FALSE, results="hide", message=FALSE}
 # Loading dependencies
