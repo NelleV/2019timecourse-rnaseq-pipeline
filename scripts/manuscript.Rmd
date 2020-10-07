@@ -28,7 +28,7 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
 header-includes:
    - \usepackage{float}
-output: rticles::arxiv_article
+output: pdf_document
 bibliography: bibliography.bib
 always_allow_html: yes
 ---
