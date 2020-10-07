@@ -18,6 +18,7 @@ get_data() {
 install_github_dependencies() {
     # install_github keeps failing because of the Github API rate limit. So
     # we're just going to do this by hand…
+    yes | apt install pandoc-citeproc
     pushd /tmp
     wget -P . https://github.com/NelleV/timecoursedata/archive/master.zip
     unzip /tmp/master.zip
