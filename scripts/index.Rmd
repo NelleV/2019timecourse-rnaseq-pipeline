@@ -1,0 +1,7 @@
+---
+title: "A pipeline to analyse time-course gene expression data"
+output: rmarkdown::html_vignette
+---
+
+The manuscript has been automatically compiled thanks to travis and can be
+found [here](manuscript.pdf).
