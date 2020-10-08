@@ -1639,7 +1639,7 @@ time-course data.
 
 The source code for this workflow can be found at
 [https://github.com/NelleV/2019timecourse-rnaseq-pipeline](https://github.com/NelleV/2019timecourse-rnaseq-pipeline).
-Archived source code at the time of publication can be found at [XXX](XXX).
+Archived source code at the time of publication can be found at [https://osf.io/2a5tw/](https://osf.io/2a5tw/).
 
 All packages used in the workflow are available on GitHub, CRAN, or
 Bioconductor.
