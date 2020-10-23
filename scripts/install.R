@@ -105,3 +105,7 @@ if(!require("pander")){
 if(!require(rticles)){
     install.packages("rticles")
 }
+
+if(!require(matrixStats)){
+    install.packages("matrixStats")
+}
