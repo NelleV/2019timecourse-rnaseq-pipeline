@@ -62,3 +62,10 @@ be found here: https://nellev.github.io/2019timecourse-rnaseq-pipeline/
 	```bash
 	Rscript run_go_terms.R
 	```
+
+
+##  SUPPLEMENTARY: PThe normalization of the micro-array data
+
+
+You can find an Rmd file containing detailed steps for the normalization in
+`scripts/miscellaneous/normalization.Rmd`
