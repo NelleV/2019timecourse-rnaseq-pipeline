@@ -63,17 +63,16 @@ knitr::opts_chunk$set(
 ```
 
 
-# TODO list
-
-
 
 ## Quality control and normalization
 
-The first steps of analysis of gene expression data is always to do normalization and quality control checks of the data. In what follows, we show an example of this for the influenza data using generic methods; these steps are not in specific to time course, but could be done for any gene expression analysis. 
+The first steps of analysis of gene expression data is always to do
+normalization and quality control checks of the data. In what follows, we show
+an example of this for the influenza data using generic methods; these steps
+are not in specific to time course, but could be done for any gene expression
+analysis. 
 
 ### Pre-processing and normalization
-
-**EAP: Should we make this part of the pipeline, or just start with normalization? It's very microarray heavy... We could have a vignette in `moanin` documenting the creation of a normalized version of the data.**
 
 The micro-array data were obtained from NCBI Gene Expression Omnibus (GEO),
 with accession number GSE63786. The dataset has a total of 209 samples, with

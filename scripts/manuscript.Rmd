@@ -486,7 +486,7 @@ interest:
 
 ```{r make_timepoints_contarts}
 # Define contrasts	
-contrasts = create_timepoints_contrasts(moanin_model,"M", "VL")
+contrasts = create_timepoints_contrasts(moanin_model, "M", "VL")
 ```
 
 This creates a character vector of contrasts to be tested, one for each timepoint, in the format required by `limma`:
