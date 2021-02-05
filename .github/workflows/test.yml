@@ -1,0 +1,30 @@
+name: check_tests
+on: [push]
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    container:
+      image: nellev/timecoursemanuscript
+    steps:
+      - name: Checkout code 🛎️
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+ 
+      - name: Install latest moanin package
+        run: |
+          pushd /tmp 
+          wget -P . https://github.com/NelleV/moanin/archive/master.zip
+          unzip /tmp/master.zip
+          cd moanin-master
+          make install-extra
+          make install
+          popd
+
+          Rscript scripts/install.R
+
+      - name: Run tests
+        run: |
+          pushd scripts
+          make all
+          popd
