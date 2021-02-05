@@ -28,7 +28,7 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
 header-includes:
    - \usepackage{float}
-output: pdf_document
+output: word_document
 bibliography: bibliography.bib
 always_allow_html: yes
 ---
@@ -590,7 +590,7 @@ but don't show real differences in the overall trend between 48H-168H. In Figure
 show some meaningful changes between 60 and 72H, but others clearly just have
 a single replicate that is different or increased variability at 72H that results in a lack of significance in 72H.
 
-```{r showMissingDEGenes, echo=FALSE, fig.cap="The expression values over time for 10 genes found significant DE in timepoints 48,60,120,168H, but not in the 72H timepoint."}
+```{r showMissingDEGenes, echo=FALSE, fig.width=10, fig.height=12, fig.cap="The expression values over time for 10 genes found significant DE in timepoints 48,60,120,168H, but not in the 72H timepoint."}
 exampleGenes<-names(signifCombos[signifCombos=="48,60,120,168"][1:10])
 plot_splines_data(moanin_model, subset_data=exampleGenes,
 		  colors=ann_colors$Group, smooth=TRUE)

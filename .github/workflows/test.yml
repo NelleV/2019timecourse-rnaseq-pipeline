@@ -17,7 +17,7 @@ jobs:
           mkdir tmp
           cd tmp
           wget -P . https://github.com/NelleV/moanin/archive/master.zip
-          unzip tmp/master.zip
+          unzip master.zip
           cd moanin-master
           make install-extra
           make install
