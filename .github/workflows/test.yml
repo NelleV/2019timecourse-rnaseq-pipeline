@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: nellev/timecoursemanuscript
+
     steps:
       - name: Checkout code 🛎️
         uses: actions/checkout@v2
@@ -13,13 +14,14 @@ jobs:
  
       - name: Install latest moanin package
         run: |
-          pushd /tmp 
+          mkdir tmp
+          cd tmp
           wget -P . https://github.com/NelleV/moanin/archive/master.zip
-          unzip /tmp/master.zip
+          unzip tmp/master.zip
           cd moanin-master
           make install-extra
           make install
-          popd
+          cd ..
 
           Rscript scripts/install.R
 
